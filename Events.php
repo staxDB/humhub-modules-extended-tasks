@@ -6,11 +6,9 @@
  *
  */
 
-namespace humhub\modules\meeting;
+namespace humhub\modules\task;
 
-use humhub\modules\meeting\integration\calendar\MeetingCalendar;
-use humhub\modules\meeting\models\MeetingTask;
-use humhub\modules\meeting\widgets\TaskAddon;
+//use humhub\modules\task\integration\calendar\TaskCalendar;
 use Yii;
 use yii\base\Object;
 
@@ -31,7 +29,7 @@ class Events extends Object
 //        $contentContainer = $event->contentContainer;
 //
 //        if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
-//            MeetingCalendar::addItemTypes($event);
+//            TaskCalendar::addItemTypes($event);
 //        }
 //    }
 //
@@ -43,7 +41,7 @@ class Events extends Object
 //        $contentContainer = $event->contentContainer;
 //
 //        if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
-//            MeetingCalendar::addItems($event);
+//            TaskCalendar::addItems($event);
 //        }
 //    }
 

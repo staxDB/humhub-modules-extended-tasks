@@ -11,7 +11,7 @@ return [
     'namespace' => 'humhub\modules\task',
     'events' => [
         ['class' => Menu::className(), 'event' => Menu::EVENT_INIT, 'callback' => ['humhub\modules\task\Events', 'onSpaceMenuInit']],
-        ['class' => WallEntryAddons::className(), 'event' => WallEntryAddons::EVENT_INIT, 'callback' => ['humhub\modules\task\Events', 'onTaskWallEntry']],
+//        ['class' => WallEntryAddons::className(), 'event' => WallEntryAddons::EVENT_INIT, 'callback' => ['humhub\modules\task\Events', 'onTaskWallEntry']],
 //        ['class' => 'humhub\modules\calendar\interfaces\CalendarService', 'event' => 'getItemTypes', 'callback' => ['humhub\modules\task\Events', 'onGetCalendarItemTypes']],
 //        ['class' => 'humhub\modules\calendar\interfaces\CalendarService', 'event' => 'findItems', 'callback' => ['humhub\modules\task\Events', 'onFindCalendarItems']],
     ]
