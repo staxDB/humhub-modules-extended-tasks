@@ -10,7 +10,8 @@ use humhub\widgets\TimeAgo;
 /* @var $canEdit boolean */
 
 $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
-$icon = !$task->isToday() && $task->isPast() ? 'fa-calendar-check-o' : 'fa-calendar-o';
+//$icon = !$task->isToday() && $task->isPast() ? 'fa-calendar-check-o' : 'fa-calendar-o';
+$icon = 'fa-calendar-o';
 $backUrl = $this->context->contentContainer->createUrl('/task/index');
 
 ?>
@@ -27,7 +28,7 @@ $backUrl = $this->context->contentContainer->createUrl('/task/index');
         <div class="col-sm-12 media">
 
             <h2 style="margin:5px 0 0 0;">
-                <?= $task->getFormattedDateTime(); ?>
+                <?= $task->getFormattedDeadline(); ?>
             </h2>
                 <span class="author">
                     <?= Html::containerLink($task->content->createdBy); ?>

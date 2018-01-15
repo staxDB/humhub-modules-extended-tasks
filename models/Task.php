@@ -22,12 +22,9 @@ use yii\db\ActiveQuery;
  * The followings are the available columns in table 'task':
  * @property integer $id
  * @property string $title
- * @property string $date
- * @property string $begin
- * @property string $end
- * @property string $location
- * @property string $room
- * @property string $external_participants
+ * @property string $deadline
+ * @property integer $percent
+ * @property integer $status
  */
 class Task extends ContentActiveRecord implements Searchable
 {
@@ -42,7 +39,12 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public $wallEntryClass = WallEntry::class;
 
-    public $inputParticipants;
+    public $assignedUsers;
+
+
+    // Status
+    const STATUS_OPEN = 1;
+    const STATUS_FINISHED = 5;
 
     /**
      * @return string the associated database table name
@@ -79,12 +81,11 @@ class Task extends ContentActiveRecord implements Searchable
     public function rules()
     {
         return [
-            [['title', 'date', 'begin', 'end'], 'required'],
-            [['begin', 'end'], 'match', 'pattern' => '/[0-9]:[0-9]/u', 'message' => Yii::t('TaskModule.base', 'Format has to be HOUR : MINUTE')],
-            [['begin', 'end'], 'validateTime'],
-            [['date'], 'date', 'format' => $this->getDbDateFormat()],
-            [['inputParticipants', 'external_participants'], 'safe'],
-            [['title', 'location', 'room'], 'string', 'max' => 255],
+            [['title'], 'required'],
+            [['deadline'], 'datetime', 'format' => $this->getDbDateFormat()],
+            [['percent', 'status'], 'integer'],
+            [['assignedUsers'], 'safe'],
+            [['title'], 'string', 'max' => 255],
         ];
     }
 
@@ -100,126 +101,37 @@ class Task extends ContentActiveRecord implements Searchable
         return [
             'id' => 'ID',
             'title' => Yii::t('TaskModule.task', 'Title'),
-            'date' => Yii::t('TaskModule.task', 'Date'),
-            'begin' => Yii::t('TaskModule.task', 'Begin'),
-            'end' => Yii::t('TaskModule.task', 'End'),
-            'location' => Yii::t('TaskModule.task', 'Location'),
-            'room' => Yii::t('TaskModule.task', 'Room'),
-            'inputParticipants' => Yii::t('TaskModule.task', 'Participants'),
-            'external_participants' => Yii::t('TaskModule.task', 'Participants (External)'),
+            'deadline' => Yii::t('TaskModule.task', 'Deadline'),
+            'percent' => Yii::t('TaskModule.task', 'Percent'),
+            'status' => Yii::t('TaskModule.task', 'Status'),
+            'assignedUsers' => Yii::t('TaskModule.task', 'Assigned user(s)'),
         ];
     }
 
-    public static function findPendingTasks(ContentContainerActiveRecord $container)
+    /**
+     * Returns an ActiveQuery for all taskUsers of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskUsers()
     {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy(['task.date' => SORT_ASC, 'task.begin' => SORT_ASC])
-            ->readable()
-            ->andWhere(['>=', 'task.date', date('Y-m-d')]);
+        $query = $this->hasMany(TaskUser::className(), ['task_id' => 'id']);
+        return $query;
+    }
+
+    public function hasTaskUsers()
+    {
+        return !empty($this->taskUsers);
     }
 
     /**
-     * @param ContentContainerActiveRecord $container
-     * @return ActiveQuery
+     * Returns an ActiveQuery for all participant user models of this meeting.
+     *
+     * @return \yii\db\ActiveQuery
      */
-    public static function findPastTasks(ContentContainerActiveRecord $container)
+    public function getTaskUserUsers()
     {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy(['task.date' => SORT_DESC, 'task.begin' => SORT_DESC])
-            ->readable()
-            ->andWhere(['<', 'task.date', date('Y-m-d')]);
-    }
-
-    public static function findReadable(ContentContainerActiveRecord $container)
-    {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy(['task.date' => SORT_DESC, 'task.begin' => SORT_DESC])
-            ->readable();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getUrl()
-    {
-        return $this->content->container->createUrl('/task/index/view', ['id' => $this->id]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function afterFind()
-    {
-        $this->begin = substr($this->begin, 0, 5);
-        $this->end = substr($this->end, 0, 5);
-
-        return parent::afterFind();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        TaskParticipant::deleteAll(['task_id' => $this->id]);
-
-        if(!empty($this->inputParticipants)) {
-            foreach ($this->inputParticipants as $guid) {
-                $this->addParticipant($guid);
-            }
-        }
-
-        return parent::afterSave($insert, $changedAttributes);
-    }
-
-    public function isParticipant($user = null)
-    {
-        if(!$user && !Yii::$app->user->isGuest) {
-            $user = Yii::$app->user->getIdentity();
-        } else if(!$user) {
-            return false;
-        }
-
-        $participant = array_filter($this->participants, function(TaskParticipant $p) use ($user) {
-            return $p->user_id == $user->id;
-        });
-
-        return !empty($participant);
-    }
-
-    public function addParticipant($user)
-    {
-        $user = (is_string($user)) ? User::findOne(['guid' => $user]) : $user ;
-        
-        if(!$user) {
-            return false;
-        }
-
-        if(!$this->isParticipant($user)) {
-            $participant = new TaskParticipant([
-                'task_id' => $this->id,
-                'user_id' => $user->id,
-            ]);
-            return $participant->save();
-        }
-
-        return false;
-    }
-
-    /**
-     * Creates a duplicated model by removing id, and date and setting isNewRecord to true.
-     * Note this method is only intended to render a TaskForm and not for saving the actual duplicate.
-     */
-    public function duplicated()
-    {
-        // Fetch participant users relation before resetting id!
-        $this->participantUsers;
-        $this->id = null;
-        $this->isNewRecord = true;
-        $this->date = null;
+        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskUsers');
     }
 
     /**
@@ -231,25 +143,210 @@ class Task extends ContentActiveRecord implements Searchable
             $item->delete();
         }
 
-        foreach (TaskParticipant::findAll(['task_id' => $this->id]) as $participant) {
-            $participant->delete();
+        foreach (TaskUser::findAll(['task_id' => $this->id]) as $taskUser) {
+            $taskUser->delete();
         }
 
         return parent::beforeDelete();
     }
 
     /**
-     * Validate time interval.
-     * @param $attribute
-     * @param $params
+     * @inheritdoc
      */
-    public function validateTime($attribute, $params)
+    public function afterSave($insert, $changedAttributes)
     {
-        if ($this->end != 0) {
-            if ($this->end < $this->begin) {
-                $this->addError('end', Yii::t('TaskModule.models_Task', 'End must be after begin'));
+
+        TaskUser::deleteAll(['task_id' => $this->id]);
+
+        if(!empty($this->assignedUsers)) {
+            foreach ($this->assignedUsers as $guid) {
+                $this->addTaskUser($guid);
             }
         }
+
+        return parent::afterSave($insert, $changedAttributes);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterFind()
+    {
+
+//        foreach ($this->assignedUsers as $user) {
+//            $this->assignedUsers .= $user->guid . ",";
+//        }
+
+        return parent::afterFind();
+    }
+
+    public function isTaskUser($user = null)
+    {
+        if(!$user && !Yii::$app->user->isGuest) {
+            $user = Yii::$app->user->getIdentity();
+        } else if(!$user) {
+            return false;
+        }
+
+        $taskUser = array_filter($this->taskUsers, function(TaskUser $p) use ($user) {
+            return $p->user_id == $user->id;
+        });
+
+        return !empty($taskUser);
+    }
+
+    public function addTaskUser($user)
+    {
+        $user = (is_string($user)) ? User::findOne(['guid' => $user]) : $user ;
+
+        if(!$user) {
+            return false;
+        }
+
+        if(!$this->isTaskUser($user)) {
+            $participant = new TaskUser([
+                'task_id' => $this->id,
+                'user_id' => $user->id,
+            ]);
+            return $participant->save();
+        }
+
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getUrl()
+    {
+        return $this->content->container->createUrl('/task/index/view', ['id' => $this->id]);
+    }
+
+    public static function findPendingTasks(ContentContainerActiveRecord $container)
+    {
+        return self::find()
+            ->contentContainer($container)
+            ->orderBy(['task.deadline' => SORT_ASC])
+            ->readable()
+            ->andWhere(['>=', 'task.deadline', date('Y-m-d')]);
+    }
+
+    public static function GetUsersOpenTasks()
+    {
+        $query = self::find();
+        $query->leftJoin('task_user', 'task.id=task_user.task_id');
+        $query->where(['task_user.user_id' => Yii::$app->user->id, 'task.status' => self::STATUS_OPEN]);
+
+        return $query->all();
+    }
+
+    public function isOverdue()
+    {
+        if (!$this->hasDeadline()) {
+            return false;
+        }
+
+        return (strtotime($this->deadline) < time());
+    }
+
+//    public function isPast()
+//    {
+//        $date = new DateTime($this->date);
+//        $now = new DateTime();
+//        return $date < $now;
+//    }
+
+//    public function isToday()
+//    {
+//        $today = new DateTime("now", new DateTimeZone(Yii::$app->formatter->timeZone));
+//        return Yii::$app->formatter->asDate($this->deadline, "ddMMyyyy") == $today->format('dmY');
+//    }
+//
+//    public function isTomorrow()
+//    {
+//        $today = new DateTime("now", new DateTimeZone(Yii::$app->formatter->timeZone));
+//        $today->add(new DateInterval('P1D'));
+//        return Yii::$app->formatter->asDate($this->date, "ddMMyyyy") == $today->format('dmY');
+//    }
+
+    /**
+     * @param ContentContainerActiveRecord $container
+     * @return ActiveQuery
+     * @throws \yii\base\Exception
+     */
+    public static function findPastTasks(ContentContainerActiveRecord $container)
+    {
+        return self::find()
+            ->contentContainer($container)
+            ->orderBy(['task.deadline' => SORT_DESC])
+            ->readable()
+            ->andWhere(['<', 'task.deadline', date('Y-m-d')]);
+    }
+
+    public static function findReadable(ContentContainerActiveRecord $container)
+    {
+        return self::find()
+            ->contentContainer($container)
+            ->orderBy(['task.deadline' => SORT_DESC])
+            ->readable();
+    }
+
+    public function changePercent($newPercent)
+    {
+        if ($this->percent != $newPercent) {
+            $this->percent = $newPercent;
+            $this->save();
+        }
+
+        if ($newPercent == 100) {
+            $this->changeStatus(Task::STATUS_FINISHED);
+        }
+
+        if ($this->percent != 100 && $this->status == Task::STATUS_FINISHED) {
+            $this->changeStatus(Task::STATUS_OPEN);
+        }
+
+        return true;
+    }
+
+    public function changeStatus($newStatus)
+    {
+        $this->status = $newStatus;
+
+        if ($newStatus == Task::STATUS_FINISHED) {
+
+            // Todo: add notification and activity
+//            $activity = new \humhub\modules\task\activities\Finished();
+//            $activity->source = $this;
+//            $activity->originator = Yii::$app->user->getIdentity();
+//            $activity->create();
+//
+//            if ($this->created_by != Yii::$app->user->id) {
+//                $notification = new \humhub\modules\task\notifications\Finished();
+//                $notification->source = $this;
+//                $notification->originator = Yii::$app->user->getIdentity();
+//                $notification->send($this->content->user);
+//            }
+
+            $this->percent = 100;
+        } else {
+            // Try to delete TaskFinishedNotification if exists
+//            $notification = new \humhub\modules\task\notifications\Finished();
+//            $notification->source = $this;
+//            $notification->delete($this->content->user);
+        }
+
+        $this->save();
+
+        return true;
+    }
+
+    public function hasDeadline()
+    {
+        if ($this->deadline != '0000-00-00 00:00:00' && $this->deadline != '' && $this->deadline != 'NULL') {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -257,16 +354,14 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function inviteUser()
     {
-        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->participantUsers);
+//        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->assignedUsers);
     }
 
     public function newItem($title = null, $duration = 0)
     {
         return new TaskItem($this->content->container, $this->content->visibility, [
             'task_id' => $this->id,
-            'sort_order' => $this->getNextIndex(),
             'title' => $title,
-            'duration' => $duration
         ]);
     }
 
@@ -277,108 +372,16 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function getItems()
     {
-        return $this->hasMany(TaskItem::class, ['task_id' => 'id'])->orderBy(['begin' => SORT_ASC, 'sort_order' => SORT_ASC]);
+        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
     }
 
-    /**
-     * Returns all related task items with populated begin/end dateTime instances.
-     *
-     * @return \humhub\modules\content\models\Content|mixed
-     */
-    public function getItemsPopulated()
-    {
-        $start = new DateTime($this->begin);
-        $items = $this->items;
-
-        foreach ($items as $item) {
-            if($item->begin) {break;} // legacy task
-            $start = $this->populateTime($item, $start);
-        }
-        return $items;
-    }
-
-    public function isPast()
-    {
-        $date = new DateTime($this->date);
-        $now = new DateTime();
-        return $date < $now;
-    }
-
-    public function isToday()
-    {
-        $today = new DateTime("now", new DateTimeZone(Yii::$app->formatter->timeZone));
-        return Yii::$app->formatter->asDate($this->date, "ddMMyyyy") == $today->format('dmY');
-    }
-
-    public function isTomorrow()
-    {
-        $today = new DateTime("now", new DateTimeZone(Yii::$app->formatter->timeZone));
-        $today->add(new DateInterval('P1D'));
-        return Yii::$app->formatter->asDate($this->date, "ddMMyyyy") == $today->format('dmY');
-    }
-
-    /**
-     * Populates the begin and end time by means of the item duration and the given start time and returns
-     * the cloned calculated end time of the item.
-     *
-     * @param TaskItem $item
-     * @param DateTime $start
-     * @return DateTime|string a clone of the calculated $item->end
-     */
-    private function populateTime(TaskItem $item, DateTime $start)
-    {
-        // Filter out legacy items
-        if(!empty($item->begin)) {
-            return;
-        }
-
-        if($item->duration === null) {
-            $item->duration = 0;
-        }
-
-        $item->begin = clone $start;
-        $item->end = clone $start;
-        $item->end->add(new DateInterval('PT' . $item->duration . 'M'));
-        return clone $item->end;
-    }
-
-    public function getNextIndex()
-    {
-        return $this->getItems()->count();
-    }
-
-    /**
-     * Returns an ActiveQuery for all participants of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getParticipants()
-    {
-        return $this->hasMany(TaskParticipant::className(), ['task_id' => 'id']);
-    }
-
-    public function hasParticipants()
-    {
-        return !empty($this->participants) || !empty($this->external_participants);
-    }
-
-    /**
-     * Returns an ActiveQuery for all participant user models of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getParticipantUsers()
-    {
-        return $this->hasMany(User::class, ['id' => 'user_id'])->via('participants');
-    }
-
-    public function getFormattedStartDate($timeZone = null, $format = 'short')
+    public function getFormattedDeadline($timeZone = null, $format = 'short')
     {
         if($timeZone) {
             Yii::$app->formatter->timeZone = $timeZone;
         }
 
-        $result = Yii::$app->formatter->asDate($this->getBeginDateTime(), $format);
+        $result = Yii::$app->formatter->asDatetime($this->getDeadlineDateTime(), $format);
 
         if($timeZone) {
             Yii::$app->i18n->autosetLocale();
@@ -387,53 +390,9 @@ class Task extends ContentActiveRecord implements Searchable
         return $result;
     }
 
-    public function getBeginDateTime()
+    public function getDeadlineDateTime()
     {
-        return new DateTime($this->date.' '.$this->begin, new DateTimeZone(Yii::$app->timeZone));
-    }
-
-    public function getEndDateTime()
-    {
-        $result = new DateTime($this->date.' '.$this->end, new DateTimeZone(Yii::$app->timeZone));
-        if($result <= $this->getBeginDateTime()) {
-            $result->add(new DateInterval('P1D'));
-        }
-        return $result;
-    }
-
-    public function getFormattedBeginTime($timeZone = null)
-    {
-        if($timeZone) {
-            Yii::$app->formatter->timeZone = $timeZone;
-        }
-
-        $result = Yii::$app->formatter->asTime(new DateTime($this->begin, new DateTimeZone(Yii::$app->timeZone)), 'short');
-
-        if($timeZone) {
-            Yii::$app->i18n->autosetLocale();
-        }
-
-        return $result;
-    }
-
-    public function getFormattedEndTime($timeZone = null)
-    {
-        if($timeZone) {
-            Yii::$app->formatter->timeZone = $timeZone;
-        }
-
-        $result = Yii::$app->formatter->asTime(new DateTime($this->end, new DateTimeZone(Yii::$app->timeZone)), 'short');
-
-        if($timeZone) {
-            Yii::$app->i18n->autosetLocale();
-        }
-
-        return $result;
-    }
-
-    public function getFormattedDateTime($timeZone = null)
-    {
-        return $this->getFormattedStartDate($timeZone, 'medium').' at '.$this->getFormattedBeginTime($timeZone).' - '.$this->getFormattedEndTime($timeZone);
+        return new DateTime($this->deadline, new DateTimeZone(Yii::$app->timeZone));
     }
 
     /**
@@ -451,51 +410,8 @@ class Task extends ContentActiveRecord implements Searchable
 
         return [
             'title' => $this->title,
-            'location' => $this->location,
             'itemTitles' => $itemTitles,
             'itemNotes' => $itemNotes
         ];
-    }
-
-    public function shiftItem($itemId)
-    {
-        $taskItem = TaskItem::find()->contentContainer($this->content->container)->where(['task_item.id' => $itemId])->one();
-
-        if(!$taskItem) {
-            return false;
-        }
-
-        if($taskItem->content->contentcontainer_id != $this->content->contentcontainer_id) {
-            throw new \InvalidArgumentException('Tried to shift item from another space!');
-        }
-
-        $taskItem->task_id = $this->id;
-        $taskItem->sort_order = $this->getNextIndex();
-        return $taskItem->save() && $this->refresh();
-    }
-
-    public function moveItemIndex($itemId, $newIndex)
-    {
-        $moveItem = TaskItem::findOne(['id' => $itemId]);
-        $items = $this->items;
-
-        // make sure no invalid index is given
-        if($moveItem->sort_order === $newIndex) {
-            return;
-        } else if($newIndex < 0) {
-            $newIndex = 0;
-        } else if($newIndex >= count($items)) {
-            $newIndex = count($items) -1;
-        }
-
-        array_splice($items, $moveItem->sort_order, 1);
-        array_splice($items, $newIndex, 0, [$moveItem]);
-
-        foreach ($items as $index => $item) {
-            $item->sort_order = $index;
-            $item->save();
-        }
-
-        $this->refresh();
     }
 }

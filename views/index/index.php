@@ -63,7 +63,7 @@ $emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', "Start now, by 
                     <?= $form->field($filter, 'past')->checkbox(['style' => 'float:left']); ?>
                 </div>
                 <div class="checkbox-filter">
-                    <?= $form->field($filter, 'participant')->checkbox(['style' => 'float:left']); ?>
+                    <?= $form->field($filter, 'taskUser')->checkbox(['style' => 'float:left']); ?>
                 </div>
                 <div class="checkbox-filter">
                     <?= $form->field($filter, 'own')->checkbox(['style' => 'float:left']); ?>

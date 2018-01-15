@@ -6,15 +6,15 @@ use Yii;
 use humhub\modules\user\models\User;
 
 /**
- * This is the model class for table "task_item_moderator".
+ * This is the model class for table "task_user".
  *
- * The followings are the available columns in table 'task_item_moderator':
+ * The followings are the available columns in table 'task_user':
  * @property integer $id
- * @property integer $task_item_id
+ * @property integer $task_id
  * @property integer $user_id
  * @property string $name
  */
-class TaskItemModerator extends \humhub\components\ActiveRecord
+class TaskUser extends \humhub\components\ActiveRecord
 {
 
     /**
@@ -22,7 +22,7 @@ class TaskItemModerator extends \humhub\components\ActiveRecord
      */
     public static function tableName()
     {
-        return 'task_item_moderator';
+        return 'task_user';
     }
 
     /**
@@ -31,8 +31,8 @@ class TaskItemModerator extends \humhub\components\ActiveRecord
     public function rules()
     {
         return [
-            ['task_item_id', 'required'],
-            [['task_item_id', 'user_id'], 'integer'],
+            ['task_id', 'required'],
+            [['task_id', 'user_id'], 'integer'],
             ['name', 'string', 'max' => 255],
         ];
     }
@@ -42,14 +42,20 @@ class TaskItemModerator extends \humhub\components\ActiveRecord
      */
     public function attributeLabels()
     {
-        return array(
-            'name' => 'Name', Yii::t('TaskModule.taskitemmoderator', 'Name'),
-        );
+        return [
+            'id' => 'ID',
+            'task_id' => 'Task',
+            'user_id' => 'User',
+            'name' => Yii::t('TaskModule.taskuser', 'Name'),
+        ];
     }
 
     public function getUser()
     {
-        return $this->hasOne(User::class, ['id' => 'user_id']);
+        if ($this->user_id) {
+            return User::findOne(['id' => $this->user_id]);
+        }
+        return null;
     }
 
 }

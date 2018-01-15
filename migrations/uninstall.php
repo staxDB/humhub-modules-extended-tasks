@@ -8,8 +8,7 @@ class uninstall extends humhub\components\Migration
 
         $this->dropTable('task');
         $this->dropTable('task_item');
-        $this->dropTable('task_item_moderator');
-        $this->dropTable('task_participant');
+        $this->dropTable('task_user');
     }
 
     public function down()

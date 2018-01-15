@@ -11,7 +11,7 @@ namespace humhub\modules\task\controllers;
 use humhub\modules\content\permissions\ManageContent;
 use humhub\modules\task\models\forms\TaskFilter;
 use humhub\modules\task\models\forms\TaskForm;
-use humhub\modules\task\models\TaskParticipant;
+use humhub\modules\task\models\TaskUser;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\task\widgets\TaskListView;
 use humhub\modules\space\models\Space;
@@ -45,7 +45,7 @@ class IndexController extends ContentContainerController
         return [
             ['permission' => ManageTasks::class,
                 'actions' => [
-                    'participant-picker',
+                    'task-user-picker',
                     'duplicate',
                     'send-invite-notifications'.
                     'edit',
@@ -110,10 +110,10 @@ class IndexController extends ContentContainerController
         ]);
     }
 
-    public function actionParticipantPicker($id = null, $keyword)
+    public function actionTaskUserPicker($id = null, $keyword)
     {
         if($id) {
-            $subQuery = TaskParticipant::find()->where(['task_participant.task_id' => $id])->andWhere('task_participant.user_id=user.id');
+            $subQuery = TaskUser::find()->where(['task_user.task_id' => $id])->andWhere('task_user.user_id=user.id');
             $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
         } else {
             $query = $this->getSpace()->getMembershipUser();

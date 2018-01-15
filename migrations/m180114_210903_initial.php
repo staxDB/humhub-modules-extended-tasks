@@ -8,13 +8,12 @@ class m180114_210903_initial extends humhub\components\Migration
         $this->createTable('task', array(
             'id' => 'pk',
             'title' => 'varchar(255) NOT NULL',
-            'date' => 'DATE NOT NULL',
-            'begin' => 'TIME NOT NULL',
-            'end' => 'TIME NOT NULL',
-            'completed' => 'tinyint(4) DEFAULT 0',
+            'deadline' => 'datetime DEFAULT NULL',
+            'percent' => 'smallint(6) NOT NULL DEFAULT 0',
+            'status' => 'tinyint(4) DEFAULT 0',
         ), '');
 
-        $this->createTable('task_participant', array(
+        $this->createTable('task_user', array(
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'user_id' => 'int(11) NOT NULL',
@@ -28,13 +27,6 @@ class m180114_210903_initial extends humhub\components\Migration
             'description' => 'TEXT NULL',
             'completed' => 'tinyint(4) DEFAULT 0',
             'notes' => 'TEXT NULL',
-        ), '');
-
-        $this->createTable('task_item_moderator', array(
-            'id' => 'pk',
-            'task_item_id' => 'int(11) NOT NULL',
-            'user_id' => 'int(11) NOT NULL',
-            'name' => 'varchar(255) NULL',
         ), '');
     }
 

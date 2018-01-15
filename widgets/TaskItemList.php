@@ -54,7 +54,8 @@ class TaskItemList extends JsWidget
     {
         return $this->render('taskItemList', [
             'options' => $this->getOptions(),
-            'items' => $this->task->getItemsPopulated(),
+//            'items' => $this->task->getItemsPopulated(),
+            'items' => $this->task->items,
             'task' => $this->task,
         ]);
     }

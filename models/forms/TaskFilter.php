@@ -18,7 +18,7 @@ namespace humhub\modules\task\models\forms;
 
 use humhub\modules\content\components\ContentContainerActiveRecord;
 use humhub\modules\task\models\Task;
-use humhub\modules\task\models\TaskParticipant;
+use humhub\modules\task\models\TaskUser;
 use humhub\modules\task\permissions\ManageTasks;
 use Yii;
 use yii\base\Model;
@@ -43,7 +43,7 @@ class TaskFilter extends Model
     /**
      * @var int
      */
-    public $participant;
+    public $taskUser;
 
     /**
      * @var int
@@ -54,7 +54,7 @@ class TaskFilter extends Model
     {
         return [
             ['title', 'string'],
-            [['past', 'participant', 'own'], 'integer']
+            [['past', 'taskUser', 'own'], 'integer']
         ];
     }
 
@@ -63,7 +63,7 @@ class TaskFilter extends Model
         return [
             'title' => Yii::t('TaskModule.models_forms_TaskFilter', 'Filter tasks'),
             'past' => Yii::t('TaskModule.models_forms_TaskFilter', 'Only past tasks'),
-            'participant' => Yii::t('TaskModule.models_forms_TaskFilter', 'I\'m participating'),
+            'taskUser' => Yii::t('TaskModule.models_forms_TaskFilter', 'I\'m working on this task'),
             'own' => Yii::t('TaskModule.models_forms_TaskFilter', 'Created by me'),
         ];
     }
@@ -82,10 +82,10 @@ class TaskFilter extends Model
             $query->andWhere(['like', 'title', $this->title]);
         }
 
-        if($this->participant) {
-            $subQuery = TaskParticipant::find()
-                ->where('task_participant.task_id=task.id')
-                ->andWhere(['task_participant.user_id' => $user->id]);
+        if($this->taskUser) {
+            $subQuery = TaskUser::find()
+                ->where('task_user.task_id=task.id')
+                ->andWhere(['task_user.user_id' => $user->id]);
             $query->andWhere(['exists', $subQuery]);
         }
 

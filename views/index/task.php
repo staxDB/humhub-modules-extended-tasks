@@ -21,12 +21,12 @@ $shareLink = $contentContainer->createUrl('share', ['id' => $task->id]);
 
 $this->registerJsConfig('task', [
     'text' => [
-        'success.notification' => Yii::t('TaskModule.views_index_task', 'Participants have been notified')
+        'success.notification' => Yii::t('TaskModule.views_index_task', 'Task Users have been notified')
     ]
 ]);
 
 $participantStyle = empty($task->location) ? 'display:inline-block;' :  'display:inline-block;padding-right:10px;border-right:2px solid '. $this->theme->variable('default');
-$locationStyle = ($task->hasParticipants()) ? 'display:inline-block;padding-left:10px;vertical-align:top;' : 'display:inline-block;';
+$locationStyle = ($task->hasTaskUsers()) ? 'display:inline-block;padding-left:10px;vertical-align:top;' : 'display:inline-block;';
 
 ?>
 <div id="task-container" class="panel panel-default task-details">
@@ -37,35 +37,19 @@ $locationStyle = ($task->hasParticipants()) ? 'display:inline-block;padding-left
     ]); ?>
     <div class="panel-body">
 
-        <?php if($task->hasParticipants() || !empty($task->location)): ?>
+        <?php if($task->hasTaskUsers()): ?>
         <div>
-            <?php if ($task->hasParticipants()) : ?>
+            <?php if ($task->hasTaskUsers()) : ?>
                 <div style="<?= $participantStyle ?>">
                     <em><strong><?= Yii::t('TaskModule.views_index_index', 'Participants') ?>:</strong></em><br>
-                    <?php foreach ($task->participantUsers as $user) : ?>
+                    <?php foreach ($task->taskUserUsers as $user) : ?>
                         <a href="<?= $user->getUrl(); ?>">
                             <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
                         </a>
                     <?php endforeach; ?>
-                    <?php if (!empty($task->external_participants)) : ?>
-                        <?= !empty($task->participantUsers) ? '<i class="fa fa-plus-circle"></i>' : ''?>
-                        <i>
-                            <?= Html::encode($task->external_participants); ?>
-                        </i>
-
-                    <?php endif; ?>
                 </div>
             <?php endif ?>
 
-            <?php if (!empty($task->location)) : ?>
-                <div style="<?= $locationStyle ?>">
-                    <em><strong><?= Yii::t('TaskModule.views_index_index', 'Location') ?>:</strong></em><br>
-                    <?= Html::encode($task->location) ?>
-                    <?php if ($task->room != null) : ?>
-                        (<?= Html::encode($task->room) ?>)
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
             <hr>
         </div>
         <?php endif; ?>

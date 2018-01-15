@@ -15,16 +15,8 @@ use humhub\libs\Html;
 
             <h4 class="media-heading"><?= Html::encode($task->title); ?></h4>
             <h5>
-                <?= Yii::$app->formatter->asDate($task->date); ?>
+                <?= Yii::$app->formatter->asDate($task->deadline); ?>
                 <?= Yii::t('TaskModule.views_index_index', 'at') ?>
-                <?= Yii::$app->formatter->asTime(new DateTime($task->begin, new DateTimeZone(Yii::$app->timeZone)), 'short'); ?>
-                - <?= Yii::$app->formatter->asTime(new DateTime($task->end, new DateTimeZone(Yii::$app->timeZone)), 'short'); ?>
-                <?php if ($task->location) : ?>
-                    , <?= Html::encode($task->location) ?>
-                <?php endif; ?>
-                <?php if ($task->room) : ?>
-                    (<?= Html::encode($task->room) ?>)
-                <?php endif; ?>
             <?= \humhub\widgets\Button::primary()
                 ->options(['class' => 'tt', 'title' => Yii::t('TaskModule.views_index_index', 'Edit'), 'style' => 'margin-left:2px']
                 )->icon('fa-pencil')->right()->xs()->action('ui.modal.load', $editUrl)->loader(false)->visible($canEdit) ?>
