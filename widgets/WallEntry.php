@@ -6,7 +6,7 @@
  * @license https://www.humhub.com/licences
  */
 
-namespace humhub\modules\meeting\widgets;
+namespace humhub\modules\task\widgets;
 
 use humhub\modules\content\widgets\WallEntryControlLink;
 use Yii;

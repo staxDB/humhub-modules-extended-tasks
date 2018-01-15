@@ -30,20 +30,6 @@ use humhub\widgets\ModalButton;
                 <li>
                     <?= ModalButton::asLink(Yii::t('TaskModule.base', 'Edit'))->icon('fa-edit')->post($editUrl)->loader(false) ?>
                 </li>
-                <?php if(!is_string($item->begin)) : ?>
-                    <li>
-                        <?= Link::withAction(Yii::t('TaskModule.base', 'Move down'),'moveDown')
-                            ->cssClass('task-item-move-down')->icon('fa-level-down')->loader(false); ?>
-                    </li>
-                    <li>
-                        <?= Link::withAction(Yii::t('TaskModule.base', 'Move up'), 'moveUp')
-                            ->cssClass('task-item-move-up')->icon('fa-level-up')->loader(false); ?>
-                    </li>
-                    <li>
-                        <?= ModalButton::asLink(Yii::t('TaskModule.base', 'Shift to other task'))->load($shiftUrl)
-                            ->icon('fa-exchange')->load($shiftUrl)->loader(false); ?>
-                    </li>
-                <?php endif; ?>
                 <li>
                     <?= Button::none(Yii::t('base', 'Delete'))->action('ui.modal.post', $deleteUrl)->icon('fa-trash')
                         ->confirm(Yii::t('TaskModule.views_index_editItem', '<strong>Confirm</strong> entry deletion'),

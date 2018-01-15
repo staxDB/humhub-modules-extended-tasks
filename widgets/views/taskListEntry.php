@@ -20,9 +20,6 @@ use humhub\libs\Html;
             <?= \humhub\widgets\Button::primary()
                 ->options(['class' => 'tt', 'title' => Yii::t('TaskModule.views_index_index', 'Edit'), 'style' => 'margin-left:2px']
                 )->icon('fa-pencil')->right()->xs()->action('ui.modal.load', $editUrl)->loader(false)->visible($canEdit) ?>
-            <?= \humhub\widgets\Button::defaultType()
-                ->options(['class' => 'tt', 'title' => Yii::t('TaskModule.views_index_index', 'Duplicate')]
-                )->icon('fa-clone')->right()->xs()->action('ui.modal.load', $duplicateUrl)->loader(false)->visible($canEdit) ?>
             </h5>
         </div>
 

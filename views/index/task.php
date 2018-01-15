@@ -64,7 +64,7 @@ $locationStyle = ($task->hasTaskUsers()) ? 'display:inline-block;padding-left:10
                         <br>
                     <?php endif; ?>
                     <br>
-                    <?= ModalButton::info(Yii::t('TaskModule.views_index_index', 'New agenda entry'))->id('task-agenda-create')->load($createItemUrl)->lg()->icon('fa-plus')?>
+                    <?= ModalButton::info(Yii::t('TaskModule.views_index_index', 'New subtask'))->id('task-agenda-create')->load($createItemUrl)->lg()->icon('fa-plus')?>
                     <br><br><br>
                 </div>
             </div>

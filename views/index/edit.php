@@ -45,7 +45,7 @@ $task = $taskForm->task;
 
     <?= $form->field($task, 'assignedUsers')->widget(UserPickerField::class, [
             'id' => 'taskUserPicker',
-            'selection' => $task->taskUsers,
+            'selection' => $task->assignedUsers,
             'url' => $taskForm->getTaskUserPickerUrl(),
             'placeholder' => Yii::t('TaskModule.views_index_edit', 'Add task users')
     ]) ?>

@@ -357,7 +357,7 @@ class Task extends ContentActiveRecord implements Searchable
 //        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->assignedUsers);
     }
 
-    public function newItem($title = null, $duration = 0)
+    public function newItem($title = null)
     {
         return new TaskItem($this->content->container, $this->content->visibility, [
             'task_id' => $this->id,

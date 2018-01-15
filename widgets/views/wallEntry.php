@@ -13,7 +13,7 @@ use humhub\widgets\ModalButton;
             <div class="col-md-11">
                 <h4 class="media-heading"><a href="<?= $meeting->getUrl(); ?>"><?= Html::encode($meeting->title); ?></a></h4>
                 <h5>
-                    <?= $meeting->getFormattedDateTime(); ?>
+                    <?= $meeting->getFormattedDeadline(); ?>
                 </h5>
                 <br />
                 <?= ModalButton::primary(Yii::t('MeetingModule.widgets_views_wallentry', 'Open Meeting'))->close()->link($meeting->getUrl())->sm() ?>

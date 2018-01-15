@@ -56,8 +56,7 @@ class TaskItemWidget extends JsWidget
     public function getData()
     {
         return [
-            'item-id' => $this->item->id,
-            'sort-order' => $this->item->sort_order
+            'item-id' => $this->item->id
         ];
     }
 }
