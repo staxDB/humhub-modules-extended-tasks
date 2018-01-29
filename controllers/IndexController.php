@@ -11,7 +11,8 @@ namespace humhub\modules\task\controllers;
 use humhub\modules\content\permissions\ManageContent;
 use humhub\modules\task\models\forms\TaskFilter;
 use humhub\modules\task\models\forms\TaskForm;
-use humhub\modules\task\models\TaskUser;
+use humhub\modules\task\models\TaskPicker;
+use humhub\modules\task\models\TaskAssigned;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\task\widgets\TaskListView;
 use humhub\modules\space\models\Space;
@@ -46,7 +47,7 @@ class IndexController extends ContentContainerController
             ['permission' => ManageTasks::class,
                 'actions' => [
                     'task-user-picker',
-                    'duplicate',
+                    'sub-task-picker',
                     'send-invite-notifications'.
                     'edit',
                     'delete',
@@ -80,7 +81,7 @@ class IndexController extends ContentContainerController
             throw new HttpException(404);
         }
 
-        if(!$task->content->canView() && !$task->isParticipant()) {
+        if(!$task->content->canView() && !$task->isTaskAssigned()) {
             throw new HttpException(403);
         }
 
@@ -110,10 +111,10 @@ class IndexController extends ContentContainerController
         ]);
     }
 
-    public function actionTaskUserPicker($id = null, $keyword)
+    public function actionTaskAssignedPicker($id = null, $keyword)
     {
         if($id) {
-            $subQuery = TaskUser::find()->where(['task_user.task_id' => $id])->andWhere('task_user.user_id=user.id');
+            $subQuery = TaskAssigned::find()->where(['task_user.task_id' => $id])->andWhere('task_user.user_id=user.id');
             $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
         } else {
             $query = $this->getSpace()->getMembershipUser();
@@ -123,6 +124,29 @@ class IndexController extends ContentContainerController
             'keyword' => $keyword,
             'query' => $query,
             'fillUser' => true
+        ]));
+    }
+
+    public function actionSubTaskPicker($id = null, $keyword)
+    {
+        if($id) {
+            $subQuery = Task::find()->where(['task.id' => $id]);
+            $query = Task::find()->where(['task.title' => $keyword])->orWhere(['task.description' => $keyword]);
+//            $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
+        } else {
+            $query = Task::find()->where(['task.title' => $keyword])->orWhere(['task.description' => $keyword]);
+//            $query = $this->getSpace()->getMembershipUser();
+        }
+
+//        echo '<pre>';
+//        print_r($query);
+//        echo '</pre>';
+//        die();
+
+        return $this->asJson(TaskPicker::filter([
+            'keyword' => $keyword,
+            'query' => $query,
+//            'fillUser' => true
         ]));
     }
 

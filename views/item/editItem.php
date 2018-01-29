@@ -18,8 +18,8 @@ use yii\bootstrap\ActiveForm;
 $item = $itemForm->model;
 
 $title = $item->isNewRecord
-    ? Yii::t('TaskModule.views_index_editItem', '<strong>Create</strong> new subtask')
-    : Yii::t('TaskModule.views_index_editItem', '<strong>Edit</strong> subtask');
+    ? Yii::t('TaskModule.views_index_editItem', '<strong>Create</strong> new item')
+    : Yii::t('TaskModule.views_index_editItem', '<strong>Edit</strong> item');
 
 ?>
 <?php \humhub\widgets\ModalDialog::begin(['header' => $title, 'size' => 'large']) ?>
@@ -27,12 +27,6 @@ $title = $item->isNewRecord
         <?php $form = ActiveForm::begin(); ?>
 
             <?= $form->field($item, 'title')->textInput(['placeholder' => Yii::t('TaskModule.views_index_editItem', 'Title of subtask')]); ?>
-
-            <?= $form->field($item, 'description')->widget(MarkdownField::class, [
-                    'placeholder' => Yii::t('TaskModule.views_index_editItem', 'Subject'),
-                    'fileModel' => $itemForm,
-                    'fileAttribute' => 'fileList'
-            ]); ?>
 
             <div class="row">
                 <div class="col-md-<?= !$item->isNewRecord ? '8 text-left': '12 text-center' ?>">

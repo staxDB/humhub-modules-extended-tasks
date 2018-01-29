@@ -29,7 +29,6 @@ class TaskListEntry extends Widget
         return $this->render('taskListEntry', [
             'task' => $this->task,
             'url' => $this->contentContainer->createUrl('/task/index/view', ['id' => $this->task->id]),
-            'duplicateUrl' => $this->contentContainer->createUrl('/task/index/duplicate', ['id' => $this->task->id]),
             'editUrl' => $this->contentContainer->createUrl('/task/index/edit', ['id' => $this->task->id]),
             'canEdit' => $this->canEdit
         ]);

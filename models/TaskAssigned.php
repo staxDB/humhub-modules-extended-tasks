@@ -14,7 +14,7 @@ use humhub\modules\user\models\User;
  * @property integer $user_id
  * @property string $name
  */
-class TaskUser extends \humhub\components\ActiveRecord
+class TaskAssigned extends \humhub\components\ActiveRecord
 {
 
     /**
@@ -22,7 +22,7 @@ class TaskUser extends \humhub\components\ActiveRecord
      */
     public static function tableName()
     {
-        return 'task_user';
+        return 'task_assigned';
     }
 
     /**
@@ -46,7 +46,7 @@ class TaskUser extends \humhub\components\ActiveRecord
             'id' => 'ID',
             'task_id' => 'Task',
             'user_id' => 'User',
-            'name' => Yii::t('TaskModule.taskuser', 'Name'),
+            'name' => Yii::t('TaskModule.taskassigned', 'Name'),
         ];
     }
 

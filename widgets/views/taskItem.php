@@ -6,13 +6,11 @@
 /* @var $canEdit boolean */
 /* @var $editUrl string */
 /* @var $editMinutesUrl string */
-
 use humhub\libs\Html;
 use humhub\modules\task\widgets\TaskItemMenu;
 use humhub\widgets\Button;
 use humhub\widgets\MarkdownView;
 use humhub\widgets\ModalButton;
-
 ?>
 <?= Html::beginTag('li', $options) ?>
     <div class="task-item" id="item-<?= $item->id; ?>">
@@ -25,25 +23,18 @@ use humhub\widgets\ModalButton;
 
                 <div class="task-item-content">
 
-
                     <?= TaskItemMenu::widget(['contentContainer' => $contentContainer, 'item' => $item, 'canEdit' => $canEdit]) ?>
 
-                    <h1 class="task-item-title"><?= Html::encode($item->title); ?></h1>
+                    <h1 class="task-item-title">
+                        <?php if (!$item->completed) : ?>
+                            <div id="completed-button">
+                                <?= Html::checkBox('completed', false, ['class' => 'tt', 'label' => Yii::t('TaskModule.widgets', Html::encode($item->title)), 'taskId' => $item->id, 'data-action-change' => 'confirm', 'data-action-submit', 'data-ui-loader']); ?>
+                            </div>
+                        <?php endif; ?>
 
-                    <?= MarkdownView::widget(['markdown' => $item->description]); ?>
-
+                    </h1>
                 </div>
 
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-1"></div>
-            <div class="col-md-11">
-                <br>
-                <hr class="buttom-line">
-                <br>
-            </div>
-        </div>
-    </div>
 <?= Html::endTag('li') ?>

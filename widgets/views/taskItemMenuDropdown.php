@@ -8,12 +8,9 @@
 ?>
 
 <?php
-
 use humhub\widgets\Button;
 use humhub\widgets\Link;
 use humhub\widgets\ModalButton;
-
-
 /* @var $editUrl string */
 /* @var $shiftUrl string */
 /* @var $deleteUrl string */

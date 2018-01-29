@@ -26,8 +26,9 @@ class Assets extends AssetBundle
 
     // We have to use the timeentry lib for the duration since the TimePicker widget uses an older version without maxHour setting...
     public $js = [
-        'js/timeentry/jquery.plugin.min.js',
-        'js/timeentry/jquery.timeentry.min.js',
-        'js/humhub.task.js'
+//        'js/timeentry/jquery.plugin.min.js',
+//        'js/timeentry/jquery.timeentry.min.js',
+        'js/humhub.task.js',
+        'js/humhub.form.js'
     ];
 }

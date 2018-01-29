@@ -11,6 +11,8 @@ use yii\helpers\Html;
 use humhub\modules\comment\widgets\CommentLink;
 use humhub\modules\like\widgets\LikeLink;
 use \humhub\modules\comment\widgets\Comments;
+use humhub\widgets\MarkdownView;
+use humhub\modules\content\widgets\WallEntryAddons;
 
 \humhub\modules\task\assets\Assets::register($this);
 
@@ -19,14 +21,16 @@ $createItemUrl = $contentContainer->createUrl('/task/item/edit', ['taskId' => $t
 $printUrl = $contentContainer->createUrl('print', ['id' => $task->id]);
 $shareLink = $contentContainer->createUrl('share', ['id' => $task->id]);
 
+
+$collapse = true;
+$renderAddons = true;
+
 $this->registerJsConfig('task', [
     'text' => [
         'success.notification' => Yii::t('TaskModule.views_index_task', 'Task Users have been notified')
     ]
 ]);
 
-$participantStyle = empty($task->location) ? 'display:inline-block;' :  'display:inline-block;padding-right:10px;border-right:2px solid '. $this->theme->variable('default');
-$locationStyle = ($task->hasTaskUsers()) ? 'display:inline-block;padding-left:10px;vertical-align:top;' : 'display:inline-block;';
 
 ?>
 <div id="task-container" class="panel panel-default task-details">
@@ -37,22 +41,16 @@ $locationStyle = ($task->hasTaskUsers()) ? 'display:inline-block;padding-left:10
     ]); ?>
     <div class="panel-body">
 
-        <?php if($task->hasTaskUsers()): ?>
-        <div>
-            <?php if ($task->hasTaskUsers()) : ?>
-                <div style="<?= $participantStyle ?>">
-                    <em><strong><?= Yii::t('TaskModule.views_index_index', 'Participants') ?>:</strong></em><br>
-                    <?php foreach ($task->taskUserUsers as $user) : ?>
-                        <a href="<?= $user->getUrl(); ?>">
-                            <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
-                        </a>
-                    <?php endforeach; ?>
+        <?php if (!empty($task->description)) : ?>
+            <div style="display:inline-block;">
+                <em><strong><?= Yii::t('TaskModule.views_index_index', 'Description') ?>:</strong></em><br>
+                <div <?= ($collapse) ? 'data-ui-show-more' : '' ?> data-read-more-text="<?= Yii::t('TaskModule.views_entry_view', "Read full description...") ?>" style="overflow:hidden">
+                    <?= MarkdownView::widget(['markdown' => $task->description]); ?>
                 </div>
-            <?php endif ?>
-
+            </div>
             <hr>
-        </div>
         <?php endif; ?>
+
         <?= TaskItemList::widget(['task' => $task, 'canEdit' => $canEdit]) ?>
 
         <?php if ($canEdit): ?>
@@ -60,17 +58,26 @@ $locationStyle = ($task->hasTaskUsers()) ? 'display:inline-block;padding-left:10
             <div class="row">
                 <div class="col-md-12 text-center">
                     <?php if (count($task->items) == 0) : ?>
-                        <?= Yii::t('TaskModule.views_index_index', 'Create your first agenda entry by clicking the following button.'); ?>
+                        <?= Yii::t('TaskModule.views_index_index', 'Add Checkpoints by clicking the following button.'); ?>
                         <br>
                     <?php endif; ?>
                     <br>
-                    <?= ModalButton::info(Yii::t('TaskModule.views_index_index', 'New subtask'))->id('task-agenda-create')->load($createItemUrl)->lg()->icon('fa-plus')?>
+                    <?= ModalButton::info(Yii::t('TaskModule.views_index_index', 'Add checkpoint'))->id('task-agenda-create')->load($createItemUrl)->lg()->icon('fa-plus')?>
                     <br><br><br>
                 </div>
             </div>
 
         <?php else: ?>
             <br><br>
+        <?php endif; ?>
+
+        <!-- wall-entry-addons class required since 1.2 -->
+        <?php if($renderAddons) : ?>
+            <div class="stream-entry-addons clearfix">
+                <?= WallEntryAddons::widget(
+                    ['object' => $task]
+                ); ?>
+            </div>
         <?php endif; ?>
 
         <?php if ($task->content->canView()) : // If the task is private and non space members are invited the task is visible, but not commentable etc. ?>

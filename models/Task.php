@@ -15,6 +15,7 @@ use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\user\models\User;
 use humhub\modules\search\interfaces\Searchable;
 use yii\db\ActiveQuery;
+use humhub\modules\task\CalendarUtils;
 
 /**
  * This is the model class for table "task".
@@ -22,10 +23,16 @@ use yii\db\ActiveQuery;
  * The followings are the available columns in table 'task':
  * @property integer $id
  * @property string $title
- * @property string $deadline
+ * @property string $description
+ * @property string $start_datetime
+ * @property string $end_datetime
+ * @property integer $all_day
  * @property integer $percent
  * @property integer $status
+ * @property integer $parent_task_id
+ * @property string $time_zone The timeZone this entry was saved, note the dates itself are always saved in app timeZone
  */
+//class Task extends ContentActiveRecord implements Searchable
 class Task extends ContentActiveRecord implements Searchable
 {
 
@@ -38,13 +45,30 @@ class Task extends ContentActiveRecord implements Searchable
      * @inheritdocs
      */
     public $wallEntryClass = WallEntry::class;
+//    public $autoAddToWall = true;
 
     public $assignedUsers;
 
 
-    // Status
+    /**
+     * Status
+     */
     const STATUS_OPEN = 1;
-    const STATUS_FINISHED = 5;
+    const STATUS_PENDING = 2;
+    const STATUS_IN_PROGRESS = 3;
+    const STATUS_PENDING_REVIEW = 4;
+    const STATUS_COMPLETED = 5;
+
+    /**
+     * @var array all given statuses as array
+     */
+    public static $statuses = [
+        self::STATUS_OPEN,
+        self::STATUS_PENDING,
+        self::STATUS_IN_PROGRESS,
+        self::STATUS_PENDING_REVIEW,
+        self::STATUS_COMPLETED
+    ];
 
     /**
      * @return string the associated database table name
@@ -81,16 +105,15 @@ class Task extends ContentActiveRecord implements Searchable
     public function rules()
     {
         return [
-            [['title'], 'required'],
-            [['deadline'], 'datetime', 'format' => $this->getDbDateFormat()],
-            [['percent', 'status'], 'integer'],
-            [['assignedUsers'], 'safe'],
+            [['title', 'start_datetime'], 'required'],
+//            [['start', 'end'], 'datetime', 'format' => $this->getDbDateFormat()],
+            [['start_datetime'], DbDateValidator::className()],
+            [['end_datetime'], DbDateValidator::className()],
+            [['all_day', 'percent'], 'integer'],
+            [['status'], 'in', 'range' => self::$statuses],
+            [['assignedUsers', 'description'], 'safe'],
             [['title'], 'string', 'max' => 255],
         ];
-    }
-
-    public function getDbDateFormat() {
-        return 'php:'.Yii::createObject(DbDateValidator::class)->convertToFormat;
     }
 
     /**
@@ -101,9 +124,13 @@ class Task extends ContentActiveRecord implements Searchable
         return [
             'id' => 'ID',
             'title' => Yii::t('TaskModule.task', 'Title'),
-            'deadline' => Yii::t('TaskModule.task', 'Deadline'),
-            'percent' => Yii::t('TaskModule.task', 'Percent'),
+            'description' => Yii::t('TaskModule.task', 'Description'),
+            'start_datetime' => Yii::t('TaskModule.task', 'Start'),
+            'end_datetime' => Yii::t('TaskModule.task', 'End'),
+            'all_day' => Yii::t('TaskModule.task', 'All Day'),
             'status' => Yii::t('TaskModule.task', 'Status'),
+            'percent' => Yii::t('TaskModule.task', 'Percent'),
+            'parent_task_id' => Yii::t('TaskModule.task', 'Parent Task'),
             'assignedUsers' => Yii::t('TaskModule.task', 'Assigned user(s)'),
         ];
     }
@@ -113,15 +140,15 @@ class Task extends ContentActiveRecord implements Searchable
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTaskUsers()
+    public function getTaskAssigned()
     {
-        $query = $this->hasMany(TaskUser::className(), ['task_id' => 'id']);
+        $query = $this->hasMany(TaskAssigned::className(), ['task_id' => 'id']);
         return $query;
     }
 
-    public function hasTaskUsers()
+    public function hasTaskAssigned()
     {
-        return !empty($this->taskUsers);
+        return !empty($this->taskAssigned);
     }
 
     /**
@@ -129,9 +156,20 @@ class Task extends ContentActiveRecord implements Searchable
      *
      * @return \yii\db\ActiveQuery
      */
-    public function getTaskUserUsers()
+    public function getTaskAssignedUsers()
     {
-        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskUsers');
+        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskAssigned');
+    }
+
+    public function beforeSave($insert)
+    {
+
+        // Check is a full day span
+        if ($this->all_day == 0 && CalendarUtils::isFullDaySpan(new DateTime($this->start_datetime), new DateTime($this->end_datetime))) {
+            $this->all_day = 1;
+        }
+
+        return parent::beforeSave($insert);
     }
 
     /**
@@ -143,8 +181,8 @@ class Task extends ContentActiveRecord implements Searchable
             $item->delete();
         }
 
-        foreach (TaskUser::findAll(['task_id' => $this->id]) as $taskUser) {
-            $taskUser->delete();
+        foreach (TaskAssigned::findAll(['task_id' => $this->id]) as $taskAssigned) {
+            $taskAssigned->delete();
         }
 
         return parent::beforeDelete();
@@ -156,31 +194,18 @@ class Task extends ContentActiveRecord implements Searchable
     public function afterSave($insert, $changedAttributes)
     {
 
-        TaskUser::deleteAll(['task_id' => $this->id]);
+        TaskAssigned::deleteAll(['task_id' => $this->id]);
 
         if(!empty($this->assignedUsers)) {
             foreach ($this->assignedUsers as $guid) {
-                $this->addTaskUser($guid);
+                $this->addTaskAssigned($guid);
             }
         }
 
         return parent::afterSave($insert, $changedAttributes);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function afterFind()
-    {
-
-//        foreach ($this->assignedUsers as $user) {
-//            $this->assignedUsers .= $user->guid . ",";
-//        }
-
-        return parent::afterFind();
-    }
-
-    public function isTaskUser($user = null)
+    public function isTaskAssigned($user = null)
     {
         if(!$user && !Yii::$app->user->isGuest) {
             $user = Yii::$app->user->getIdentity();
@@ -188,14 +213,14 @@ class Task extends ContentActiveRecord implements Searchable
             return false;
         }
 
-        $taskUser = array_filter($this->taskUsers, function(TaskUser $p) use ($user) {
+        $taskAssigned = array_filter($this->taskAssigned, function(TaskAssigned $p) use ($user) {
             return $p->user_id == $user->id;
         });
 
-        return !empty($taskUser);
+        return !empty($taskAssigned);
     }
 
-    public function addTaskUser($user)
+    public function addTaskAssigned($user)
     {
         $user = (is_string($user)) ? User::findOne(['guid' => $user]) : $user ;
 
@@ -203,12 +228,12 @@ class Task extends ContentActiveRecord implements Searchable
             return false;
         }
 
-        if(!$this->isTaskUser($user)) {
-            $participant = new TaskUser([
+        if(!$this->isTaskAssigned($user)) {
+            $taskAssigned = new TaskAssigned([
                 'task_id' => $this->id,
                 'user_id' => $user->id,
             ]);
-            return $participant->save();
+            return $taskAssigned->save();
         }
 
         return false;
@@ -226,16 +251,16 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return self::find()
             ->contentContainer($container)
-            ->orderBy(['task.deadline' => SORT_ASC])
+            ->orderBy(['task.end_datetime' => SORT_ASC])
             ->readable()
-            ->andWhere(['>=', 'task.deadline', date('Y-m-d')]);
+            ->andWhere(['>=', 'task.end_datetime', date('Y-m-d')]);
     }
 
     public static function GetUsersOpenTasks()
     {
         $query = self::find();
-        $query->leftJoin('task_user', 'task.id=task_user.task_id');
-        $query->where(['task_user.user_id' => Yii::$app->user->id, 'task.status' => self::STATUS_OPEN]);
+        $query->leftJoin('task_assigned', 'task.id=task_assigned.task_id');
+        $query->where(['task_assigned.user_id' => Yii::$app->user->id, 'task.status' => self::STATUS_OPEN]);
 
         return $query->all();
     }
@@ -246,28 +271,8 @@ class Task extends ContentActiveRecord implements Searchable
             return false;
         }
 
-        return (strtotime($this->deadline) < time());
+        return (strtotime($this->end_datetime) < time());
     }
-
-//    public function isPast()
-//    {
-//        $date = new DateTime($this->date);
-//        $now = new DateTime();
-//        return $date < $now;
-//    }
-
-//    public function isToday()
-//    {
-//        $today = new DateTime("now", new DateTimeZone(Yii::$app->formatter->timeZone));
-//        return Yii::$app->formatter->asDate($this->deadline, "ddMMyyyy") == $today->format('dmY');
-//    }
-//
-//    public function isTomorrow()
-//    {
-//        $today = new DateTime("now", new DateTimeZone(Yii::$app->formatter->timeZone));
-//        $today->add(new DateInterval('P1D'));
-//        return Yii::$app->formatter->asDate($this->date, "ddMMyyyy") == $today->format('dmY');
-//    }
 
     /**
      * @param ContentContainerActiveRecord $container
@@ -278,16 +283,16 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return self::find()
             ->contentContainer($container)
-            ->orderBy(['task.deadline' => SORT_DESC])
+            ->orderBy(['task.end_datetime' => SORT_DESC])
             ->readable()
-            ->andWhere(['<', 'task.deadline', date('Y-m-d')]);
+            ->andWhere(['<', 'task.end_datetime', date('Y-m-d')]);
     }
 
     public static function findReadable(ContentContainerActiveRecord $container)
     {
         return self::find()
             ->contentContainer($container)
-            ->orderBy(['task.deadline' => SORT_DESC])
+            ->orderBy(['task.end_datetime' => SORT_DESC])
             ->readable();
     }
 
@@ -299,11 +304,11 @@ class Task extends ContentActiveRecord implements Searchable
         }
 
         if ($newPercent == 100) {
-            $this->changeStatus(Task::STATUS_FINISHED);
+            $this->changeStatus(Task::STATUS_COMPLETED);
         }
 
-        if ($this->percent != 100 && $this->status == Task::STATUS_FINISHED) {
-            $this->changeStatus(Task::STATUS_OPEN);
+        if ($this->percent != 100 && $this->status == self::STATUS_COMPLETED) {
+            $this->changeStatus(self::STATUS_OPEN);
         }
 
         return true;
@@ -313,7 +318,7 @@ class Task extends ContentActiveRecord implements Searchable
     {
         $this->status = $newStatus;
 
-        if ($newStatus == Task::STATUS_FINISHED) {
+        if ($newStatus == Task::STATUS_COMPLETED) {
 
             // Todo: add notification and activity
 //            $activity = new \humhub\modules\task\activities\Finished();
@@ -343,10 +348,17 @@ class Task extends ContentActiveRecord implements Searchable
 
     public function hasDeadline()
     {
-        if ($this->deadline != '0000-00-00 00:00:00' && $this->deadline != '' && $this->deadline != 'NULL') {
+        if ($this->end_datetime != '0000-00-00 00:00:00' && $this->end_datetime != '' && $this->end_datetime != 'NULL') {
             return true;
         }
         return false;
+    }
+
+
+    public function hasSubTasks()
+    {
+        // Todo check task_items and subtask-Items
+        return !empty($this->subTasks);
     }
 
     /**
@@ -354,7 +366,18 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function inviteUser()
     {
+        // Todo
 //        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->assignedUsers);
+    }
+
+    /**
+     * Returns an ActiveQuery for all task items of this task.
+     *
+     * @return ActiveQuery
+     */
+    public function getItems()
+    {
+        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
     }
 
     public function newItem($title = null)
@@ -370,18 +393,58 @@ class Task extends ContentActiveRecord implements Searchable
      *
      * @return ActiveQuery
      */
-    public function getItems()
+    public function getSubTasks()
     {
-        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
+        return $this->hasMany(self::class, ['id' => 'parent_task_id']);
     }
 
-    public function getFormattedDeadline($timeZone = null, $format = 'short')
+    /**
+     * @inheritdoc
+     */
+    public function getTimezone()
+    {
+        return $this->time_zone;
+    }
+
+    public function getStartDateTime()
+    {
+        return new DateTime($this->start_datetime, new DateTimeZone(Yii::$app->timeZone));
+    }
+
+    public function getEndDateTime()
+    {
+        return new DateTime($this->end_datetime, new DateTimeZone(Yii::$app->timeZone));
+    }
+
+    public function getFormattedEndDateTime($timeZone = null, $format = 'short')
     {
         if($timeZone) {
             Yii::$app->formatter->timeZone = $timeZone;
         }
 
-        $result = Yii::$app->formatter->asDatetime($this->getDeadlineDateTime(), $format);
+        if ($this->all_day) {
+            $result = Yii::$app->formatter->asDate($this->getEndDateTime(), $format);
+        } else {
+            $result = Yii::$app->formatter->asDatetime($this->getEndDateTime(), $format);
+        }
+        if($timeZone) {
+            Yii::$app->i18n->autosetLocale();
+        }
+
+        return $result;
+    }
+
+    public function getFormattedStartDateTime($timeZone = null, $format = 'short')
+    {
+        if($timeZone) {
+            Yii::$app->formatter->timeZone = $timeZone;
+        }
+
+        if ($this->all_day) {
+            $result = Yii::$app->formatter->asDate($this->getStartDateTime(), $format);
+        } else {
+            $result = Yii::$app->formatter->asDatetime($this->getStartDateTime(), $format);
+        }
 
         if($timeZone) {
             Yii::$app->i18n->autosetLocale();
@@ -390,9 +453,16 @@ class Task extends ContentActiveRecord implements Searchable
         return $result;
     }
 
-    public function getDeadlineDateTime()
+    /**
+     * @return boolean weather or not this item spans exactly over a whole day
+     */
+    public function isAllDay()
     {
-        return new DateTime($this->deadline, new DateTimeZone(Yii::$app->timeZone));
+        if($this->all_day === null) {
+            return true;
+        }
+
+        return (boolean) $this->all_day;
     }
 
     /**
@@ -405,7 +475,7 @@ class Task extends ContentActiveRecord implements Searchable
 
         foreach ($this->items as $item) {
             $itemTitles .= $item->title;
-            $itemNotes .= $item->notes;
+            $itemNotes .= $item->description;
         }
 
         return [
@@ -413,5 +483,40 @@ class Task extends ContentActiveRecord implements Searchable
             'itemTitles' => $itemTitles,
             'itemNotes' => $itemNotes
         ];
+    }
+
+
+    public static function getStatusItems()
+    {
+        return [
+            self::STATUS_OPEN => Yii::t('TaskModule.task', 'Open'),
+            self::STATUS_PENDING => Yii::t('TaskModule.task', 'Pending'),
+            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.task', 'In Progress'),
+            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.task', 'Pending Review'),
+            self::STATUS_COMPLETED => Yii::t('TaskModule.task', 'Completed'),
+        ];
+    }
+
+    public function getStatus()
+    {
+        switch ($this->status){
+            case (self::STATUS_OPEN):
+                return Yii::t('TaskModule.task', 'Open');
+                break;
+            case (self::STATUS_PENDING):
+                return Yii::t('TaskModule.task', 'Pending');
+                break;
+            case (self::STATUS_IN_PROGRESS):
+                return Yii::t('TaskModule.task', 'In Progress');
+                break;
+            case (self::STATUS_PENDING_REVIEW):
+                return Yii::t('TaskModule.task', 'Pending Review');
+                break;
+            case (self::STATUS_COMPLETED):
+                return Yii::t('TaskModule.task', 'Completed');
+                break;
+            default:
+                return;
+        }
     }
 }

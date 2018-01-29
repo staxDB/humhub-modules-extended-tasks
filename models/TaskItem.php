@@ -1,13 +1,10 @@
 <?php
-
 namespace humhub\modules\task\models;
-
 use DateTime;
 use Yii;
 use humhub\modules\content\components\ContentActiveRecord;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\user\models\User;
-
 /**
  * This is the model class for table "task_item".
  *
@@ -15,7 +12,6 @@ use humhub\modules\user\models\User;
  * @property integer $id
  * @property integer $task_id
  * @property string $title
- * @property string $description
  * @property integer $completed
  * @property string $notes
  */
@@ -25,12 +21,10 @@ class TaskItem extends ContentActiveRecord
      * @inheritdocs
      */
     protected $managePermission = ManageTasks::class;
-
     /**
      * @inheritdocs
      */
     protected $streamChannel = null;
-
     /**
      * @return string the associated database table name
      */
@@ -38,7 +32,6 @@ class TaskItem extends ContentActiveRecord
     {
         return 'task_item';
     }
-
     /**
      * @inheritdoc
      */
@@ -51,7 +44,6 @@ class TaskItem extends ContentActiveRecord
             [['description', 'notes'], 'safe'],
         ];
     }
-
     /**
      * @inheritdoc
      */
@@ -60,7 +52,6 @@ class TaskItem extends ContentActiveRecord
         $scenarios = parent::scenarios();
         return $scenarios;
     }
-
     /**
      * @return array customized attribute labels (name=>label)
      */
@@ -69,12 +60,10 @@ class TaskItem extends ContentActiveRecord
         return [
             'id' => 'ID',
             'title' => Yii::t('TaskModule.taskitem', 'Title'),
-            'description' => Yii::t('TaskModule.taskitem', 'Description'),
             'completed' => Yii::t('TaskModule.taskitem', 'Completed'),
             'notes' => Yii::t('TaskModule.taskitem', 'Minutes'),
         ];
     }
-
     public function getTasks()
     {
         $query = \humhub\modules\tasks\models\Task::find();
@@ -84,36 +73,29 @@ class TaskItem extends ContentActiveRecord
         $query->orderBy(['task.deadline' => SORT_ASC]);
         return $query->all();
     }
-
     public function afterSave($insert, $changedAttributes)
     {
-        Yii::$app->search->update($this->task);
+//        Yii::$app->search->update($this->task);
         return parent::afterSave($insert, $changedAttributes);
     }
-
     public function beforeDelete()
     {
         return parent::beforeDelete();
     }
-
     public function getTask()
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
-
     public function getUrl()
     {
         return $this->content->container->createUrl('/task/index/view', ['id' => $this->task_id]);
     }
-
     public function getContentName()
     {
         return Yii::t('TaskModule.base', "Task Entry");
     }
-
     public function getContentDescription()
     {
         return $this->title;
     }
-
 }

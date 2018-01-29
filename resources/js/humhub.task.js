@@ -282,13 +282,92 @@ humhub.module('task', function (module, require, $) {
         });
     };
 
+
+
+    var Form = function (node, options) {
+        Widget.call(this, node, options);
+    };
+
+    object.inherits(Form, Widget);
+
+    Form.prototype.init = function() {
+        // modal.global.$.find('.tab-basic').on('shown.bs.tab', function (e) {
+        //     $('#calendarentry-title').focus();
+        // });
+        //
+        // modal.global.$.find('.tab-participation').on('shown.bs.tab', function (e) {
+        //     $('#calendarentry-participation_mode').focus();
+        // });
+
+        this.initTimeInput();
+    };
+
+    Form.prototype.initTimeInput = function(evt) {
+        $timeFields = modal.global.$.find('.timeField');
+        $timeInputs =  $timeFields.find('.form-control');
+        $timeInputs.each(function() {
+            var $this = $(this);
+            if($this.prop('disabled')) {
+                $this.data('oldVal', $this.val()).val('');
+            }
+        });
+    };
+
+    Form.prototype.toggleDateTime = function(evt) {
+        $timeFields = modal.global.$.find('.timeField');
+        $timeInputs =  $timeFields.find('.form-control');
+        if (evt.$trigger.prop('checked')) {
+            $timeInputs.prop('disabled', true);
+            $timeInputs.each(function() {
+                $(this).data('oldVal', $(this).val()).val('');
+            });
+            $timeFields.css('opacity', '0.2');
+        } else {
+            $timeInputs.each(function() {
+                $this = $(this);
+                if($this.data('oldVal')) {
+                    $this.val($this.data('oldVal'));
+                }
+            });
+            $timeInputs.prop('disabled', false);
+            $timeFields.css('opacity', '1.0');
+        }
+    };
+
+    Form.prototype.removeTaskItem = function (evt) {
+        evt.$trigger.closest('.form-group').remove();
+    };
+
+    Form.prototype.addTaskItem = function (evt) {
+        var $this = evt.$trigger;
+        $this.prev('input').tooltip({
+            html: true,
+            container: 'body'
+        });
+
+        var $newInputGroup = $this.closest('.form-group').clone(false);
+        var $input = $newInputGroup.find('input');
+
+        $input.val('');
+        $newInputGroup.hide();
+        $this.closest('.form-group').after($newInputGroup);
+        $this.children('span').removeClass('glyphicon-plus').addClass('glyphicon-trash');
+        $this.off('click.humhub-action').on('click', function () {
+            $this.closest('.form-group').remove();
+        });
+        $this.removeAttr('data-action-click');
+        $newInputGroup.fadeIn('fast');
+    };
+
+
     module.export({
         ItemList: ItemList,
         Item: Item,
         deleteTask: deleteTask,
         editTask:editTask,
         sendNotification: sendNotification,
-        TaskFilter: TaskFilter
+        TaskFilter: TaskFilter,
+        Form: Form
     });
 })
 ;

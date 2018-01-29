@@ -8,12 +8,17 @@ class m180114_210903_initial extends humhub\components\Migration
         $this->createTable('task', array(
             'id' => 'pk',
             'title' => 'varchar(255) NOT NULL',
-            'deadline' => 'datetime DEFAULT NULL',
-            'percent' => 'smallint(6) NOT NULL DEFAULT 0',
+            'description' => 'TEXT NULL',
+            'start_datetime' => 'datetime NOT NULL',
+            'end_datetime' => 'datetime DEFAULT NULL',
+            'all_day' => 'tinyint(4) NOT NULL',
             'status' => 'tinyint(4) DEFAULT 0',
+            'percent' => 'smallint(6) NOT NULL DEFAULT 0',
+            'time_zone' => 'varchar(60) DEFAULT NULL',
+            'parent_task_id' => 'int(11) DEFAULT NULL',
         ), '');
 
-        $this->createTable('task_user', array(
+        $this->createTable('task_assigned', array(
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'user_id' => 'int(11) NOT NULL',
@@ -26,7 +31,6 @@ class m180114_210903_initial extends humhub\components\Migration
             'title' => 'VARCHAR(255) NOT NULL',
             'description' => 'TEXT NULL',
             'completed' => 'tinyint(4) DEFAULT 0',
-            'notes' => 'TEXT NULL',
         ), '');
     }
 

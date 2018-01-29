@@ -34,7 +34,7 @@ class WallEntry extends \humhub\modules\content\widgets\WallEntry
     public function run()
     {
         \humhub\modules\meeting\assets\Assets::register($this->view);
-        return $this->render('wallEntry', ['meeting' => $this->contentObject, 'justEdited' => $this->justEdited]);
+        return $this->render('wallEntry', ['task' => $this->contentObject, 'justEdited' => $this->justEdited]);
     }
 
     public function getContextMenu()

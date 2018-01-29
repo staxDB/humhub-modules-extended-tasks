@@ -18,7 +18,7 @@ namespace humhub\modules\task\models\forms;
 
 use humhub\modules\content\components\ContentContainerActiveRecord;
 use humhub\modules\task\models\Task;
-use humhub\modules\task\models\TaskUser;
+use humhub\modules\task\models\TaskAssigned;
 use humhub\modules\task\permissions\ManageTasks;
 use Yii;
 use yii\base\Model;
@@ -83,8 +83,8 @@ class TaskFilter extends Model
         }
 
         if($this->taskUser) {
-            $subQuery = TaskUser::find()
-                ->where('task_user.task_id=task.id')
+            $subQuery = TaskAssigned::find()
+                ->where('task_assigned.task_id=task.id')
                 ->andWhere(['task_user.user_id' => $user->id]);
             $query->andWhere(['exists', $subQuery]);
         }
