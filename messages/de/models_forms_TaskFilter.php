@@ -1,7 +1,7 @@
 <?php
 return array (
-  'Created by me' => 'Von mir erstellt',
-  'Filter meetings' => 'Besprechungen filtern',
-  'I\'m participating' => 'Ich nehme teil',
-  'Only past meetings' => 'Zurückliegende  Besprechungen',
+    'Filter tasks' => 'Aufgaben filtern',
+    'Only past tasks' => 'Nur vergangene Aufgaben',
+    'I\'m working on this task' => 'Ich arbeite an dieser Aufgabe',
+    'Created by me' => 'Von mir erstellt'
 );

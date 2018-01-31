@@ -19,8 +19,8 @@ $title = ($showTitle) ? '0' . Yii::t('TaskModule.widgets_views_entry', 'votes') 
 <div class="form-group">
     <div class="input-group">
         <input type="text" name="<?= $name ?>" 
-               class="form-control poll_answer_new_input contentForm"
-               placeholder="<?= Yii::t('TaskModule.widgets_views_pollForm', "Add checkpoint...") ?>"
+               class="form-control task_item_new_input contentForm"
+               placeholder="<?= Yii::t('TaskModule.widgets_views_form', "Add checkpoint...") ?>"
                title="<?= $title ?>"/>
         <div class="input-group-addon addPollAnswerButton" data-action-click="addTaskItem" style="cursor:pointer">
             <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>

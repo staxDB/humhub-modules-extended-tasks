@@ -57,7 +57,7 @@ class Events extends Object
                 'label' => Yii::t('TaskModule.base', 'Tasks'),
                 'group' => 'modules',
                 'url' => $space->createUrl('//task/index'),
-                'icon' => '<i class="fa fa-calendar-o"></i>',
+                'icon' => '<i class="fa fa-tasks"></i>',
                 'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'task'),
             ]);
         }

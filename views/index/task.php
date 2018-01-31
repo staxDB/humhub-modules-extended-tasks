@@ -44,7 +44,7 @@ $this->registerJsConfig('task', [
         <?php if (!empty($task->description)) : ?>
             <div style="display:inline-block;">
                 <em><strong><?= Yii::t('TaskModule.views_index_index', 'Description') ?>:</strong></em><br>
-                <div <?= ($collapse) ? 'data-ui-show-more' : '' ?> data-read-more-text="<?= Yii::t('TaskModule.views_entry_view', "Read full description...") ?>" style="overflow:hidden">
+                <div <?= ($collapse) ? 'data-ui-show-more' : '' ?> data-read-more-text="<?= Yii::t('TaskModule.views_entry_view', 'Read full description...') ?>" style="overflow:hidden">
                     <?= MarkdownView::widget(['markdown' => $task->description]); ?>
                 </div>
             </div>

@@ -16,7 +16,7 @@ use yii\helpers\Html;
 
 $createUrl = $contentContainer->createUrl('/task/index/edit');
 $filterUrl = $contentContainer->createUrl('/task/index/filter-tasks');
-$emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', "Start now, by creating a new task!")
+$emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', 'Start now, by creating a new task!')
     : Yii::t('TaskModule.views_index_index', 'There are currently no upcoming tasks!.');
 
 ?>

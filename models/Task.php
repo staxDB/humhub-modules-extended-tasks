@@ -48,6 +48,8 @@ class Task extends ContentActiveRecord implements Searchable
 //    public $autoAddToWall = true;
 
     public $assignedUsers;
+    public $newItems;
+    public $editItems;
 
 
     /**
@@ -110,7 +112,7 @@ class Task extends ContentActiveRecord implements Searchable
             [['start_datetime'], DbDateValidator::className()],
             [['end_datetime'], DbDateValidator::className()],
             [['all_day', 'percent'], 'integer'],
-            [['status'], 'in', 'range' => self::$statuses],
+//            [['status'], 'in', 'range' => self::$statuses],
             [['assignedUsers', 'description'], 'safe'],
             [['title'], 'string', 'max' => 255],
         ];
@@ -123,15 +125,17 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return [
             'id' => 'ID',
-            'title' => Yii::t('TaskModule.task', 'Title'),
-            'description' => Yii::t('TaskModule.task', 'Description'),
-            'start_datetime' => Yii::t('TaskModule.task', 'Start'),
-            'end_datetime' => Yii::t('TaskModule.task', 'End'),
-            'all_day' => Yii::t('TaskModule.task', 'All Day'),
-            'status' => Yii::t('TaskModule.task', 'Status'),
-            'percent' => Yii::t('TaskModule.task', 'Percent'),
-            'parent_task_id' => Yii::t('TaskModule.task', 'Parent Task'),
-            'assignedUsers' => Yii::t('TaskModule.task', 'Assigned user(s)'),
+            'title' => Yii::t('TaskModule.model_task', 'Title'),
+            'description' => Yii::t('TaskModule.model_task', 'Description'),
+            'start_datetime' => Yii::t('TaskModule.model_task', 'Start'),
+            'end_datetime' => Yii::t('TaskModule.model_task', 'End'),
+            'all_day' => Yii::t('TaskModule.model_task', 'All Day'),
+            'status' => Yii::t('TaskModule.model_task', 'Status'),
+            'percent' => Yii::t('TaskModule.model_task', 'Percent'),
+            'parent_task_id' => Yii::t('TaskModule.model_task', 'Parent Task'),
+            'newItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
+            'editItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
+            'assignedUsers' => Yii::t('TaskModule.model_task', 'Assigned user(s)'),
         ];
     }
 
@@ -152,7 +156,25 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
-     * Returns an ActiveQuery for all participant user models of this meeting.
+     * Returns an ActiveQuery for all taskItems of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+
+    // todo: check getTaskItems() and getItems() --> sum
+//    public function getTaskItems()
+//    {
+//        $query = $this->hasMany(TaskItem::className(), ['task_id' => 'id']);
+//        return $query;
+//    }
+
+//    public function hasTaskItems()
+//    {
+//        return !empty($this->taskItems);
+//    }
+
+    /**
+     * Returns an ActiveQuery for all assigned user models of this task.
      *
      * @return \yii\db\ActiveQuery
      */
@@ -189,7 +211,10 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
-     * @inheritdoc
+     * Saves new items (if set) and updates items given edititems (if set)
+     * @param type $insert
+     * @param type $changedAttributes
+     * @return boolean
      */
     public function afterSave($insert, $changedAttributes)
     {
@@ -202,8 +227,81 @@ class Task extends ContentActiveRecord implements Searchable
             }
         }
 
-        return parent::afterSave($insert, $changedAttributes);
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!$insert) {
+            $this->updateItems();
+        }
+
+        $this->saveNewItems();
+
+        return true;
     }
+
+    public function saveNewItems()
+    {
+        if ($this->newItems == null) {
+            return;
+        }
+
+        foreach ($this->newItems as $itemText) {
+            $this->addItem($itemText);
+        }
+
+        // Reset cached items
+        unset($this->items);
+    }
+
+    public function addItem($itemText)
+    {
+        if (trim($itemText) === '') {
+            return;
+        }
+
+        $item = new TaskItem();
+        $item->task_id = $this->id;
+        $item->title = $itemText;
+        $item->save();
+        return $item;
+    }
+
+    public function updateItems()
+    {
+        if ($this->editItems == null && $this->newItems == null) {
+            return;
+        }
+
+        foreach ($this->items as $item) {
+            if (!array_key_exists($item->id, $this->editItems)) {
+                $item->delete();
+            } else if ($item->title !== $this->editItems[$item->id]) {
+                $item->title = $this->editItems[$item->id];
+                $item->update();
+            }
+        }
+    }
+
+    /**
+     * Sets the newItems array, which is used for creating and updating (afterSave)
+     * the task, by saving all valid item title contained in the given array.
+     * @param type $newItemArr
+     */
+    public function setNewItems($newItemArr)
+    {
+        $this->newItems = TaskItem::filterValidItems($newItemArr);
+    }
+
+    /**
+     * Sets the editItems array, which is used for updating (afterSave)
+     * the task. The given array has to contain task item ids as key and an title
+     * as values.
+     * @param type $editItemArr
+     */
+    public function setEditItems($editItemArr)
+    {
+        $this->editItems = TaskItem::filterValidItems($editItemArr);
+    }
+
 
     public function isTaskAssigned($user = null)
     {
@@ -354,7 +452,6 @@ class Task extends ContentActiveRecord implements Searchable
         return false;
     }
 
-
     public function hasSubTasks()
     {
         // Todo check task_items and subtask-Items
@@ -489,11 +586,11 @@ class Task extends ContentActiveRecord implements Searchable
     public static function getStatusItems()
     {
         return [
-            self::STATUS_OPEN => Yii::t('TaskModule.task', 'Open'),
-            self::STATUS_PENDING => Yii::t('TaskModule.task', 'Pending'),
-            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.task', 'In Progress'),
-            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.task', 'Pending Review'),
-            self::STATUS_COMPLETED => Yii::t('TaskModule.task', 'Completed'),
+            self::STATUS_OPEN => Yii::t('TaskModule.model_task', 'Open'),
+            self::STATUS_PENDING => Yii::t('TaskModule.model_task', 'Pending'),
+            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.model_task', 'In Progress'),
+            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.model_task', 'Pending Review'),
+            self::STATUS_COMPLETED => Yii::t('TaskModule.model_task', 'Completed'),
         ];
     }
 
@@ -501,19 +598,19 @@ class Task extends ContentActiveRecord implements Searchable
     {
         switch ($this->status){
             case (self::STATUS_OPEN):
-                return Yii::t('TaskModule.task', 'Open');
+                return Yii::t('TaskModule.model_task', 'Open');
                 break;
             case (self::STATUS_PENDING):
-                return Yii::t('TaskModule.task', 'Pending');
+                return Yii::t('TaskModule.model_task', 'Pending');
                 break;
             case (self::STATUS_IN_PROGRESS):
-                return Yii::t('TaskModule.task', 'In Progress');
+                return Yii::t('TaskModule.model_task', 'In Progress');
                 break;
             case (self::STATUS_PENDING_REVIEW):
-                return Yii::t('TaskModule.task', 'Pending Review');
+                return Yii::t('TaskModule.model_task', 'Pending Review');
                 break;
             case (self::STATUS_COMPLETED):
-                return Yii::t('TaskModule.task', 'Completed');
+                return Yii::t('TaskModule.model_task', 'Completed');
                 break;
             default:
                 return;

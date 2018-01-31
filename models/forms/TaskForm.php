@@ -153,7 +153,7 @@ class TaskForm extends Model
     {
         return array_merge(parent::attributeLabels(), [
             'start_date' => Yii::t('TaskModule.task', 'Start Date'),
-            'type_id' => Yii::t('TaskModule.task', 'Event Type'),
+//            'type_id' => Yii::t('TaskModule.task', 'Event Type'),
             'end_date' => Yii::t('TaskModule.task', 'End Date'),
             'start_time' => Yii::t('TaskModule.task', 'Start Time'),
             'end_time' => Yii::t('TaskModule.task', 'End Time'),

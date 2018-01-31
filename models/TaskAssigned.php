@@ -4,17 +4,18 @@ namespace humhub\modules\task\models;
 
 use Yii;
 use humhub\modules\user\models\User;
+use humhub\components\ActiveRecord;
 
 /**
- * This is the model class for table "task_user".
+ * This is the model class for table "task_assigned".
  *
- * The followings are the available columns in table 'task_user':
+ * The followings are the available columns in table 'task_assigned':
  * @property integer $id
  * @property integer $task_id
  * @property integer $user_id
  * @property string $name
  */
-class TaskAssigned extends \humhub\components\ActiveRecord
+class TaskAssigned extends ActiveRecord
 {
 
     /**
@@ -46,7 +47,7 @@ class TaskAssigned extends \humhub\components\ActiveRecord
             'id' => 'ID',
             'task_id' => 'Task',
             'user_id' => 'User',
-            'name' => Yii::t('TaskModule.taskassigned', 'Name'),
+            'name' => Yii::t('TaskModule.models_taskassigned', 'Name'),
         ];
     }
 

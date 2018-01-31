@@ -85,7 +85,7 @@ class TaskFilter extends Model
         if($this->taskUser) {
             $subQuery = TaskAssigned::find()
                 ->where('task_assigned.task_id=task.id')
-                ->andWhere(['task_user.user_id' => $user->id]);
+                ->andWhere(['task_assigned.user_id' => $user->id]);
             $query->andWhere(['exists', $subQuery]);
         }
 

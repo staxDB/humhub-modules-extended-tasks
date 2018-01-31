@@ -188,6 +188,10 @@ class IndexController extends ContentContainerController
             throw new HttpException(404);
         }
 
+        //Set newAnswers, and editAnswers which will be saved by afterSave of the poll class
+        $taskForm->task->setNewItems(Yii::$app->request->post('newItems'));
+        $taskForm->task->setEditItems(Yii::$app->request->post('items'));
+
         if ($taskForm->load(Yii::$app->request->post()) && $taskForm->save()) {
             if($cal) {
                 return ModalClose::widget(['saved' => true]);

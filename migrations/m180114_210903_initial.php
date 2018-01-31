@@ -32,6 +32,12 @@ class m180114_210903_initial extends humhub\components\Migration
             'description' => 'TEXT NULL',
             'completed' => 'tinyint(4) DEFAULT 0',
         ), '');
+
+        $this->createTable('task_reminder', array(
+            'id' => 'pk',
+            'task_id' => 'int(11) NOT NULL',
+            'remind_mode' => 'tinyint(4) DEFAULT 0',
+        ), '');
     }
 
     public function down()
