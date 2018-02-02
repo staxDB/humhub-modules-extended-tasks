@@ -48,28 +48,34 @@ class TaskMenu extends \yii\base\Widget
 
         $linkLabel = '';
         $changeStatusUrl = '';
+        $canSeeLink = false;
         switch ($this->task->status) {
             case Task::STATUS_PENDING:
                 $linkLabel = Yii::t('TaskModule.views_index_index', 'Begin Task');
                 $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_IN_PROGRESS]);
+                ($this->task->isUserAssigned() || $this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
                 break;
             case Task::STATUS_IN_PROGRESS:
                 if (Yii::$app->user->getIdentity() !== $this->task->getCreatedBy()) {
                     $linkLabel = Yii::t('TaskModule.views_index_index', 'Let Task Review');
                     $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_PENDING_REVIEW]);
+                    ($this->task->isUserAssigned() || $this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
                 }
                 else {
                     $linkLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
                     $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_COMPLETED]);
+                    ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
                 }
                 break;
             case Task::STATUS_PENDING_REVIEW:
                 $linkLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
                 $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_COMPLETED]);
+                ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
                 break;
             case Task::STATUS_COMPLETED:
                 $linkLabel = Yii::t('TaskModule.views_index_index', 'Reset Task');
                 $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_PENDING]);
+                ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
                 break;
         }
 
@@ -80,7 +86,8 @@ class TaskMenu extends \yii\base\Widget
                     'shareUrl' => $shareUrl,
                     'canEdit' => $this->canEdit,
                     'changeStatusUrl' => $changeStatusUrl,
-                    'linkLabel' => $linkLabel
+                    'linkLabel' => $linkLabel,
+                    'canSeeLink' => $canSeeLink
         ]);
     }
 

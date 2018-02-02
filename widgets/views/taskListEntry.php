@@ -4,6 +4,7 @@ use humhub\libs\Html;
 /* @var $task \humhub\modules\task\models\Task */
 /* @var $url string */
 /* @var $canEdit boolean */
+/* @var $filterResult boolean */
 ?>
 
 <a href="<?= $url ?>">
@@ -24,7 +25,7 @@ use humhub\libs\Html;
                 )->icon('fa-pencil')->right()->xs()->action('ui.modal.load', $editUrl)->loader(false)->visible($canEdit) ?>
             </h5>
             <h5>
-                <?= \humhub\modules\task\widgets\TaskPercentageBar::widget(['task' => $task, 'right' => false])?>
+                <?= \humhub\modules\task\widgets\TaskPercentageBar::widget(['task' => $task, 'filterResult' => $filterResult])?>
             </h5>
         </div>
 

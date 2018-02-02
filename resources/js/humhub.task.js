@@ -9,75 +9,10 @@ humhub.module('task', function (module, require, $) {
     var Widget = require('ui.widget').Widget;
     var object = require('util').object;
     var client = require('client');
-    var Content = require('content').Content;
     var loader = require('ui.loader');
     var modal = require('ui.modal');
 
 
-
-    var Item = function (node, options) {
-        Widget.call(this, node, options);
-    };
-
-    object.inherits(Item, Widget);
-
-    Item.prototype.init = function () {
-        var that = this;
-    };
-
-    Item.prototype.loader = function (show) {
-
-    };
-
-    Item.prototype.confirm = function (submitEvent) {
-        this.update(client.submit(submitEvent));
-    };
-
-    Item.prototype.update = function (update) {
-        this.loader();
-        update.then($.proxy(this.handleUpdateSuccess, this))
-            .catch(Item.handleUpdateError)
-            .finally($.proxy(this.loader, this, false));
-    };
-
-    Item.prototype.handleUpdateSuccess = function (response) {
-        // var streamEntry = this.streamEntry();
-        // return streamEntry.replace(response.output).then(function () {
-            module.log.success('success.saved');
-        // });
-    };
-
-    Item.handleUpdateError = function (e) {
-        module.log.error(e.message, true);
-        // module.log.error(e, true);
-    };
-
-    var ItemList = function (node, options) {
-        Widget.call(this, node, options);
-    };
-
-    object.inherits(ItemList, Widget);
-
-    ItemList.prototype.init = function () {
-
-    };
-
-    ItemList.prototype.getItems = function () {
-        var result = [];
-
-        this.$.find("[data-item-id]").each(function () {
-            result.push(Item.instance(this));
-        });
-
-        return result;
-    };
-
-    ItemList.prototype.updateItems = function (items) {
-        $.each(items, function (itemId, item) {
-            var itemInst = Item.instance($('[data-item-id="' + itemId + '"]'));
-            itemInst.setData(item);
-        });
-    };
 
     var sendNotification = function (evt) {
         client.post(evt).then(function (response) {
@@ -144,19 +79,19 @@ humhub.module('task', function (module, require, $) {
 
     };
 
-    // TaskFilter.prototype.loader = function (show) {
-    //     var $node = $('#task-filter-loader');
-    //
-    //     if (show === false) {
-    //         loader.reset($node);
-    //     } else {
-    //         loader.set($node, {
-    //             'position': 'left',
-    //             'size': '8px',
-    //             'css': {padding: '0px'}
-    //         });
-    //     }
-    // };
+    TaskFilter.prototype.loader = function (show) {
+        var $node = $('#task-filter-loader');
+
+        if (show === false) {
+            loader.reset($node);
+        } else {
+            loader.set($node, {
+                'position': 'left',
+                'size': '8px',
+                'css': {padding: '0px'}
+            });
+        }
+    };
 
     TaskFilter.prototype.title = function () {
         return this.$titleFilter.val();
@@ -259,6 +194,76 @@ humhub.module('task', function (module, require, $) {
         });
         $this.removeAttr('data-action-click');
         $newInputGroup.fadeIn('fast');
+    };
+
+
+    var Item = function (node, options) {
+        Widget.call(this, node, options);
+    };
+
+    object.inherits(Item, Widget);
+
+    Item.prototype.init = function () {
+        var that = this;
+    };
+
+    Item.prototype.loader = function (show) {
+        debugger;
+    };
+
+    Item.prototype.confirm = function (submitEvent) {
+        this.update(client.submit(submitEvent));
+    };
+
+    Item.prototype.update = function (update) {
+        this.loader();
+        update.then($.proxy(this.handleUpdateSuccess, this))
+            .catch(Item.handleUpdateError)
+            .finally($.proxy(this.loader, this, false));
+    };
+
+    Item.prototype.handleUpdateSuccess = function (response) {
+
+        // if (this.$.find("#taskStatus").text() === "Pending") {
+        //     client.reload();
+        // }
+        // var streamEntry = this.streamEntry();
+        // return streamEntry.replace(response.output).then(function () {
+        // this.loader();
+        module.log.success('success.saved');
+        // });
+    };
+
+    Item.handleUpdateError = function (e) {
+        module.log.error(e.message, true);
+        // module.log.error(e, true);
+    };
+
+    var ItemList = function (node, options) {
+        Widget.call(this, node, options);
+    };
+
+    object.inherits(ItemList, Widget);
+
+    ItemList.prototype.init = function () {
+
+    };
+
+    ItemList.prototype.getItems = function () {
+        var result = [];
+
+        this.$.find("[data-item-id]").each(function () {
+            result.push(Item.instance(this));
+        });
+
+        return result;
+    };
+
+    ItemList.prototype.updateItems = function (items) {
+        $.each(items, function (itemId, item) {
+            var itemInst = Item.instance($('[data-item-id="' + itemId + '"]'));
+            itemInst.setData(item);
+        });
     };
 
 

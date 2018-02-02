@@ -387,13 +387,22 @@ class Task extends ContentActiveRecord implements Searchable
     public function changeStatus($newStatus)
     {
         if (!in_array($newStatus, self::$statuses))
-            return false;
+            return;
 
-        $this->status = $newStatus;
+        switch ($newStatus) {
+            case Task::STATUS_IN_PROGRESS:
+                // Todo: Notify responsible Person, e.g. creator
+                break;
 
-//        if ($newStatus == Task::STATUS_COMPLETED) {
+            case Task::STATUS_PENDING_REVIEW:
+                // Todo: Notify responsible Person, e.g. creator
+                break;
 
-            // Todo: add notification and activity
+            case Task::STATUS_COMPLETED:
+                // Todo: Notify responsible Person, e.g. assigned persons or creator (if finisher is not creator)
+                break;
+        }
+            // Todo: example notification and activity
 //            $activity = new \humhub\modules\task\activities\Finished();
 //            $activity->source = $this;
 //            $activity->originator = Yii::$app->user->getIdentity();
@@ -406,15 +415,13 @@ class Task extends ContentActiveRecord implements Searchable
 //                $notification->send($this->content->user);
 //            }
 
-//            $this->percent = 100;
-//        } else {
             // Try to delete TaskFinishedNotification if exists
 //            $notification = new \humhub\modules\task\notifications\Finished();
 //            $notification->source = $this;
 //            $notification->delete($this->content->user);
 //        }
 
-        $this->save();
+        $this->updateAttributes(['status' => $newStatus]);
 
         return true;
     }

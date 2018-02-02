@@ -28,10 +28,10 @@ use humhub\widgets\ModalButton;
                     <?= ModalButton::asLink(Yii::t('TaskModule.base', 'Edit'))->post($editUrl)->icon('fa-edit')->visible($canEdit) ?>
                 </li>
                 <li>
-                    <?= Button::asLink( $linkLabel, $changeStatusUrl)->icon('fa-check-square')->visible($canEdit) ?>
+                    <?= Button::asLink( $linkLabel, $changeStatusUrl)->icon('fa-check-square')->visible($canSeeLink)->loader(true); ?>
                 </li>
                 <li>
-                    <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Print agenda'), $printUrl)->icon('fa-print')->options(['target' => '_blank']);?>
+                    <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Print task'), $printUrl)->icon('fa-print')->options(['target' => '_blank']);?>
                 </li>
                 <li>
                     <?= ModalButton::asLink(Yii::t('TaskModule.views_index_index', 'Share task'))->load($shareUrl)->icon('fa-share-alt')?>

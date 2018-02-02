@@ -23,6 +23,7 @@ class TaskListEntry extends Widget
     public $task;
     public $canEdit;
     public $contentContainer;
+    public $filterResult = false;
 
     public function run()
     {
@@ -30,7 +31,8 @@ class TaskListEntry extends Widget
             'task' => $this->task,
             'url' => $this->contentContainer->createUrl('/task/index/view', ['id' => $this->task->id]),
             'editUrl' => $this->contentContainer->createUrl('/task/index/edit', ['id' => $this->task->id]),
-            'canEdit' => $this->canEdit
+            'canEdit' => $this->canEdit,
+            'filterResult' => $this->filterResult
         ]);
     }
 

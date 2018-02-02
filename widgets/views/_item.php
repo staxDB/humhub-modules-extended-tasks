@@ -7,11 +7,13 @@
  */
 
 /* @var $this \yii\web\View */
+/* @var $task \humhub\modules\task\models\Task */
 /* @var $item \humhub\modules\task\models\TaskItem */
 /* @var $options array */
 
 use humhub\libs\Html;
 
+$disabled = ($task->content->canEdit() || $task->isUserAssigned()) ? false : 'true';
 ?>
 <?= Html::beginTag('div', $options) ?>
 
@@ -22,7 +24,7 @@ use humhub\libs\Html;
             <div class="col-md-12" style="padding-right: 0;">
                 <div class="checkbox">
                     <label>
-                        <?= Html::checkBox('item[' . $item->id . ']', $item->completed, ['label' => $item->title, 'itemId' => $item->id, 'data-action-change' => 'confirm', 'data-action-submit']); ?>
+                        <?= Html::checkBox('item[' . $item->id . ']', $item->completed, ['label' => $item->title, 'itemId' => $item->id, 'data-action-change' => 'confirm', 'data-action-submit', 'disabled' => $disabled]); ?>
                     </label>
                 </div>
             </div>

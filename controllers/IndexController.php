@@ -240,6 +240,7 @@ class IndexController extends ContentContainerController
         return $this->contentContainer->getPermissionManager()->can(new ManageTasks());
     }
 
+    // Todo
     public function actionShare($id)
     {
         $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
@@ -251,6 +252,7 @@ class IndexController extends ContentContainerController
         return $this->renderAjax('share', ['task' => $task, 'contentContainer' => $this->contentContainer, 'canEdit' => $this->canEdit()]);
     }
 
+    // Todo
     public function actionGetIcs($id, $type = null)
     {
         $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
@@ -266,6 +268,7 @@ class IndexController extends ContentContainerController
         return $this->renderAjax('getICS', ['task' => $task, 'type' => $type, 'contentContainer' => $this->contentContainer]);
     }
 
+    // Todo
     public function actionCalendarUpdate($id)
     {
         $this->forcePostRequest();
@@ -289,6 +292,7 @@ class IndexController extends ContentContainerController
         throw new HttpException(400, "Could not save! " . print_r($taskForm->getErrors()));
     }
 
+    // Todo
     public function actionSendInviteNotifications($id)
     {
         $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
@@ -309,13 +313,16 @@ class IndexController extends ContentContainerController
     }
 
     /**
-     * Confirm an Announcement
+     * Confirm an checklist item as closed
      */
     public function actionConfirm()
     {
         Yii::$app->response->format = 'json';
 
         $task = $this->getTaskByParameter();
+
+        if (!$task->content->canEdit() && !$task->isUserAssigned())
+            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
 
         $items = Yii::$app->request->post('item');
 
@@ -332,10 +339,14 @@ class IndexController extends ContentContainerController
         $task->resetItems();
         $task->confirm($results);
 
+        if ($task->status === Task::STATUS_PENDING)
+            $task->changeStatus(Task::STATUS_IN_PROGRESS);
+
         return $this->render("task", [
             'task' => $task,
             'contentContainer' => $this->contentContainer
         ]);
+
     }
 
     public function actionStatus($id, $status)
@@ -352,12 +363,13 @@ class IndexController extends ContentContainerController
             throw new HttpException(403);
         }
 
-        $task->updateAttributes(['status' => $status]);
+        if ($task->changeStatus($status))
+            $this->view->success(Yii::t('TaskModule.results', 'Success'));
+        else
+            $this->view->error(Yii::t('TaskModule.results', 'Error'));
 
-        return $this->render("task", [
-            'task' => $task,
-            'contentContainer' => $this->contentContainer
-        ]);
+        return $this->redirect($this->contentContainer->createUrl('/task/index/view', ['id' => $task->id]));
+
     }
 
     /**

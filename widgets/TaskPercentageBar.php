@@ -27,15 +27,16 @@ class TaskPercentageBar extends Widget
     public $task;
 
     /**
-     * @var Task
+     * Needed to show progress_bar in upcoming tasks and in filtered results
+     * @var $filterResult
      */
-    public $right;
+    public $filterResult = false;
 
     public function run()
     {
         return $this->render('taskPercentageBar', [
             'task' => $this->task,
-            'right' => $this->right
+            'filterResult' => $this->filterResult
         ]);
     }
 

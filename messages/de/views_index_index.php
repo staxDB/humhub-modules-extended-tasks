@@ -5,5 +5,27 @@ return array (
     '<strong>Next</strong> tasks' => '<strong>Nächste</strong> Aufgaben',
     'New task' => 'Neue Aufgabe',
     '<strong>Task</strong> overview' => '<strong>Aufgaben</strong>-Übersicht',
-    'Filter tasks by title' => 'Aufgaben nach Titel filtern'
+    'Filter tasks by title' => 'Aufgaben nach Titel filtern',
+    'Checklist' => 'Checkliste',
+    'Assigned User' => 'Zugewiesene Anwender',
+
+    // Badge
+    'Today' => 'Heute',
+    'Tomorrow' => 'Morgen',
+    'Pending' => 'Anstehend',
+    'In Progress' => 'In Arbeit',
+    'Pending Review' => 'Zur Prüfung',
+    'Completed' => 'Beendet',
+
+    // widgets
+    'Edit' => 'Bearbeiten',
+    'Deadline at' => 'Deadline am',
+    'Begin Task' => 'Aufgabe starten',
+    'Let Task Review' => 'Prüfen lassen',
+    'Finish Task' => 'Aufgabe abschließen',
+    'Reset Task' => 'Aufgabe zurücksetzen',
+    'Print task' => 'Aufgabe Drucken',
+    'Share task' => 'Aufgabe teilen',
+
+
 );
