@@ -115,7 +115,7 @@ class IndexController extends ContentContainerController
     public function actionTaskAssignedPicker($id = null, $keyword)
     {
         if($id) {
-            $subQuery = TaskAssigned::find()->where(['task_user.task_id' => $id])->andWhere('task_user.user_id=user.id');
+            $subQuery = TaskAssigned::find()->where(['task_assigned.task_id' => $id])->andWhere('task_assigned.user_id=user.id');
             $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
         } else {
             $query = $this->getSpace()->getMembershipUser();
