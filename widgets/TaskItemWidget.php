@@ -42,13 +42,10 @@ class TaskItemWidget extends JsWidget
     public function run()
     {
         $contentContainer = $this->task->content->container;
-        return $this->render('taskItem', [
+        return $this->render('_item', [
             'options' => $this->getOptions(),
             'task' => $this->task,
             'item' => $this->item,
-            'canEdit' =>  $this->task->content->canEdit(),
-            'editUrl' => $contentContainer->createUrl('/task/item/edit', ['id' => $this->item->id, 'taskId' => $this->task->id]),
-            'editProtocolUrl' => $contentContainer->createUrl('/task/item/edit-protocol', ['id' => $this->item->id, 'taskId' => $this->task->id]),
             'contentContainer' => $this->task->content->container,
         ]);
     }
@@ -56,7 +53,7 @@ class TaskItemWidget extends JsWidget
     public function getData()
     {
         return [
-            'item-id' => $this->item->id
+            'item-id' => $this->item->id,
         ];
     }
 }

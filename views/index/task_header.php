@@ -16,6 +16,7 @@ $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
 $icon = 'fa-calendar-o';
 $backUrl = $this->context->contentContainer->createUrl('/task/index');
 
+
 $participantStyle = 'display:inline-block;' ;
 
 ?>

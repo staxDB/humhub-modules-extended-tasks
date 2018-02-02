@@ -27,7 +27,6 @@ use humhub\modules\task\CalendarUtils;
  * @property string $start_datetime
  * @property string $end_datetime
  * @property integer $all_day
- * @property integer $percent
  * @property integer $status
  * @property integer $parent_task_id
  * @property string $time_zone The timeZone this entry was saved, note the dates itself are always saved in app timeZone
@@ -51,21 +50,18 @@ class Task extends ContentActiveRecord implements Searchable
     public $newItems;
     public $editItems;
 
-
     /**
      * Status
      */
-    const STATUS_OPEN = 1;
-    const STATUS_PENDING = 2;
-    const STATUS_IN_PROGRESS = 3;
-    const STATUS_PENDING_REVIEW = 4;
-    const STATUS_COMPLETED = 5;
+    const STATUS_PENDING = 0;
+    const STATUS_IN_PROGRESS = 1;
+    const STATUS_PENDING_REVIEW = 2;
+    const STATUS_COMPLETED = 3;
 
     /**
      * @var array all given statuses as array
      */
     public static $statuses = [
-        self::STATUS_OPEN,
         self::STATUS_PENDING,
         self::STATUS_IN_PROGRESS,
         self::STATUS_PENDING_REVIEW,
@@ -98,7 +94,7 @@ class Task extends ContentActiveRecord implements Searchable
 
     public function getIcon()
     {
-        return 'fa-calendar-o';
+        return 'fa-tasks';
     }
 
     /**
@@ -111,7 +107,7 @@ class Task extends ContentActiveRecord implements Searchable
 //            [['start', 'end'], 'datetime', 'format' => $this->getDbDateFormat()],
             [['start_datetime'], DbDateValidator::className()],
             [['end_datetime'], DbDateValidator::className()],
-            [['all_day', 'percent'], 'integer'],
+            [['all_day'], 'integer'],
 //            [['status'], 'in', 'range' => self::$statuses],
             [['assignedUsers', 'description'], 'safe'],
             [['title'], 'string', 'max' => 255],
@@ -131,7 +127,6 @@ class Task extends ContentActiveRecord implements Searchable
             'end_datetime' => Yii::t('TaskModule.model_task', 'End'),
             'all_day' => Yii::t('TaskModule.model_task', 'All Day'),
             'status' => Yii::t('TaskModule.model_task', 'Status'),
-            'percent' => Yii::t('TaskModule.model_task', 'Percent'),
             'parent_task_id' => Yii::t('TaskModule.model_task', 'Parent Task'),
             'newItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
             'editItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
@@ -140,7 +135,7 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
-     * Returns an ActiveQuery for all taskUsers of this task.
+     * Returns an ActiveQuery for all assigned task users of this task.
      *
      * @return \yii\db\ActiveQuery
      */
@@ -154,38 +149,77 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return !empty($this->taskAssigned);
     }
-
-    /**
-     * Returns an ActiveQuery for all taskItems of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-
-    // todo: check getTaskItems() and getItems() --> sum
-//    public function getTaskItems()
-//    {
-//        $query = $this->hasMany(TaskItem::className(), ['task_id' => 'id']);
-//        return $query;
-//    }
-
-//    public function hasTaskItems()
-//    {
-//        return !empty($this->taskItems);
-//    }
-
     /**
      * Returns an ActiveQuery for all assigned user models of this task.
      *
      * @return \yii\db\ActiveQuery
      */
+
     public function getTaskAssignedUsers()
     {
         return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskAssigned');
     }
 
+    /**
+     * Returns an ActiveQuery for all task items of this task.
+     *
+     * @return ActiveQuery
+     */
+    public function getItems()
+    {
+        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
+    }
+
+    public function hasItems()
+    {
+        // Todo check task_items and subtask-Items
+        return !empty($this->items);
+    }
+
+    public function saveNewItems()
+    {
+        if ($this->newItems == null) {
+            return;
+        }
+
+        foreach ($this->newItems as $itemText) {
+            $this->addItem($itemText);
+        }
+
+        // Reset cached items
+        unset($this->items);
+    }
+
+    public function addItem($itemText)
+    {
+        if (trim($itemText) === '') {
+            return;
+        }
+
+        $item = new TaskItem();
+        $item->task_id = $this->id;
+        $item->title = $itemText;
+        $item->save();
+        return $item;
+    }
+
+    public function updateItems()
+    {
+        foreach ($this->items as $item) {
+            if (!array_key_exists($item->id, $this->editItems)) {
+                $item->delete();
+            } else if ($item->title !== $this->editItems[$item->id]) {
+                $item->title = $this->editItems[$item->id];
+                $item->update();
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function beforeSave($insert)
     {
-
         // Check is a full day span
         if ($this->all_day == 0 && CalendarUtils::isFullDaySpan(new DateTime($this->start_datetime), new DateTime($this->end_datetime))) {
             $this->all_day = 1;
@@ -238,49 +272,6 @@ class Task extends ContentActiveRecord implements Searchable
         return true;
     }
 
-    public function saveNewItems()
-    {
-        if ($this->newItems == null) {
-            return;
-        }
-
-        foreach ($this->newItems as $itemText) {
-            $this->addItem($itemText);
-        }
-
-        // Reset cached items
-        unset($this->items);
-    }
-
-    public function addItem($itemText)
-    {
-        if (trim($itemText) === '') {
-            return;
-        }
-
-        $item = new TaskItem();
-        $item->task_id = $this->id;
-        $item->title = $itemText;
-        $item->save();
-        return $item;
-    }
-
-    public function updateItems()
-    {
-        if ($this->editItems == null && $this->newItems == null) {
-            return;
-        }
-
-        foreach ($this->items as $item) {
-            if (!array_key_exists($item->id, $this->editItems)) {
-                $item->delete();
-            } else if ($item->title !== $this->editItems[$item->id]) {
-                $item->title = $this->editItems[$item->id];
-                $item->update();
-            }
-        }
-    }
-
     /**
      * Sets the newItems array, which is used for creating and updating (afterSave)
      * the task, by saving all valid item title contained in the given array.
@@ -301,7 +292,6 @@ class Task extends ContentActiveRecord implements Searchable
     {
         $this->editItems = TaskItem::filterValidItems($editItemArr);
     }
-
 
     public function isTaskAssigned($user = null)
     {
@@ -358,7 +348,7 @@ class Task extends ContentActiveRecord implements Searchable
     {
         $query = self::find();
         $query->leftJoin('task_assigned', 'task.id=task_assigned.task_id');
-        $query->where(['task_assigned.user_id' => Yii::$app->user->id, 'task.status' => self::STATUS_OPEN]);
+        $query->where(['task_assigned.user_id' => Yii::$app->user->id, 'task.status' => self::STATUS_PENDING]);
 
         return $query->all();
     }
@@ -394,29 +384,14 @@ class Task extends ContentActiveRecord implements Searchable
             ->readable();
     }
 
-    public function changePercent($newPercent)
-    {
-        if ($this->percent != $newPercent) {
-            $this->percent = $newPercent;
-            $this->save();
-        }
-
-        if ($newPercent == 100) {
-            $this->changeStatus(Task::STATUS_COMPLETED);
-        }
-
-        if ($this->percent != 100 && $this->status == self::STATUS_COMPLETED) {
-            $this->changeStatus(self::STATUS_OPEN);
-        }
-
-        return true;
-    }
-
     public function changeStatus($newStatus)
     {
+        if (!in_array($newStatus, self::$statuses))
+            return false;
+
         $this->status = $newStatus;
 
-        if ($newStatus == Task::STATUS_COMPLETED) {
+//        if ($newStatus == Task::STATUS_COMPLETED) {
 
             // Todo: add notification and activity
 //            $activity = new \humhub\modules\task\activities\Finished();
@@ -431,13 +406,13 @@ class Task extends ContentActiveRecord implements Searchable
 //                $notification->send($this->content->user);
 //            }
 
-            $this->percent = 100;
-        } else {
+//            $this->percent = 100;
+//        } else {
             // Try to delete TaskFinishedNotification if exists
 //            $notification = new \humhub\modules\task\notifications\Finished();
 //            $notification->source = $this;
 //            $notification->delete($this->content->user);
-        }
+//        }
 
         $this->save();
 
@@ -467,23 +442,14 @@ class Task extends ContentActiveRecord implements Searchable
 //        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->assignedUsers);
     }
 
-    /**
-     * Returns an ActiveQuery for all task items of this task.
-     *
-     * @return ActiveQuery
-     */
-    public function getItems()
-    {
-        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
-    }
-
-    public function newItem($title = null)
-    {
-        return new TaskItem($this->content->container, $this->content->visibility, [
-            'task_id' => $this->id,
-            'title' => $title,
-        ]);
-    }
+//
+//    public function newItem($title = null)
+//    {
+//        return new TaskItem($this->content->container, $this->content->visibility, [
+//            'task_id' => $this->id,
+//            'title' => $title,
+//        ]);
+//    }
 
     /**
      * Returns an ActiveQuery for all task items of this task.
@@ -586,7 +552,6 @@ class Task extends ContentActiveRecord implements Searchable
     public static function getStatusItems()
     {
         return [
-            self::STATUS_OPEN => Yii::t('TaskModule.model_task', 'Open'),
             self::STATUS_PENDING => Yii::t('TaskModule.model_task', 'Pending'),
             self::STATUS_IN_PROGRESS => Yii::t('TaskModule.model_task', 'In Progress'),
             self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.model_task', 'Pending Review'),
@@ -597,9 +562,6 @@ class Task extends ContentActiveRecord implements Searchable
     public function getStatus()
     {
         switch ($this->status){
-            case (self::STATUS_OPEN):
-                return Yii::t('TaskModule.model_task', 'Open');
-                break;
             case (self::STATUS_PENDING):
                 return Yii::t('TaskModule.model_task', 'Pending');
                 break;
@@ -615,5 +577,77 @@ class Task extends ContentActiveRecord implements Searchable
             default:
                 return;
         }
+    }
+
+
+    /**
+     * @throws \yii\db\Exception
+     */
+    public function resetItems()
+    {
+        Yii::$app->db->createCommand()
+            ->update(
+                TaskItem::tableName(),
+                ['completed' => 0], //columns and values
+                ['task_id' => $this->id] //condition, similar to where()
+            )
+            ->execute();
+    }
+
+    public function isUserAssigned(User $user = null)
+    {
+        if ($user === null) {
+            $user = Yii::$app->user->getIdentity();
+        }
+
+        if (!$this->hasTaskAssigned()) {
+            return false;
+        }
+
+        return !empty($this->getTaskAssignedUsers()->where(['id' => $user->id])->one());
+
+    }
+
+    /**
+     * @param array $items
+     * @throws \yii\db\Exception
+     */
+    public function confirm($items = array())
+    {
+        foreach ($items as $itemID) {
+            $item = TaskItem::findOne(['id' => $itemID, 'task_id' => $this->id]);
+            if ($item) {
+                $item->completed = 1;
+                $item->save();
+            }
+        }
+    }
+
+
+
+
+    /**
+     * Returns the percentage of tasj confirmed this message
+     *
+     * @return int
+     */
+    public function getPercent()
+    {
+//        $total = TaskItem::find()->where(['task_id' => $this->id])->count();
+        $total = $this->getItems()->count();
+        if ($total == 0)
+            return 0;
+
+        return $this->getConfirmedCount() / $total * 100;
+    }
+
+    /**
+     * Returns the total number of confirmed users got this message
+     *
+     * @return int
+     */
+    public function getConfirmedCount()
+    {
+        return $this->getItems()->where(['completed' => true])->count();
     }
 }

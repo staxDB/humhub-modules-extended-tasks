@@ -5,17 +5,20 @@
  * @license https://www.humhub.com/licences
  *
  */
+
 /* @var $this \yii\web\View */
 /* @var $task \humhub\modules\task\models\Task */
 /* @var $items \humhub\modules\task\models\TaskItem[] */
 /* @var $options array */
+
 use humhub\libs\Html;
 use humhub\modules\task\widgets\TaskItemWidget;
+
 ?>
 <div class="<?= (count($items)) ? "task-item-container" : '' ?>">
-    <?= Html::beginTag('ul', $options) ?>
+    <?= Html::beginTag('div', $options) ?>
     <?php foreach ($items as $item): ?>
-        <?= TaskItemWidget::widget(['item' => $item, 'task' => $task]); ?>
+            <?= TaskItemWidget::widget(['item' => $item, 'task' => $task]); ?>
     <?php endforeach; ?>
-    <?= Html::endTag('ul') ?>
+    <?= Html::endTag('div') ?>
 </div>

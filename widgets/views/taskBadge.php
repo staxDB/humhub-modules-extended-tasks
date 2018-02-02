@@ -9,9 +9,7 @@ use humhub\modules\task\models\Task;
     <div class="label label-warning <?= $right ? 'pull-right' : '' ?>"><?= Yii::t('TaskModule.views_index_index', 'Tomorrow'); ?></div>
 <?php endif; ?>
 
-<?php if ($task->status == Task::STATUS_OPEN) : ?>
-    <div class="label label-info <?= $right ? 'pull-right' : '' ?>"><?= Yii::t('TaskModule.views_index_index', 'Open'); ?></div>
-<?php elseif ($task->status == Task::STATUS_PENDING) : ?>
+<?php if ($task->status == Task::STATUS_PENDING) : ?>
     <div class="label label-default <?= $right ? 'pull-right' : '' ?>"><?= Yii::t('TaskModule.views_index_index', 'Pending'); ?></div>
 <?php elseif ($task->status == Task::STATUS_IN_PROGRESS) : ?>
     <div class="label label-info <?= $right ? 'pull-right' : '' ?>"><?= Yii::t('TaskModule.views_index_index', 'In Progress'); ?></div>

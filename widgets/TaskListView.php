@@ -44,6 +44,7 @@ class TaskListView extends Widget
 
         return  ListView::widget([
             'dataProvider' => $tasksProvider,
+//            'itemView' => '@task/widgets/views/taskListEntry',
             'itemView' => '@task/widgets/views/_taskItem',
             'viewParams' => [
                 'contentContainer' => $this->filter->contentContainer,

@@ -12,6 +12,7 @@
 use humhub\widgets\Button;
 use humhub\widgets\Link;
 use humhub\widgets\ModalButton;
+
 ?>
 
 <div class="pull-right">
@@ -27,7 +28,7 @@ use humhub\widgets\ModalButton;
                     <?= ModalButton::asLink(Yii::t('TaskModule.base', 'Edit'))->post($editUrl)->icon('fa-edit')->visible($canEdit) ?>
                 </li>
                 <li>
-                    <?= ModalButton::asLink( Yii::t('TaskModule.views_index_index', 'Duplicate'))->post($duplicateUrl)->icon('fa-clone')->visible($canEdit) ?>
+                    <?= Button::asLink( $linkLabel, $changeStatusUrl)->icon('fa-check-square')->visible($canEdit) ?>
                 </li>
                 <li>
                     <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Print agenda'), $printUrl)->icon('fa-print')->options(['target' => '_blank']);?>

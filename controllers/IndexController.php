@@ -28,6 +28,7 @@ use humhub\modules\content\models\Content;
 use humhub\modules\task\models\Task;
 use humhub\modules\task\models\TaskItem;
 //use humhub\modules\meeting\models\MeetingTask;
+use humhub\modules\stream\actions\Stream;
 
 /**
  * Description of IndexController
@@ -305,6 +306,80 @@ class IndexController extends ContentContainerController
         return $this->asJson([
             'success' => true
         ]);
+    }
+
+    /**
+     * Confirm an Announcement
+     */
+    public function actionConfirm()
+    {
+        Yii::$app->response->format = 'json';
+
+        $task = $this->getTaskByParameter();
+
+        $items = Yii::$app->request->post('item');
+
+        // Build array of answer ids
+        $results = array();
+        if (is_array($items)) {
+            foreach ($items as $item_id => $flag) {
+                $results[] = (int) $item_id;
+            }
+        } else {
+            $results[] = $items;
+        }
+
+        $task->resetItems();
+        $task->confirm($results);
+
+        return $this->render("task", [
+            'task' => $task,
+            'contentContainer' => $this->contentContainer
+        ]);
+    }
+
+    public function actionStatus($id, $status)
+    {
+//        Yii::$app->response->format = 'json';
+
+        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
+
+        if(!$task) {
+            throw new HttpException(404);
+        }
+
+        if(!$task->content->canView() && !$task->isTaskAssigned()) {
+            throw new HttpException(403);
+        }
+
+        $task->updateAttributes(['status' => $status]);
+
+        return $this->render("task", [
+            'task' => $task,
+            'contentContainer' => $this->contentContainer
+        ]);
+    }
+
+    /**
+     * Returns a given tasItem by given request parameter.
+     *
+     * This method also validates access rights of the requested task object.
+     */
+    private function getTaskByParameter()
+    {
+        $taskId = (int) Yii::$app->request->get('taskID');
+
+        $task = Task::find()->contentContainer($this->contentContainer)->readable()->where(['task.id' => $taskId])->one();
+
+        if ($task == null) {
+            throw new HttpException(401, Yii::t('TaskModule.controller', 'Could not load Task!'));
+        }
+
+        if (!$task->content->canRead()) {
+            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+        }
+
+        return $task;
     }
 
 }

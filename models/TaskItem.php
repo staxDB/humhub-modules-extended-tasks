@@ -1,6 +1,7 @@
 <?php
 namespace humhub\modules\task\models;
 use DateTime;
+use humhub\components\ActiveRecord;
 use Yii;
 use humhub\modules\content\components\ContentActiveRecord;
 use humhub\modules\task\permissions\ManageTasks;
@@ -15,16 +16,18 @@ use humhub\modules\user\models\User;
  * @property integer $completed
  * @property string $notes
  */
-class TaskItem extends ContentActiveRecord
+class TaskItem extends ActiveRecord
 {
     /**
      * @inheritdocs
      */
     protected $managePermission = ManageTasks::class;
+
     /**
      * @inheritdocs
      */
-    protected $streamChannel = null;
+//    protected $streamChannel = null;
+
     /**
      * @return string the associated database table name
      */
@@ -49,11 +52,11 @@ class TaskItem extends ContentActiveRecord
     /**
      * @inheritdoc
      */
-    public function scenarios()
-    {
-        $scenarios = parent::scenarios();
-        return $scenarios;
-    }
+//    public function scenarios()
+//    {
+//        $scenarios = parent::scenarios();
+//        return $scenarios;
+//    }
 
     /**
      * @return array customized attribute labels (name=>label)
@@ -70,7 +73,6 @@ class TaskItem extends ContentActiveRecord
 
     public function afterSave($insert, $changedAttributes)
     {
-//        Yii::$app->search->update($this->task);
         return parent::afterSave($insert, $changedAttributes);
     }
 
@@ -84,25 +86,25 @@ class TaskItem extends ContentActiveRecord
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
 
-    public function getUrl()
-    {
-        return $this->content->container->createUrl('/task/index/view', ['id' => $this->task_id]);
-    }
+//    public function getUrl()
+//    {
+//        return $this->content->container->createUrl('/task/index/view', ['id' => $this->task_id]);
+//    }
 
-    public function getContentName()
-    {
-        return Yii::t('TaskModule.base', "Task Entry");
-    }
+//    public function getContentName()
+//    {
+//        return Yii::t('TaskModule.base', "Task Item");
+//    }
 
-    public function getContentDescription()
-    {
-        return $this->title;
-    }
+//    public function getContentDescription()
+//    {
+//        return $this->title;
+//    }
 
     public static function filterValidItems($itemArr)
     {
         if($itemArr == null) {
-            return;
+            return [];
         }
 
         $result = [];
