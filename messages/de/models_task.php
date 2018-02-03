@@ -1,6 +1,7 @@
 <?php
 return array (
     'Task' => 'Aufgabe',
+    'Title' => 'Titel',
     'Description' => 'Beschreibung',
     'Start' => 'Start',
     'End' => 'Ende',
@@ -9,10 +10,6 @@ return array (
     'Percent' => 'Prozent',
     'Parent Task' => 'Übergeordnete Aufgabe',
     'Checklist Items' => 'Checklisten Elemente',
-    'Assigned user(s)' => 'Zugeordnete Benutzer',
-    'Open' => 'Offen',
-    'Pending' => 'Anstehend',
-    'In Progress' => 'In Arbeit',
-    'Pending Review' => 'Muss geprüft werden',
-    'Completed' => 'Abgeschlossen'
+    'Assigned user(s)' => 'Zugeordnete Personen',
+    'Responsible user(s)' => 'Verantwortliche Personen',
 );

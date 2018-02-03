@@ -129,7 +129,6 @@ class IndexController extends ContentContainerController
         ]));
     }
 
-
     public function actionTaskResponsiblePicker($id = null, $keyword)
     {
         if($id) {
@@ -146,6 +145,7 @@ class IndexController extends ContentContainerController
         ]));
     }
 
+    // Todo
     public function actionSubTaskPicker($id = null, $keyword)
     {
         if($id) {
@@ -180,6 +180,7 @@ class IndexController extends ContentContainerController
         ]);
     }
 
+    // Todo
     public function actionPrint($id)
     {
         $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
@@ -222,6 +223,7 @@ class IndexController extends ContentContainerController
         return $this->renderAjax('edit', ['taskForm' => $taskForm]);
     }
 
+    // Todo
     public function actionDuplicate($id, $itemId = null)
     {
         $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
@@ -339,7 +341,7 @@ class IndexController extends ContentContainerController
 
         $task = $this->getTaskByParameter();
 
-        if (!$task->content->canEdit() && !$task->isUserAssigned())
+        if (!$task->canCheckItems())
             throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
 
         $items = Yii::$app->request->post('item');

@@ -13,7 +13,7 @@
 
 use humhub\libs\Html;
 
-$disabled = ($task->content->canEdit() || $task->isUserAssigned()) ? false : 'true';
+$disabled = ($task->canCheckItems()) ? false : 'true';
 ?>
 <?= Html::beginTag('div', $options) ?>
 

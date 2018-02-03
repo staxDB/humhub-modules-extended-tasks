@@ -46,37 +46,33 @@ class TaskMenu extends \yii\base\Widget
         $printUrl = $this->contentContainer->createUrl('/task/index/print', ['id' => $this->task->id]);
         $shareUrl = $this->contentContainer->createUrl('/task/index/share', ['id' => $this->task->id]);
 
-        $linkLabel = '';
-        $changeStatusUrl = '';
-        $canSeeLink = false;
+        // handle change-status link
         switch ($this->task->status) {
             case Task::STATUS_PENDING:
                 $linkLabel = Yii::t('TaskModule.views_index_index', 'Begin Task');
                 $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_IN_PROGRESS]);
-                ($this->task->isUserAssigned() || $this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
+                $canSeeLink = $this->task->canChangeStatus();
                 break;
             case Task::STATUS_IN_PROGRESS:
-                if (Yii::$app->user->getIdentity() !== $this->task->getCreatedBy()) {
-                    $linkLabel = Yii::t('TaskModule.views_index_index', 'Let Task Review');
-                    $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_PENDING_REVIEW]);
-                    ($this->task->isUserAssigned() || $this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
-                }
-                else {
-                    $linkLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
-                    $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_COMPLETED]);
-                    ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
-                }
+                $linkLabel = Yii::t('TaskModule.views_index_index', 'Let Task Review');
+                $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_PENDING_REVIEW]);
+                $canSeeLink = $this->task->canChangeStatus();
                 break;
             case Task::STATUS_PENDING_REVIEW:
                 $linkLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
                 $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_COMPLETED]);
-                ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
+                $canSeeLink = $this->task->canReviewTask();
                 break;
-            case Task::STATUS_COMPLETED:
-                $linkLabel = Yii::t('TaskModule.views_index_index', 'Reset Task');
-                $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_PENDING]);
-                ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
-                break;
+                // Todo
+//            case Task::STATUS_COMPLETED:
+//                $linkLabel = Yii::t('TaskModule.views_index_index', 'Reset Task');
+//                $changeStatusUrl = $this->contentContainer->createUrl('/task/index/status', ['id' => $this->task->id, 'status' => Task::STATUS_PENDING]);
+//                ($this->canEdit) ? $canSeeLink = true : $canSeeLink = false;
+//                break;
+            default :
+                $linkLabel = '';
+                $changeStatusUrl = '';
+                $canSeeLink = false;
         }
 
         return $this->render('taskMenuDropdown', [

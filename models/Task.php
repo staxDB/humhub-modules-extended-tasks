@@ -82,7 +82,7 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function getContentName()
     {
-        return Yii::t('TaskModule.base', "Task");
+        return Yii::t('TaskModule.base', 'Task');
     }
 
     /**
@@ -122,17 +122,17 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return [
             'id' => 'ID',
-            'title' => Yii::t('TaskModule.model_task', 'Title'),
-            'description' => Yii::t('TaskModule.model_task', 'Description'),
-            'start_datetime' => Yii::t('TaskModule.model_task', 'Start'),
-            'end_datetime' => Yii::t('TaskModule.model_task', 'End'),
-            'all_day' => Yii::t('TaskModule.model_task', 'All Day'),
-            'status' => Yii::t('TaskModule.model_task', 'Status'),
-            'parent_task_id' => Yii::t('TaskModule.model_task', 'Parent Task'),
-            'newItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
-            'editItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
-            'assignedUsers' => Yii::t('TaskModule.model_task', 'Assigned user(s)'),
-            'responsibleUsers' => Yii::t('TaskModule.model_task', 'Responsible user(s)'),
+            'title' => Yii::t('TaskModule.models_task', 'Title'),
+            'description' => Yii::t('TaskModule.models_task', 'Description'),
+            'start_datetime' => Yii::t('TaskModule.models_task', 'Start'),
+            'end_datetime' => Yii::t('TaskModule.models_task', 'End'),
+            'all_day' => Yii::t('TaskModule.models_task', 'All Day'),
+            'status' => Yii::t('TaskModule.models_task', 'Status'),
+            'parent_task_id' => Yii::t('TaskModule.models_task', 'Parent Task'),
+            'newItems' => Yii::t('TaskModule.models_task', 'Checklist Items'),
+            'editItems' => Yii::t('TaskModule.models_task', 'Checklist Items'),
+            'assignedUsers' => Yii::t('TaskModule.models_task', 'Assigned user(s)'),
+            'responsibleUsers' => Yii::t('TaskModule.models_task', 'Responsible user(s)'),
         ];
     }
 
@@ -614,49 +614,19 @@ class Task extends ContentActiveRecord implements Searchable
     public function getSearchAttributes()
     {
         $itemTitles = "";
-        $itemNotes = "";
+        $itemDescriptions = "";
 
         foreach ($this->items as $item) {
             $itemTitles .= $item->title;
-            $itemNotes .= $item->description;
+            $itemDescriptions .= $item->description;
         }
 
         return [
             'title' => $this->title,
+            'description' => $this->description,
             'itemTitles' => $itemTitles,
-            'itemNotes' => $itemNotes
+            'itemDescriptions' => $itemDescriptions
         ];
-    }
-
-
-    public static function getStatusItems()
-    {
-        return [
-            self::STATUS_PENDING => Yii::t('TaskModule.model_task', 'Pending'),
-            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.model_task', 'In Progress'),
-            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.model_task', 'Pending Review'),
-            self::STATUS_COMPLETED => Yii::t('TaskModule.model_task', 'Completed'),
-        ];
-    }
-
-    public function getStatus()
-    {
-        switch ($this->status){
-            case (self::STATUS_PENDING):
-                return Yii::t('TaskModule.model_task', 'Pending');
-                break;
-            case (self::STATUS_IN_PROGRESS):
-                return Yii::t('TaskModule.model_task', 'In Progress');
-                break;
-            case (self::STATUS_PENDING_REVIEW):
-                return Yii::t('TaskModule.model_task', 'Pending Review');
-                break;
-            case (self::STATUS_COMPLETED):
-                return Yii::t('TaskModule.model_task', 'Completed');
-                break;
-            default:
-                return;
-        }
     }
 
 
@@ -688,6 +658,22 @@ class Task extends ContentActiveRecord implements Searchable
 
     }
 
+    public function isUserResponsible(User $user = null)
+    {
+        if ($user === null) {
+            $user = Yii::$app->user->getIdentity();
+        }
+
+        if (!$this->hasTaskResponsible()) {
+            return false;
+        }
+
+        return !empty($this->getTaskResponsibleUsers()->where(['id' => $user->id])->one());
+
+    }
+
+
+
     /**
      * @param array $items
      * @throws \yii\db\Exception
@@ -702,6 +688,51 @@ class Task extends ContentActiveRecord implements Searchable
             }
         }
     }
+
+
+
+
+
+    /**
+     * handle task specific permissions
+     * @return bool
+     */
+    public function canCheckItems()
+    {
+        return (self::isTaskResponsible() || self::isTaskAssigned());
+    }
+
+    /**
+     * handle task specific permissions
+     * @return bool
+     */
+    public function canChangeStatus()
+    {
+//        return (self::isTaskResponsible() || self::isTaskAssigned() || $this->content->canEdit());
+        return (self::isTaskResponsible() || self::isTaskAssigned());
+    }
+
+    /**
+     * handle task specific permissions
+     * @return bool
+     */
+    public function canReviewTask()
+    {
+        return (self::isTaskResponsible());
+    }
+
+    /**
+     * Todo
+     * handle task specific permissions
+     * @return bool
+     */
+//    public function canResetTask()
+//    {
+//        return (self::isTaskResponsible());
+//    }
+
+
+
 
 
 

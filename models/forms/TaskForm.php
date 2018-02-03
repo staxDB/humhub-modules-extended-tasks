@@ -103,7 +103,7 @@ class TaskForm extends Model
             [['start_date'], DbDateValidator::className(), 'format' => Yii::$app->params['formatter']['defaultDateFormat'], 'timeAttribute' => 'start_time', 'timeZone' => $this->timeZone],
             [['end_date'], DbDateValidator::className(), 'format' => Yii::$app->params['formatter']['defaultDateFormat'], 'timeAttribute' => 'end_time', 'timeZone' => $this->timeZone],
             [['end_date'], 'validateEndTime'],
-
+            [['start_date', 'end_date'], 'required'],
             [['is_public', 'itemId'], 'integer'],
         ];
     }
@@ -142,7 +142,7 @@ class TaskForm extends Model
     public function validateEndTime($attribute, $params)
     {
         if (new DateTime($this->start_date) >= new DateTime($this->end_date)) {
-            $this->addError($attribute, Yii::t('TaskModule.base', "End time must be after start time!"));
+            $this->addError($attribute, Yii::t('TaskModule.models_forms_TaskForm', 'End time must be after start time!'));
         }
     }
 
@@ -152,21 +152,21 @@ class TaskForm extends Model
     public function attributeLabels()
     {
         return array_merge(parent::attributeLabels(), [
-            'start_date' => Yii::t('TaskModule.task', 'Start Date'),
-//            'type_id' => Yii::t('TaskModule.task', 'Event Type'),
-            'end_date' => Yii::t('TaskModule.task', 'End Date'),
-            'start_time' => Yii::t('TaskModule.task', 'Start Time'),
-            'end_time' => Yii::t('TaskModule.task', 'End Time'),
-            'timeZone' => Yii::t('TaskModule.task', 'Time Zone'),
-            'is_public' => Yii::t('TaskModule.task', 'Public'),
+            'start_date' => Yii::t('TaskModule.models_forms_TaskForm', 'Start Date'),
+//            'type_id' => Yii::t('TaskModule.models_forms_TaskForm', 'Event Type'),
+            'end_date' => Yii::t('TaskModule.models_forms_TaskForm', 'End Date'),
+            'start_time' => Yii::t('TaskModule.models_forms_TaskForm', 'Start Time'),
+            'end_time' => Yii::t('TaskModule.models_forms_TaskForm', 'End Time'),
+            'timeZone' => Yii::t('TaskModule.models_forms_TaskForm', 'Time Zone'),
+            'is_public' => Yii::t('TaskModule.models_forms_TaskForm', 'Public'),
         ]);
     }
 
     public function getTitle()
     {
-        if($this->itemId) {
-            return Yii::t('TaskModule.base', '<strong>Shift</strong> agenda entry to new task');
-        }
+//        if($this->itemId) {
+//            return Yii::t('TaskModule.base', '<strong>Shift</strong> agenda entry to new task');
+//        }
 
         if($this->task->isNewRecord) {
            return Yii::t('TaskModule.views_index_edit', '<strong>Create</strong> new task');

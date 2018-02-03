@@ -17,11 +17,10 @@ class AddItemsInput extends Widget
 {
     
     public $name;
-    public $showTitle;
-    
+
     public function run()
     {
-        return $this->render('addItemsInput', ['name' => $this->name, 'showTitle' => $this->showTitle]);
+        return $this->render('addItemsInput', ['name' => $this->name]);
     }
 
 }

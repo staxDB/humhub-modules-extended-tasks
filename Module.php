@@ -5,8 +5,6 @@ namespace humhub\modules\task;
 
 use Yii;
 use humhub\modules\task\permissions\ManageTasks;
-use humhub\modules\task\permissions\ManageTaskItems;
-use humhub\modules\task\permissions\ManageTaskReminders;
 use humhub\modules\task\models\Task;
 use humhub\modules\space\models\Space;
 use humhub\modules\content\components\ContentContainerActiveRecord;
@@ -29,9 +27,7 @@ class Module extends ContentContainerModule
     {
         if ($contentContainer !== null) {
             return [
-                new ManageTasks(),
-                new ManageTaskReminders(),
-                new ManageTaskItems()
+                new ManageTasks()
             ];
         }
 

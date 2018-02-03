@@ -41,10 +41,8 @@ $participantStyle = 'display:inline-block;' ;
                     <?= Html::containerLink($task->content->createdBy); ?>
                 </span>
                 <?php if ($task->content->updated_at !== null) : ?>
-                    &middot <span class="tt updated"
-                                  title="<?= Yii::$app->formatter->asDateTime($task->content->updated_at); ?>"><?= Yii::t('ContentModule.base', 'Updated'); ?></span>
+                    &middot <span class="tt updated" title="<?= Yii::$app->formatter->asDateTime($task->content->updated_at); ?>"><?= Yii::t('ContentModule.base', 'Updated'); ?></span>
                 <?php endif; ?>
-
 
                 <?php $badge = TaskBadge::widget(['task' => $task]) ?>
                 <?= (!empty($badge)) ? '<br>' . $badge : '' ?>

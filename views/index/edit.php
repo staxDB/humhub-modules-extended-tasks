@@ -3,14 +3,8 @@
 use humhub\widgets\Button;
 
 use humhub\widgets\ModalDialog;
-use humhub\widgets\Link;
 use humhub\widgets\ModalButton;
 use humhub\widgets\ActiveForm;
-use humhub\modules\user\widgets\UserPickerField;
-use humhub\modules\task\widgets\TaskPickerField;
-use humhub\widgets\TimePicker;
-use humhub\widgets\TimeZoneDropdownAddition;
-use yii\jui\DatePicker;
 use humhub\widgets\Tabs;
 
 /* @var $taskForm \humhub\modules\task\models\forms\TaskForm */
@@ -33,7 +27,7 @@ $task = $taskForm->task;
             'items' => [
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Basic'),'view' => 'edit-basic', 'linkOptions' => ['class' => 'tab-basic']],
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Checklist'),'view' => 'edit-checklist', 'linkOptions' => ['class' => 'tab-checklist']],
-                ['label' => Yii::t('TaskModule.views_index_edit', 'Assign Users'),'view' => 'edit-assigned', 'linkOptions' => ['class' => 'tab-assigned']],
+                ['label' => Yii::t('TaskModule.views_index_edit', 'Assignment'),'view' => 'edit-assignment', 'linkOptions' => ['class' => 'tab-assignment']],
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Files'),'view' => 'edit-files', 'linkOptions' => ['class' => 'tab-files']]
             ]
         ]); ?>

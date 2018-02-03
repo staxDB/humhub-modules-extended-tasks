@@ -13,7 +13,7 @@
                     <input type="text" name="items[<?= $item->id ?>]"
                            value="<?= $item->title ?>"
                            class="form-control tt task_item_old_input"
-                           placeholder="<?= Yii::t('TaskModule.widgets_views_form', "Edit item (empty field will be removed)...") ?>"/>
+                           placeholder="<?= Yii::t('TaskModule.views_index_edit', 'Edit item (empty field will be removed)...') ?>"/>
                     <div class="input-group-addon" style="cursor:pointer;" data-action-click="removeTaskItem">
                         <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                     </div>
@@ -21,6 +21,6 @@
             </div>
         <?php endforeach; ?>
 
-        <?= humhub\modules\task\widgets\AddItemsInput::widget(['name' => 'newItems[]', 'showTitle' => true]); ?>
+        <?= humhub\modules\task\widgets\AddItemsInput::widget(['name' => 'newItems[]']); ?>
 
 </div>
