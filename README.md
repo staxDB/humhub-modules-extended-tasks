@@ -8,4 +8,8 @@ Keep responsible users up to date, manage task status and finish them. Before co
 DISCUSS
 Send notifications to all assigned and responsible users within your HumHub, add it to your private calendar or send invitations via email (supports iCal, Outlook).
 
-
+TODO
+- option for tasks without deadline!!
+- add filter (Pending Tasks, In Progress, Pending Review, Completed)
+- add reminder
+- add to user profile
