@@ -1,3 +1,3 @@
-Meetings Module - How to install:
+Tasks Module - How to install:
 
 Extract the *.zip folder into the HumHub directory under /protected/modules/. Then sign in at HumHub with an administrator account and install and enable the module under Account menu -> Administration -> Modules. After that, you can enable the module in every space under Space preferences -> Modules.
