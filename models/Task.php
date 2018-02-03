@@ -44,9 +44,10 @@ class Task extends ContentActiveRecord implements Searchable
      * @inheritdocs
      */
     public $wallEntryClass = WallEntry::class;
-//    public $autoAddToWall = true;
+    public $autoAddToWall = true;
 
     public $assignedUsers;
+    public $responsibleUsers;
     public $newItems;
     public $editItems;
 
@@ -109,7 +110,7 @@ class Task extends ContentActiveRecord implements Searchable
             [['end_datetime'], DbDateValidator::className()],
             [['all_day'], 'integer'],
 //            [['status'], 'in', 'range' => self::$statuses],
-            [['assignedUsers', 'description'], 'safe'],
+            [['assignedUsers', 'description', 'responsibleUsers'], 'safe'],
             [['title'], 'string', 'max' => 255],
         ];
     }
@@ -131,6 +132,7 @@ class Task extends ContentActiveRecord implements Searchable
             'newItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
             'editItems' => Yii::t('TaskModule.model_task', 'Checklist Items'),
             'assignedUsers' => Yii::t('TaskModule.model_task', 'Assigned user(s)'),
+            'responsibleUsers' => Yii::t('TaskModule.model_task', 'Responsible user(s)'),
         ];
     }
 
@@ -158,6 +160,32 @@ class Task extends ContentActiveRecord implements Searchable
     public function getTaskAssignedUsers()
     {
         return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskAssigned');
+    }
+
+    /**
+     * Returns an ActiveQuery for all responsible task users of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskResponsible()
+    {
+        $query = $this->hasMany(TaskResponsible::className(), ['task_id' => 'id']);
+        return $query;
+    }
+
+    public function hasTaskResponsible()
+    {
+        return !empty($this->taskResponsible);
+    }
+
+    /**
+     * Returns an ActiveQuery for all responsible user models of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskResponsibleUsers()
+    {
+        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskResponsible');
     }
 
     /**
@@ -205,6 +233,9 @@ class Task extends ContentActiveRecord implements Searchable
 
     public function updateItems()
     {
+        if (!isset($this->editItems))
+            return;
+
         foreach ($this->items as $item) {
             if (!array_key_exists($item->id, $this->editItems)) {
                 $item->delete();
@@ -258,6 +289,14 @@ class Task extends ContentActiveRecord implements Searchable
         if(!empty($this->assignedUsers)) {
             foreach ($this->assignedUsers as $guid) {
                 $this->addTaskAssigned($guid);
+            }
+        }
+
+        TaskResponsible::deleteAll(['task_id' => $this->id]);
+
+        if(!empty($this->responsibleUsers)) {
+            foreach ($this->responsibleUsers as $guid) {
+                $this->addTaskResponsible($guid);
             }
         }
 
@@ -322,6 +361,40 @@ class Task extends ContentActiveRecord implements Searchable
                 'user_id' => $user->id,
             ]);
             return $taskAssigned->save();
+        }
+
+        return false;
+    }
+
+    public function isTaskResponsible($user = null)
+    {
+        if(!$user && !Yii::$app->user->isGuest) {
+            $user = Yii::$app->user->getIdentity();
+        } else if(!$user) {
+            return false;
+        }
+
+        $taskResponsible = array_filter($this->taskResponsible, function(TaskResponsible $p) use ($user) {
+            return $p->user_id == $user->id;
+        });
+
+        return !empty($taskResponsible);
+    }
+
+    public function addTaskResponsible($user)
+    {
+        $user = (is_string($user)) ? User::findOne(['guid' => $user]) : $user ;
+
+        if(!$user) {
+            return false;
+        }
+
+        if(!$this->isTaskResponsible($user)) {
+            $taskResponsible = new TaskResponsible([
+                'task_id' => $this->id,
+                'user_id' => $user->id,
+            ]);
+            return $taskResponsible->save();
         }
 
         return false;

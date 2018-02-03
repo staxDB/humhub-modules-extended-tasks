@@ -22,7 +22,12 @@ class m180114_210903_initial extends humhub\components\Migration
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'user_id' => 'int(11) NOT NULL',
-            'name' => 'varchar(255) NULL',
+        ), '');
+
+        $this->createTable('task_responsible', array(
+            'id' => 'pk',
+            'task_id' => 'int(11) NOT NULL',
+            'user_id' => 'int(11) NOT NULL',
         ), '');
 
         $this->createTable('task_item', array(

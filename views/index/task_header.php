@@ -50,27 +50,42 @@ $participantStyle = 'display:inline-block;' ;
                 <?= (!empty($badge)) ? '<br>' . $badge : '' ?>
 
                 <?php if ($task->content->isPublic()) : ?>
-                    <span class="label label-info"><?= Yii::t('base', 'Public'); ?></span>
+                    <span class="label label-info"><?= Yii::t('SpaceModule.base', 'Public'); ?></span>
                 <?php endif; ?>
 
                 <?= Button::back($backUrl, Yii::t('TaskModule.base', 'Back to overview'))->sm()->loader(true); ?>
 
             </div>
 
-            <?php if($task->hasTaskAssigned()): ?>
-                <div>
-                    <?php if ($task->hasTaskAssigned()) : ?>
-                        <div style="<?= $participantStyle ?>">
-                            <em><strong><?= Yii::t('TaskModule.views_index_index', 'Assigned User') ?>:</strong></em><br>
-                            <?php foreach ($task->taskAssignedUsers as $user) : ?>
-                                <a href="<?= $user->getUrl(); ?>">
-                                    <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif ?>
+<!--        Assigned Task User-->
+            <?php if ($task->hasTaskAssigned()) : ?>
+            <div>
+                <div style="<?= $participantStyle ?>">
+                    <em><strong><?= Yii::t('TaskModule.views_index_index', 'Assigned') ?>:</strong></em><br>
+                    <?php foreach ($task->taskAssignedUsers as $user) : ?>
+                        <a href="<?= $user->getUrl(); ?>">
+                            <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
-            <?php endif; ?>
+            </div>
+            <?php endif ?>
+
+<!--        Responsible Task User-->
+            <?php if ($task->hasTaskResponsible()) : ?>
+                <div>
+                <div style="<?= $participantStyle ?>">
+                    <em><strong><?= Yii::t('TaskModule.views_index_index', 'Responsible') ?>:</strong></em><br>
+                    <?php foreach ($task->taskResponsibleUsers as $user) : ?>
+                        <a href="<?= $user->getUrl(); ?>">
+                            <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif ?>
+
+
 
         </div>
     </div>

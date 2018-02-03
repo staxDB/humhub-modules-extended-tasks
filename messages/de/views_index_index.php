@@ -6,8 +6,10 @@ return array (
     'New task' => 'Neue Aufgabe',
     '<strong>Task</strong> overview' => '<strong>Aufgaben</strong>-Übersicht',
     'Filter tasks by title' => 'Aufgaben nach Titel filtern',
+    'Description' => 'Beschreibung',
     'Checklist' => 'Checkliste',
-    'Assigned User' => 'Zugewiesene Anwender',
+    'Assigned' => 'Zugewiesen',
+    'Responsible' => 'Verantwortlich',
 
     // Badge
     'Today' => 'Heute',

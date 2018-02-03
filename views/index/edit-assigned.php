@@ -11,6 +11,10 @@ use humhub\widgets\Link;
 
 /* @var $form \humhub\widgets\ActiveForm */
 /* @var $taskForm \humhub\modules\task\models\forms\TaskForm */
+/* @var $responsible [] \humhub\modules\user\models\User */
+
+$responsible = $taskForm->task->taskResponsibleUsers;
+array_push($responsible, Yii::$app->user->getIdentity()); // add creator to responsible users
 ?>
 
 <div class="modal-body">
@@ -23,5 +27,14 @@ use humhub\widgets\Link;
     ]) ?>
 
     <?= Link::userPickerSelfSelect('#taskUserPicker'); ?>
+
+    <?= $form->field($taskForm->task, 'responsibleUsers')->widget(UserPickerField::class, [
+        'id' => 'taskResponsibleUserPicker',
+        'selection' => $responsible,
+        'url' => $taskForm->getTaskResponsiblePickerUrl(),
+        'placeholder' => Yii::t('TaskModule.views_index_edit', 'Add responsible users'),
+    ]) ?>
+
+    <?= Link::userPickerSelfSelect('#taskResponsibleUserPicker'); ?>
 
 </div>

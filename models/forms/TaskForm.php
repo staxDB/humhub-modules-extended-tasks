@@ -338,6 +338,11 @@ class TaskForm extends Model
         return $this->task->content->container->createUrl('/task/index/task-assigned-picker', ['id' => $this->task->id]);
     }
 
+    public function getTaskResponsiblePickerUrl()
+    {
+        return $this->task->content->container->createUrl('/task/index/task-assigned-picker', ['id' => $this->task->id]);
+    }
+
     public function getContentContainer()
     {
         return $this->task->content->container;

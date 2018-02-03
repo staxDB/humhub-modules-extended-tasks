@@ -13,6 +13,7 @@ use humhub\modules\task\models\forms\TaskFilter;
 use humhub\modules\task\models\forms\TaskForm;
 use humhub\modules\task\models\TaskPicker;
 use humhub\modules\task\models\TaskAssigned;
+use humhub\modules\task\models\TaskResponsible;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\task\widgets\TaskListView;
 use humhub\modules\space\models\Space;
@@ -116,6 +117,23 @@ class IndexController extends ContentContainerController
     {
         if($id) {
             $subQuery = TaskAssigned::find()->where(['task_assigned.task_id' => $id])->andWhere('task_assigned.user_id=user.id');
+            $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
+        } else {
+            $query = $this->getSpace()->getMembershipUser();
+        }
+
+        return $this->asJson(UserPicker::filter([
+            'keyword' => $keyword,
+            'query' => $query,
+            'fillUser' => true
+        ]));
+    }
+
+
+    public function actionTaskResponsiblePicker($id = null, $keyword)
+    {
+        if($id) {
+            $subQuery = TaskResponsible::find()->where(['task_responsible.task_id' => $id])->andWhere('task_responsible.user_id=user.id');
             $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
         } else {
             $query = $this->getSpace()->getMembershipUser();
