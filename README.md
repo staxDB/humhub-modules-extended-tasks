@@ -12,4 +12,4 @@ TODO
 - option for tasks without deadline!!
 - add filter (Pending Tasks, In Progress, Pending Review, Completed)
 - add reminder
-- add to user profile
+- add to (assigned & responsible)user profile calendar!!
