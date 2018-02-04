@@ -7,6 +7,7 @@ use humhub\widgets\Button;
 use humhub\widgets\ModalButton;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
+use humhub\modules\task\models\Task;
 
 /* @var $canEdit boolean */
 /* @var $contentContainer \humhub\modules\content\components\ContentContainerActiveRecord */
@@ -63,10 +64,16 @@ $emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', 'Start now, by 
                     <?= $form->field($filter, 'past')->checkbox(['style' => 'float:left']); ?>
                 </div>
                 <div class="checkbox-filter">
-                    <?= $form->field($filter, 'taskUser')->checkbox(['style' => 'float:left']); ?>
+                    <?= $form->field($filter, 'taskAssigned')->checkbox(['style' => 'float:left']); ?>
+                </div>
+                <div class="checkbox-filter">
+                    <?= $form->field($filter, 'taskResponsible')->checkbox(['style' => 'float:left']); ?>
                 </div>
                 <div class="checkbox-filter">
                     <?= $form->field($filter, 'own')->checkbox(['style' => 'float:left']); ?>
+                </div>
+                <div class="dropdown-filter">
+                    <?= $form->field($filter, 'status')->dropDownList(Task::getStatusItems())->label(false); ?>
                 </div>
         <?php ActiveForm::end() ?>
     </div>

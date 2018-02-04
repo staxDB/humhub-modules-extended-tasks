@@ -28,6 +28,7 @@ array_push($responsible, Yii::$app->user->getIdentity()); // add creator to resp
 
     <?= Link::userPickerSelfSelect('#taskUserPicker'); ?>
 
+
     <?= $form->field($taskForm->task, 'responsibleUsers')->widget(UserPickerField::class, [
         'id' => 'taskResponsibleUserPicker',
         'selection' => $responsible,
@@ -36,5 +37,11 @@ array_push($responsible, Yii::$app->user->getIdentity()); // add creator to resp
     ]) ?>
 
     <?= Link::userPickerSelfSelect('#taskResponsibleUserPicker'); ?>
+
+    <br>
+    <?= $form->field($taskForm->task, 'review')->checkbox() ?>
+
+    <br>
+    <?= $form->field($taskForm->task, 'cal_mode')->dropDownList($taskForm->task->getCalModeItems()) ?>
 
 </div>

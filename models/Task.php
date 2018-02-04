@@ -14,8 +14,12 @@ use humhub\modules\task\widgets\WallEntry;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\user\models\User;
 use humhub\modules\search\interfaces\Searchable;
+use yii\data\Sort;
 use yii\db\ActiveQuery;
 use humhub\modules\task\CalendarUtils;
+use yii\db\Expression;
+use yii\db\Query;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "task".
@@ -24,10 +28,13 @@ use humhub\modules\task\CalendarUtils;
  * @property integer $id
  * @property string $title
  * @property string $description
+ * @property integer $review
+ * @property integer $scheduling
+ * @property integer $all_day
  * @property string $start_datetime
  * @property string $end_datetime
- * @property integer $all_day
  * @property integer $status
+ * @property integer $cal_mode
  * @property integer $parent_task_id
  * @property string $time_zone The timeZone this entry was saved, note the dates itself are always saved in app timeZone
  */
@@ -58,6 +65,7 @@ class Task extends ContentActiveRecord implements Searchable
     const STATUS_IN_PROGRESS = 1;
     const STATUS_PENDING_REVIEW = 2;
     const STATUS_COMPLETED = 3;
+    const STATUS_ALL = 4;
 
     /**
      * @var array all given statuses as array
@@ -67,6 +75,22 @@ class Task extends ContentActiveRecord implements Searchable
         self::STATUS_IN_PROGRESS,
         self::STATUS_PENDING_REVIEW,
         self::STATUS_COMPLETED
+    ];
+
+    /**
+     * Cal Modes
+     */
+    const CAL_MODE_NONE = 0;
+    const CAL_MODE_USERS = 1;
+    const CAL_MODE_SPACE = 2;
+
+    /**
+     * @var array all given cal modes as array
+     */
+    public static $calModes = [
+        self::CAL_MODE_NONE,
+        self::CAL_MODE_USERS,
+        self::CAL_MODE_SPACE
     ];
 
     /**
@@ -104,12 +128,16 @@ class Task extends ContentActiveRecord implements Searchable
     public function rules()
     {
         return [
-            [['title', 'start_datetime'], 'required'],
-//            [['start', 'end'], 'datetime', 'format' => $this->getDbDateFormat()],
+            [['title'], 'required'],
+            [['start_datetime', 'end_datetime'], 'required', 'when' => function($model) {
+                return $model->scheduling == 1;
+            }, 'whenClient' => "function (attribute, value) {
+                return $('#task-scheduling').val() == 1;
+            }"],
             [['start_datetime'], DbDateValidator::className()],
             [['end_datetime'], DbDateValidator::className()],
-            [['all_day'], 'integer'],
-//            [['status'], 'in', 'range' => self::$statuses],
+            [['all_day', 'scheduling', 'review'], 'integer'],
+            [['cal_mode'], 'in', 'range' => self::$calModes],
             [['assignedUsers', 'description', 'responsibleUsers'], 'safe'],
             [['title'], 'string', 'max' => 255],
         ];
@@ -124,10 +152,13 @@ class Task extends ContentActiveRecord implements Searchable
             'id' => 'ID',
             'title' => Yii::t('TaskModule.models_task', 'Title'),
             'description' => Yii::t('TaskModule.models_task', 'Description'),
+            'review' => Yii::t('TaskModule.models_task', 'Review by responsible user required'),
+            'scheduling' => Yii::t('TaskModule.models_task', 'Scheduling'),
+            'all_day' => Yii::t('TaskModule.models_task', 'All Day'),
             'start_datetime' => Yii::t('TaskModule.models_task', 'Start'),
             'end_datetime' => Yii::t('TaskModule.models_task', 'End'),
-            'all_day' => Yii::t('TaskModule.models_task', 'All Day'),
             'status' => Yii::t('TaskModule.models_task', 'Status'),
+            'cal_mode' => Yii::t('TaskModule.models_task', 'Calendar Mode'),
             'parent_task_id' => Yii::t('TaskModule.models_task', 'Parent Task'),
             'newItems' => Yii::t('TaskModule.models_task', 'Checklist Items'),
             'editItems' => Yii::t('TaskModule.models_task', 'Checklist Items'),
@@ -412,9 +443,9 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return self::find()
             ->contentContainer($container)
-            ->orderBy(['task.end_datetime' => SORT_ASC])
+            ->orderBy([new Expression('-task.end_datetime DESC')])
             ->readable()
-            ->andWhere(['>=', 'task.end_datetime', date('Y-m-d')]);
+            ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED]);
     }
 
     public static function GetUsersOpenTasks()
@@ -460,7 +491,7 @@ class Task extends ContentActiveRecord implements Searchable
     public function changeStatus($newStatus)
     {
         if (!in_array($newStatus, self::$statuses))
-            return;
+            return false;
 
         switch ($newStatus) {
             case Task::STATUS_IN_PROGRESS:
@@ -468,10 +499,15 @@ class Task extends ContentActiveRecord implements Searchable
                 break;
 
             case Task::STATUS_PENDING_REVIEW:
+                if (!$this->review)
+                    return false;
                 // Todo: Notify responsible Person, e.g. creator
                 break;
 
             case Task::STATUS_COMPLETED:
+                if ($this->hasItems()) {
+                    $this->completeItems();
+                }
                 // Todo: Notify responsible Person, e.g. assigned persons or creator (if finisher is not creator)
                 break;
         }
@@ -531,14 +567,62 @@ class Task extends ContentActiveRecord implements Searchable
 //        ]);
 //    }
 
-    /**
-     * Returns an ActiveQuery for all task items of this task.
+    /** TODO
+     * Returns an ActiveQuery for all available sub-tasks.
      *
      * @return ActiveQuery
      */
     public function getSubTasks()
     {
         return $this->hasMany(self::class, ['id' => 'parent_task_id']);
+    }
+
+    /**
+     * Returns an array of statusItems.
+     * Primary used in TaskFilter
+     *
+     * @return array
+     */
+    public static function getStatusItems()
+    {
+        return [
+            self::STATUS_PENDING => Yii::t('TaskModule.views_index_index', 'Pending'),
+            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.views_index_index', 'In Progress'),
+            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.views_index_index', 'Pending Review'),
+            self::STATUS_COMPLETED => Yii::t('TaskModule.views_index_index', 'Completed'),
+            self::STATUS_ALL => Yii::t('TaskModule.views_index_index', 'All'),
+        ];
+    }
+
+    /**
+     * Returns an array of calendarModes.
+     *
+     * @return array
+     */
+    public static function getCalModeItems()
+    {
+        return [
+            self::CAL_MODE_NONE => Yii::t('TaskModule.models_task', 'Don\'t add to calendar'),
+            self::CAL_MODE_USERS => Yii::t('TaskModule.models_task', 'Add in users calendar'),
+            self::CAL_MODE_SPACE => Yii::t('TaskModule.models_task', 'Add to space calendar'),
+        ];
+    }
+
+    public function getCalMode()
+    {
+        switch ($this->cal_mode){
+            case (self::CAL_MODE_NONE):
+                return Yii::t('TaskModule.models_task', 'Don\'t add to calendar');
+                break;
+            case (self::CAL_MODE_USERS):
+                return Yii::t('TaskModule.models_task', 'Add in users calendar');
+                break;
+            case (self::CAL_MODE_SPACE):
+                return Yii::t('TaskModule.models_task', 'Add to space calendar');
+                break;
+            default:
+                return;
+        }
     }
 
     /**
@@ -644,6 +728,20 @@ class Task extends ContentActiveRecord implements Searchable
             ->execute();
     }
 
+    /**
+     * @throws \yii\db\Exception
+     */
+    public function completeItems()
+    {
+        Yii::$app->db->createCommand()
+            ->update(
+                TaskItem::tableName(),
+                ['completed' => 1], //columns and values
+                ['task_id' => $this->id] //condition, similar to where()
+            )
+            ->execute();
+    }
+
     public function isUserAssigned(User $user = null)
     {
         if ($user === null) {
@@ -722,6 +820,19 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
+     * handle task specific permissions
+     * @return bool
+     */
+    public function canSeeStatusButton()
+    {
+        if ($this->status === self::STATUS_COMPLETED)
+            return false;
+        elseif ($this->review)
+            return $this->canReviewTask();
+        return $this->canChangeStatus();
+    }
+
+    /**
      * Todo
      * handle task specific permissions
      * @return bool
@@ -731,9 +842,57 @@ class Task extends ContentActiveRecord implements Searchable
 //        return (self::isTaskResponsible());
 //    }
 
+    /**
+     * send link for change-status button
+     * @return string $statusLink
+     */
+    public function getStatusLink()
+    {
+        switch ($this->status) {
+            case Task::STATUS_PENDING:
+                $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_IN_PROGRESS]);
+                break;
+            case Task::STATUS_IN_PROGRESS:
+                if ($this->review)
+                    $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_PENDING_REVIEW]);
+                else
+                    $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_COMPLETED]);
+                break;
+            case Task::STATUS_PENDING_REVIEW:
+                $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_COMPLETED]);
+                break;
+            default :
+                $statusLink = '';
+        }
 
+        return $statusLink;
+    }
 
+    /**
+     * send label for change-status button
+     * @return string $statusLabel
+     */
+    public function getStatusLabel()
+    {
+        switch ($this->status) {
+            case Task::STATUS_PENDING:
+                $statusLabel = Yii::t('TaskModule.views_index_index', 'Begin Task');
+                break;
+            case Task::STATUS_IN_PROGRESS:
+                if ($this->review)
+                    $statusLabel = Yii::t('TaskModule.views_index_index', 'Let Task Review');
+                else
+                    $statusLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
+                break;
+            case Task::STATUS_PENDING_REVIEW:
+                $statusLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
+                break;
+            default :
+                $statusLabel = '';
+        }
 
+        return $statusLabel;
+    }
 
 
 

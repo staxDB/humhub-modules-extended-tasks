@@ -39,7 +39,10 @@ humhub.module('task', function (module, require, $) {
         this.$entryContainer = $('#filter-tasks-list');
         var that = this;
 
-        this.$titleFilter.on('keyup', function (evt) {
+        this.$titleFilter.on('keypress', function (evt) {
+            if (evt.keyCode == 13) {
+                evt.preventDefault();
+            }
             if (that.title() !== that.lastTitleSearch) {
                 if (that.request) {
                     clearTimeout(that.request);
@@ -50,6 +53,10 @@ humhub.module('task', function (module, require, $) {
         });
 
         this.$.find('.checkbox').on('change', function () {
+            that.filterCall();
+        });
+
+        this.$.find('.field-taskfilter-status').on('change', function () {
             that.filterCall();
         });
 
@@ -129,15 +136,24 @@ humhub.module('task', function (module, require, $) {
 
     Form.prototype.init = function() {
         // modal.global.$.find('.tab-basic').on('shown.bs.tab', function (e) {
-        //     $('#calendarentry-title').focus();
-        // });
-        //
-        // modal.global.$.find('.tab-participation').on('shown.bs.tab', function (e) {
-        //     $('#calendarentry-participation_mode').focus();
+        //     $('#task-title').focus();
         // });
 
+        // this.initDateInput();
         this.initTimeInput();
+        this.initScheduling();
     };
+
+    // Form.prototype.initDateInput = function(evt) {
+    //     $dateFields = modal.global.$.find('.dateField');
+    //     $dateInputs =  $timeFields.find('.form-control');
+    //     $dateInputs.each(function() {
+    //         var $this = $(this);
+    //         if($this.prop('disabled')) {
+    //             $this.data('oldVal', $this.val()).val('');
+    //         }
+    //     });
+    // };
 
     Form.prototype.initTimeInput = function(evt) {
         $timeFields = modal.global.$.find('.timeField');
@@ -148,6 +164,25 @@ humhub.module('task', function (module, require, $) {
                 $this.data('oldVal', $this.val()).val('');
             }
         });
+    };
+
+    Form.prototype.initScheduling = function(evt) {
+        $schedulingTab = modal.global.$.find('.tab-scheduling');
+        $checkBox = modal.global.$.find('#task-scheduling');
+        if($checkBox.prop('checked')) {
+            $schedulingTab.show();
+        } else {
+            $schedulingTab.hide();
+        }
+    };
+
+    Form.prototype.toggleScheduling = function(evt) {
+        $schedulingTab = modal.global.$.find('.tab-scheduling');
+        if (evt.$trigger.prop('checked')) {
+            $schedulingTab.show();
+        } else {
+            $schedulingTab.hide();
+        }
     };
 
     Form.prototype.toggleDateTime = function(evt) {
@@ -219,6 +254,7 @@ humhub.module('task', function (module, require, $) {
         this.loader();
         update.then($.proxy(this.handleUpdateSuccess, this))
             .catch(Item.handleUpdateError)
+            // .catch()
             .finally($.proxy(this.loader, this, false));
     };
 

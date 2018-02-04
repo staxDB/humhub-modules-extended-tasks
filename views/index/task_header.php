@@ -32,11 +32,13 @@ $participantStyle = 'display:inline-block;' ;
     <div class="row clearfix">
         <div class="col-sm-12 media">
             <div class="media-body clearfix">
+                <?php if ($task->scheduling) : ?>
                 <h2 style="margin:5px 0 0 0;">
                     <?= $task->getFormattedStartDateTime(); ?>
                     -
                     <?= $task->getFormattedEndDateTime(); ?>
                 </h2>
+                <?php endif; ?>
                 <span class="author">
                     <?= Html::containerLink($task->content->createdBy); ?>
                 </span>

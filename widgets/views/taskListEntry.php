@@ -18,8 +18,12 @@ use humhub\libs\Html;
             </h4>
 
             <h5>
-                <?= Yii::t('TaskModule.views_index_index', 'Deadline at') ?>
-                <?= $task->getFormattedEndDateTime() ?>
+                <?php if ($task->scheduling) : ?>
+                    <?= Yii::t('TaskModule.views_index_index', 'Deadline at') ?>
+                    <?= $task->getFormattedEndDateTime() ?>
+                <?php else : ?>
+                    <?= Yii::t('TaskModule.views_index_index', 'No Scheduling set for this Task') ?>
+                <?php endif; ?>
                 <?= \humhub\widgets\Button::primary()
                 ->options(['class' => 'tt', 'title' => Yii::t('TaskModule.views_index_index', 'Edit'), 'style' => 'margin-left:2px']
                 )->icon('fa-pencil')->right()->xs()->action('ui.modal.load', $editUrl)->loader(false)->visible($canEdit) ?>

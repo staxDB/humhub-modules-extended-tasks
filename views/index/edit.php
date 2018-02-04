@@ -21,11 +21,13 @@ $task = $taskForm->task;
 
     <div id="task-form" data-ui-widget="task.Form" data-ui-init>
 
+        <?php $hidden = $taskForm->task->scheduling ?>
         <?= Tabs::widget([
             'viewPath' => '@task/views/index',
             'params' => ['form' => $form, 'taskForm' => $taskForm],
             'items' => [
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Basic'),'view' => 'edit-basic', 'linkOptions' => ['class' => 'tab-basic']],
+                ['label' => Yii::t('TaskModule.views_index_edit', 'Scheduling'),'view' => 'edit-scheduling', 'linkOptions' => ['class' => 'tab-scheduling']],
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Checklist'),'view' => 'edit-checklist', 'linkOptions' => ['class' => 'tab-checklist']],
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Assignment'),'view' => 'edit-assignment', 'linkOptions' => ['class' => 'tab-assignment']],
                 ['label' => Yii::t('TaskModule.views_index_edit', 'Files'),'view' => 'edit-files', 'linkOptions' => ['class' => 'tab-files']]

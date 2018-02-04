@@ -9,12 +9,17 @@ use yii\helpers\Html;
 use humhub\widgets\MarkdownView;
 use humhub\modules\content\widgets\WallEntryAddons;
 use humhub\modules\task\widgets\TaskItemList;
+use humhub\widgets\Button;
+use humhub\modules\task\models\Task;
 
 \humhub\modules\task\assets\Assets::register($this);
 
 $canEdit = $task->content->canEdit();
 $printUrl = $contentContainer->createUrl('print', ['id' => $task->id]);
 $shareLink = $contentContainer->createUrl('share', ['id' => $task->id]);
+
+// todo --> change in controller
+$actionUrl = '#';
 
 $collapse = true;
 $renderAddons = true;
@@ -60,6 +65,11 @@ $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
 
             <?= Html::endForm(); ?>
 
+            <hr>
+        <?php endif; ?>
+
+        <?php if ($task->canSeeStatusButton()) : ?>
+            <?= Button::success( $task->getStatusLabel() )->link( $task->getStatusLink() )->sm()->icon('fa-check-square')->loader(true); ?>
             <hr>
         <?php endif; ?>
 

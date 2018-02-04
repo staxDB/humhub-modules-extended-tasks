@@ -18,6 +18,7 @@ return array (
     'In Progress' => 'In Arbeit',
     'Pending Review' => 'Zur Prüfung',
     'Completed' => 'Beendet',
+    'All' => 'Alle',
 
     // widgets
     'Edit' => 'Bearbeiten',

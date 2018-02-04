@@ -342,7 +342,8 @@ class IndexController extends ContentContainerController
         $task = $this->getTaskByParameter();
 
         if (!$task->canCheckItems())
-            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+            $this->view->error(Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+//        throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
 
         $items = Yii::$app->request->post('item');
 
@@ -359,8 +360,11 @@ class IndexController extends ContentContainerController
         $task->resetItems();
         $task->confirm($results);
 
-        if ($task->status === Task::STATUS_PENDING)
+        if ($task->status === Task::STATUS_PENDING) {
             $task->changeStatus(Task::STATUS_IN_PROGRESS);
+            $this->view->success(Yii::t('TaskModule.results', 'Success'));
+            return $this->redirect($this->contentContainer->createUrl('/task/index/view', ['id' => $task->id]));
+        }
 
         return $this->render("task", [
             'task' => $task,

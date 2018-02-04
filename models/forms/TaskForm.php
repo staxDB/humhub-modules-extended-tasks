@@ -103,7 +103,18 @@ class TaskForm extends Model
             [['start_date'], DbDateValidator::className(), 'format' => Yii::$app->params['formatter']['defaultDateFormat'], 'timeAttribute' => 'start_time', 'timeZone' => $this->timeZone],
             [['end_date'], DbDateValidator::className(), 'format' => Yii::$app->params['formatter']['defaultDateFormat'], 'timeAttribute' => 'end_time', 'timeZone' => $this->timeZone],
             [['end_date'], 'validateEndTime'],
-            [['start_date', 'end_date'], 'required'],
+
+            [['start_date', 'end_date'], 'required', 'when' => function($model) {
+                return $model->task->scheduling == 1;
+            }, 'whenClient' => "function (attribute, value) {
+                return $('#task-scheduling').val() == 1;
+            }"],
+            [['start_time', 'end_time'], 'required', 'when' => function($model) {
+                return $model->task->all_day == 0;
+            }, 'whenClient' => "function (attribute, value) {
+                return $('#task-all_day').val() == 0;
+            }"],
+
             [['is_public', 'itemId'], 'integer'],
         ];
     }

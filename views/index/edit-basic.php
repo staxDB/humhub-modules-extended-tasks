@@ -19,35 +19,7 @@ use yii\jui\DatePicker;
 
 
     <?= $form->field($taskForm, 'is_public')->checkbox() ?>
-    <?= $form->field($taskForm->task, 'all_day')->checkbox(['data-action-change' => 'toggleDateTime']) ?>
-
-
-    <div class="row">
-        <div class="col-md-6">
-            <?= $form->field($taskForm, 'start_date')->widget(DatePicker::className(), ['dateFormat' => Yii::$app->params['formatter']['defaultDateFormat'], 'clientOptions' => [], 'options' => ['class' => 'form-control']]) ?>
-        </div>
-        <div class="col-md-6 timeField" <?= !$taskForm->showTimeFields() ? 'style="opacity:0.2"' : '' ?>>
-            <?= $form->field($taskForm, 'start_time')->widget(TimePicker::class, ['disabled' => $taskForm->task->all_day]); ?>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <?= $form->field($taskForm, 'end_date')->widget(DatePicker::className(), ['dateFormat' => Yii::$app->params['formatter']['defaultDateFormat'], 'clientOptions' => [], 'options' => ['class' => 'form-control']]) ?>
-        </div>
-        <div class="col-md-6 timeField" <?= !$taskForm->showTimeFields() ? 'style="opacity:0.2"' : '' ?>>
-            <?= $form->field($taskForm, 'end_time')->widget(TimePicker::class, ['disabled' => $taskForm->task->all_day]); ?>
-        </div>
-    </div>
-
-    <?php Yii::$app->i18n->autosetLocale(); ?>
-
-    <div class="row">
-        <div class="col-md-6"></div>
-        <div class="col-md-6 timeZoneField" >
-            <?= TimeZoneDropdownAddition::widget(['model' => $taskForm])?>
-        </div>
-    </div>
+    <?= $form->field($taskForm->task, 'scheduling')->checkbox(['data-action-change' => 'toggleScheduling']) ?>
 
     <?= $form->field($taskForm->task, 'subTasks')->widget(TaskPickerField::class, [
         'id' => 'subTaskPicker',
