@@ -40,6 +40,8 @@ class TaskReminder extends ActiveRecord
     const REMIND_TWO_DAYS = 7;
     const REMIND_ONE_WEEK = 8;
     const REMIND_TWO_WEEKS = 9;
+    const REMIND_THREE_WEEKS = 10;
+    const REMIND_ONE_MONTH = 11;
 
     /**
      * @var array all given remind modes as array
@@ -53,7 +55,9 @@ class TaskReminder extends ActiveRecord
         self::REMIND_TWO_HOURS,
         self::REMIND_ONE_DAY,
         self::REMIND_TWO_DAYS,
-        self::REMIND_TWO_WEEKS
+        self::REMIND_TWO_WEEKS,
+        self::REMIND_THREE_WEEKS,
+        self::REMIND_ONE_MONTH
     ];
 
     /**
@@ -92,8 +96,8 @@ class TaskReminder extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'task_id' => Yii::t('TaskModule.model_taskreminder', 'Task'),
-            'remind_mode' => Yii::t('TaskModule.model_taskreminder', 'Remind Mode'),
+            'task_id' => Yii::t('TaskModule.models_taskreminder', 'Task'),
+            'remind_mode' => Yii::t('TaskModule.models_taskreminder', 'Remind Mode'),
         ];
     }
 
@@ -105,16 +109,18 @@ class TaskReminder extends ActiveRecord
     public static function getRemindModeItems()
     {
         return [
-            self::REMIND_ON_EVENT => Yii::t('TaskModule.model_taskreminder', 'Remind on Deadline'),
-            self::REMIND_FIVE_MIN => Yii::t('TaskModule.model_taskreminder', '5 Minutes before'),
-            self::REMIND_FIFTEEN_MIN => Yii::t('TaskModule.model_taskreminder', '15 Minutes before'),
-            self::REMIND_THIRTY_MIN => Yii::t('TaskModule.model_taskreminder', '30 Minutes before'),
-            self::REMIND_ONE_HOUR => Yii::t('TaskModule.model_taskreminder', '1 Hour before'),
-            self::REMIND_TWO_HOURS => Yii::t('TaskModule.model_taskreminder', '2 Hours before'),
-            self::REMIND_ONE_DAY => Yii::t('TaskModule.model_taskreminder', '1 Day before'),
-            self::REMIND_TWO_DAYS => Yii::t('TaskModule.model_taskreminder', '2 Days before'),
-            self::REMIND_ONE_WEEK => Yii::t('TaskModule.model_taskreminder', '1 Week before'),
-            self::REMIND_TWO_WEEKS => Yii::t('TaskModule.model_taskreminder', '2 Weeks before'),
+            self::REMIND_ON_EVENT => Yii::t('TaskModule.models_taskreminder', 'Remind on Deadline'),
+            self::REMIND_FIVE_MIN => Yii::t('TaskModule.models_taskreminder', '5 Minutes before'),
+            self::REMIND_FIFTEEN_MIN => Yii::t('TaskModule.models_taskreminder', '15 Minutes before'),
+            self::REMIND_THIRTY_MIN => Yii::t('TaskModule.models_taskreminder', '30 Minutes before'),
+            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskreminder', '1 Hour before'),
+            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskreminder', '2 Hours before'),
+            self::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskreminder', '1 Day before'),
+            self::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskreminder', '2 Days before'),
+            self::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskreminder', '1 Week before'),
+            self::REMIND_TWO_WEEKS => Yii::t('TaskModule.models_taskreminder', '2 Weeks before'),
+            self::REMIND_THREE_WEEKS => Yii::t('TaskModule.models_taskreminder', '3 Weeks before'),
+            self::REMIND_ONE_MONTH => Yii::t('TaskModule.models_taskreminder', '1 Month before'),
         ];
     }
 
@@ -122,34 +128,40 @@ class TaskReminder extends ActiveRecord
     {
         switch ($this->remind_mode){
             case (self::REMIND_ON_EVENT):
-                return Yii::t('TaskModule.model_taskreminder', 'Remind on Deadline');
+                return Yii::t('TaskModule.models_taskreminder', 'Remind on Deadline');
                 break;
             case (self::REMIND_FIVE_MIN):
-                return Yii::t('TaskModule.model_taskreminder', '5 Minutes before');
+                return Yii::t('TaskModule.models_taskreminder', '5 Minutes before');
                 break;
             case (self::REMIND_FIFTEEN_MIN):
-                return Yii::t('TaskModule.model_taskreminder', '15 Minutes before');
+                return Yii::t('TaskModule.models_taskreminder', '15 Minutes before');
                 break;
             case (self::REMIND_THIRTY_MIN):
-                return Yii::t('TaskModule.model_taskreminder', '30 Minutes before');
+                return Yii::t('TaskModule.models_taskreminder', '30 Minutes before');
                 break;
             case (self::REMIND_ONE_HOUR):
-                return Yii::t('TaskModule.model_taskreminder', '1 Hour before');
+                return Yii::t('TaskModule.models_taskreminder', '1 Hour before');
                 break;
             case (self::REMIND_TWO_HOURS):
-                return Yii::t('TaskModule.model_taskreminder', '2 Hours before');
+                return Yii::t('TaskModule.models_taskreminder', '2 Hours before');
                 break;
             case (self::REMIND_ONE_DAY):
-                return Yii::t('TaskModule.model_taskreminder', '1 Day before');
+                return Yii::t('TaskModule.models_taskreminder', '1 Day before');
                 break;
             case (self::REMIND_TWO_DAYS):
-                return Yii::t('TaskModule.model_taskreminder', '2 Days before');
+                return Yii::t('TaskModule.models_taskreminder', '2 Days before');
                 break;
             case (self::REMIND_ONE_WEEK):
-                return Yii::t('TaskModule.model_taskreminder', '1 Week before');
+                return Yii::t('TaskModule.models_taskreminder', '1 Week before');
                 break;
             case (self::REMIND_TWO_WEEKS):
-                return Yii::t('TaskModule.model_taskreminder', '2 Weeks before');
+                return Yii::t('TaskModule.models_taskreminder', '2 Weeks before');
+                break;
+            case (self::REMIND_THREE_WEEKS):
+                return Yii::t('TaskModule.models_taskreminder', '3 Weeks before');
+                break;
+            case (self::REMIND_ONE_MONTH):
+                return Yii::t('TaskModule.models_taskreminder', '1 Month before');
                 break;
             default:
                 return;

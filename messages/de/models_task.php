@@ -12,4 +12,6 @@ return array (
     'Checklist Items' => 'Checklisten Elemente',
     'Assigned user(s)' => 'Zugeordnete Personen',
     'Responsible user(s)' => 'Verantwortliche Personen',
+    'Reminders' => 'Erinnerungen',
+    'Scheduling' => 'Zeitplanung'
 );

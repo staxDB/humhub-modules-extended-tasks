@@ -10,6 +10,6 @@ Send notifications to all assigned and responsible users within your HumHub, add
 
 TODO
 - option for tasks without deadline!!
-- add filter (Pending Tasks, In Progress, Pending Review, Completed)
-- add reminder
-- add to (assigned & responsible)user profile calendar!!
+- add (multiple) reminder(s)
+- add TaskResults (add text or upload files) for users who are assigned / responsible
+- add to (assigned & responsible) user profile calendar!!

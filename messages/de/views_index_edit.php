@@ -1,11 +1,15 @@
 <?php
 return array (
     'Basic' => 'Allgemein',
+    'Scheduling' => 'Zeitplanung',
     'Checklist' => 'Checkliste',
     'Assignment' => 'Zuordnung',
     'Files' => 'Dateien',
     '<strong>Confirm</strong> task deletion' => 'Aufgabe löschen  <strong>bestätigen</strong>',
     'Do you really want to delete this task?' => 'Wollen Sie diese Aufgabe wirklich löschen?',
+
+    //scheduling
+    'Add reminder' => 'Erinnerungen hinzufügen',
 
     //edit-basic
     'Title of your task' => 'Titel Ihrer Aufgabe',

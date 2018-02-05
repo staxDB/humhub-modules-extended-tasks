@@ -55,6 +55,7 @@ class Task extends ContentActiveRecord implements Searchable
 
     public $assignedUsers;
     public $responsibleUsers;
+    public $selectedReminders;
     public $newItems;
     public $editItems;
 
@@ -138,7 +139,7 @@ class Task extends ContentActiveRecord implements Searchable
             [['end_datetime'], DbDateValidator::className()],
             [['all_day', 'scheduling', 'review'], 'integer'],
             [['cal_mode'], 'in', 'range' => self::$calModes],
-            [['assignedUsers', 'description', 'responsibleUsers'], 'safe'],
+            [['assignedUsers', 'description', 'responsibleUsers', 'selectedReminders'], 'safe'],
             [['title'], 'string', 'max' => 255],
         ];
     }
@@ -164,6 +165,7 @@ class Task extends ContentActiveRecord implements Searchable
             'editItems' => Yii::t('TaskModule.models_task', 'Checklist Items'),
             'assignedUsers' => Yii::t('TaskModule.models_task', 'Assigned user(s)'),
             'responsibleUsers' => Yii::t('TaskModule.models_task', 'Responsible user(s)'),
+            'selectedReminders' => Yii::t('TaskModule.models_task', 'Reminders'),
         ];
     }
 
@@ -218,6 +220,26 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskResponsible');
     }
+
+
+
+
+    /**
+     * Returns an ActiveQuery for all assigned task users of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskReminder()
+    {
+        $query = $this->hasMany(TaskReminder::className(), ['task_id' => 'id']);
+        return $query;
+    }
+
+    public function hasTaskReminder()
+    {
+        return !empty($this->taskReminder);
+    }
+
 
     /**
      * Returns an ActiveQuery for all task items of this task.
@@ -343,6 +365,14 @@ class Task extends ContentActiveRecord implements Searchable
             }
         }
 
+        TaskReminder::deleteAll(['task_id' => $this->id]);
+
+        if(!empty($this->selectedReminders)) {
+            foreach ($this->selectedReminders as $remind_mode) {
+                $this->addTaskReminder($remind_mode);
+            }
+        }
+
         parent::afterSave($insert, $changedAttributes);
 
         if (!$insert) {
@@ -438,6 +468,34 @@ class Task extends ContentActiveRecord implements Searchable
                 'user_id' => $user->id,
             ]);
             return $taskResponsible->save();
+        }
+
+        return false;
+    }
+
+    public function isTaskReminder($remind_mode)
+    {
+        if(!$remind_mode) {
+            return false;
+        }
+
+        $taskReminder = $this->getTaskReminder()->where(['remind_mode' => $remind_mode])->one();
+
+        return !empty($taskReminder);
+    }
+
+    public function addTaskReminder($remind_mode)
+    {
+        if(!$remind_mode) {
+            return false;
+        }
+
+        if(!$this->isTaskReminder($remind_mode)) {
+            $taskReminder = new TaskReminder([
+                'task_id' => $this->id,
+                'remind_mode' => $remind_mode,
+            ]);
+            return $taskReminder->save();
         }
 
         return false;
@@ -692,6 +750,15 @@ class Task extends ContentActiveRecord implements Searchable
         return $result;
     }
 
+    // TODO calc remaining days for notifications
+    public function getRemainingDays()
+    {
+//        $datetime1 = new DateTime('2009-10-11');
+//        $datetime2 = new DateTime('2009-10-13');
+//        $interval = $datetime1->diff($datetime2);
+//        echo $interval->format('%R%a days');
+    }
+
     /**
      * @return boolean weather or not this item spans exactly over a whole day
      */
@@ -754,6 +821,11 @@ class Task extends ContentActiveRecord implements Searchable
             ->execute();
     }
 
+    /**
+     * checks if a user is assigned to task
+     * @param User|null $user
+     * @return bool
+     */
     public function isUserAssigned(User $user = null)
     {
         if ($user === null) {
@@ -768,6 +840,11 @@ class Task extends ContentActiveRecord implements Searchable
 
     }
 
+    /**
+     * checks if a user is responsible for task
+     * @param User|null $user
+     * @return bool
+     */
     public function isUserResponsible(User $user = null)
     {
         if ($user === null) {

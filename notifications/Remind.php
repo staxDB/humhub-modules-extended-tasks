@@ -17,7 +17,7 @@ use yii\helpers\Html;
  *
  * @since 0.5
  */
-class Invite extends BaseNotification
+class Remind extends BaseNotification
 {
 
     /**
@@ -28,11 +28,28 @@ class Invite extends BaseNotification
     /**
      * @inheritdoc
      */
-    public $viewName = "invite";
+    public $viewName = "remind";
+
+    /**
+     *  @inheritdoc
+     */
+    public function category()
+    {
+        return new TaskNotificationCategory();
+    }
     
     public function html() {
-        return Yii::t('TaskModule.views_notifications_invited', '{userName} invited you to {task}.', [
-            '{userName}' => '<strong>' . Html::encode($this->originator->displayName) . '</strong>',
+        return Yii::t('TaskModule.notifications', 'You have to work on this {task}.', [
+            '{task}' => '<strong>' . $this->getContentInfo($this->source) . '</strong>'
+        ]);
+    }
+
+    /**
+     *  @inheritdoc
+     */
+    public function getMailSubject()
+    {
+        return Yii::t('TaskModule.notifications', 'You have to work on this {task}.', [
             '{task}' => '<strong>' . $this->getContentInfo($this->source) . '</strong>'
         ]);
     }
