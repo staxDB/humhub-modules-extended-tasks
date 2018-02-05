@@ -169,19 +169,25 @@ humhub.module('task', function (module, require, $) {
     Form.prototype.initScheduling = function(evt) {
         $schedulingTab = modal.global.$.find('.tab-scheduling');
         $checkBox = modal.global.$.find('#task-scheduling');
+        $calMode = modal.global.$.find('.field-task-cal_mode');
         if($checkBox.prop('checked')) {
             $schedulingTab.show();
+            $calMode.show();
         } else {
             $schedulingTab.hide();
+            $calMode.hide();
         }
     };
 
     Form.prototype.toggleScheduling = function(evt) {
         $schedulingTab = modal.global.$.find('.tab-scheduling');
+        $calMode = modal.global.$.find('.field-task-cal_mode');
         if (evt.$trigger.prop('checked')) {
             $schedulingTab.show();
+            $calMode.show();
         } else {
             $schedulingTab.hide();
+            $calMode.hide();
         }
     };
 

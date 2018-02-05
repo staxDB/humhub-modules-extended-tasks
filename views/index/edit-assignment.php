@@ -45,4 +45,5 @@ array_push($responsible, Yii::$app->user->getIdentity()); // add creator to resp
     <br>
     <?= $form->field($taskForm->task, 'cal_mode')->dropDownList($taskForm->task->getCalModeItems()) ?>
 
+
 </div>
