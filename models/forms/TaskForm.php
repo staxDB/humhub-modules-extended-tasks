@@ -40,11 +40,6 @@ class TaskForm extends Model
     public $task;
 
     /**
-     * @var integer TaskItem id used in case we shift an item to a new task
-     */
-    public $itemId;
-
-    /**
      * @var string start date submitted by user will be converted to db date format and timezone after validation
      */
     public $start_date;
@@ -115,7 +110,7 @@ class TaskForm extends Model
                 return $('#task-all_day').val() == 0;
             }"],
 
-            [['is_public', 'itemId'], 'integer'],
+            [['is_public'], 'integer'],
         ];
     }
 
@@ -175,10 +170,6 @@ class TaskForm extends Model
 
     public function getTitle()
     {
-//        if($this->itemId) {
-//            return Yii::t('TaskModule.base', '<strong>Shift</strong> agenda entry to new task');
-//        }
-
         if($this->task->isNewRecord) {
            return Yii::t('TaskModule.views_index_edit', '<strong>Create</strong> new task');
         }
@@ -331,7 +322,6 @@ class TaskForm extends Model
     {
         return $this->task->content->container->createUrl('/task/index/edit', [
             'id' => $this->task->id,
-            'itemId' => $this->itemId,
             'cal' => $this->cal
         ]);
     }

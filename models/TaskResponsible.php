@@ -56,4 +56,9 @@ class TaskResponsible extends ActiveRecord
         return null;
     }
 
+    public function getTask()
+    {
+        return $this->hasOne(Task::class, ['id' => 'task_id']);
+    }
+
 }

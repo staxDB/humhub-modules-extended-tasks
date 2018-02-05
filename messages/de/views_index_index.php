@@ -9,6 +9,7 @@ return array (
     'Description' => 'Beschreibung',
     'Checklist' => 'Checkliste',
     'Assigned' => 'Zugewiesen',
+    'Anyone can work on this task' => 'Jeder kann an dieser Aufgabe arbeiten',
     'Responsible' => 'Verantwortlich',
 
     // Badge

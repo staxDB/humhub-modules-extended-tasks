@@ -18,6 +18,7 @@ return array (
     //edit-assignment
     'Assign users' => 'Benutzer zuordnen',
     'Add responsible users' => 'Verantwortliche Benutzer hinzufügen',
+    'Leave empty to let anyone work on this task.' => 'Leer lassen, um jeden an dieser Aufgabe arbeiten zu lassen.',
 
     // Task-Form
     '<strong>Create</strong> new task' => '<strong>Erstelle</strong> neue Aufgabe',

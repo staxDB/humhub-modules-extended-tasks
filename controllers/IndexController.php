@@ -83,7 +83,7 @@ class IndexController extends ContentContainerController
             throw new HttpException(404);
         }
 
-        if(!$task->content->canView() && !$task->isTaskAssigned()) {
+        if( !$task->content->canView() && !($task->isTaskAssigned() || $task->isTaskResponsible()) ) {
             throw new HttpException(403);
         }
 
@@ -194,12 +194,11 @@ class IndexController extends ContentContainerController
     public function actionEdit($id = null, $itemId = null, $cal = false)
     {
         if (!$id) {
-            $taskForm = new TaskForm(['itemId' => $itemId, 'cal' => $cal]);
+            $taskForm = new TaskForm(['cal' => $cal]);
             $taskForm->createNew($this->contentContainer);
         } else {
             $taskForm = new TaskForm([
                 'task' => Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one(),
-                'itemId' => $itemId,
                 'cal' => $cal
             ]);
         }
@@ -342,8 +341,7 @@ class IndexController extends ContentContainerController
         $task = $this->getTaskByParameter();
 
         if (!$task->canCheckItems())
-            $this->view->error(Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
-//        throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
 
         $items = Yii::$app->request->post('item');
 
@@ -360,11 +358,8 @@ class IndexController extends ContentContainerController
         $task->resetItems();
         $task->confirm($results);
 
-        if ($task->status === Task::STATUS_PENDING) {
+        if ($task->status === Task::STATUS_PENDING)
             $task->changeStatus(Task::STATUS_IN_PROGRESS);
-            $this->view->success(Yii::t('TaskModule.results', 'Success'));
-            return $this->redirect($this->contentContainer->createUrl('/task/index/view', ['id' => $task->id]));
-        }
 
         return $this->render("task", [
             'task' => $task,
@@ -383,7 +378,7 @@ class IndexController extends ContentContainerController
             throw new HttpException(404);
         }
 
-        if(!$task->content->canView() && !$task->isTaskAssigned()) {
+        if(!$task->content->canView() && !$task->canChangeStatus()) {
             throw new HttpException(403);
         }
 

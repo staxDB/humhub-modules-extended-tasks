@@ -286,6 +286,10 @@ class Task extends ContentActiveRecord implements Searchable
         if ($this->all_day == 0 && CalendarUtils::isFullDaySpan(new DateTime($this->start_datetime), new DateTime($this->end_datetime))) {
             $this->all_day = 1;
         }
+        if (!$this->scheduling) {
+            $this->start_datetime = new Expression("NULL");
+            $this->end_datetime = new Expression("NULL");
+        }
 
         return parent::beforeSave($insert);
     }
@@ -301,6 +305,14 @@ class Task extends ContentActiveRecord implements Searchable
 
         foreach (TaskAssigned::findAll(['task_id' => $this->id]) as $taskAssigned) {
             $taskAssigned->delete();
+        }
+
+        foreach (TaskResponsible::findAll(['task_id' => $this->id]) as $taskResponsible) {
+            $taskResponsible->delete();
+        }
+
+        foreach (TaskReminder::findAll(['task_id' => $this->id]) as $taskReminder) {
+            $taskReminder->delete();
         }
 
         return parent::beforeDelete();
@@ -789,7 +801,20 @@ class Task extends ContentActiveRecord implements Searchable
 
 
 
+    public function isCompleted()
+    {
+        return ($this->status === self::STATUS_COMPLETED);
+    }
 
+    public function isPending()
+    {
+        return ($this->status === self::STATUS_PENDING);
+    }
+
+    public function canAnyoneProcessTask()
+    {
+        return (!$this->hasTaskAssigned());
+    }
 
     /**
      * handle task specific permissions
@@ -797,7 +822,7 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function canCheckItems()
     {
-        return (self::isTaskResponsible() || self::isTaskAssigned());
+        return ( (self::isTaskResponsible() || self::isTaskAssigned() || self::canAnyoneProcessTask()) && ( !(self::isCompleted() || self::isPending()) ) );
     }
 
     /**
@@ -806,12 +831,11 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function canChangeStatus()
     {
-//        return (self::isTaskResponsible() || self::isTaskAssigned() || $this->content->canEdit());
-        return (self::isTaskResponsible() || self::isTaskAssigned());
+        return ( (self::isTaskResponsible() || self::isTaskAssigned() || self::canAnyoneProcessTask()) && !(self::isCompleted()) );
     }
 
     /**
-     * handle task specific permissions
+     * Only responsible users can review task
      * @return bool
      */
     public function canReviewTask()
@@ -825,7 +849,7 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function canSeeStatusButton()
     {
-        if ($this->status === self::STATUS_COMPLETED)
+        if ($this->isCompleted())
             return false;
         elseif ($this->review)
             return $this->canReviewTask();

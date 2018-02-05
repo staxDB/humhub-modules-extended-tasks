@@ -20,14 +20,15 @@ array_push($responsible, Yii::$app->user->getIdentity()); // add creator to resp
 <div class="modal-body">
 
     <?= $form->field($taskForm->task, 'assignedUsers')->widget(UserPickerField::class, [
-        'id' => 'taskUserPicker',
+        'id' => 'taskAssignedUserPicker',
         'selection' => $taskForm->task->taskAssignedUsers,
         'url' => $taskForm->getTaskAssignedPickerUrl(),
         'placeholder' => Yii::t('TaskModule.views_index_edit', 'Assign users')
-    ]) ?>
+    ])->hint(Yii::t('TaskModule.views_index_edit', 'Leave empty to let anyone work on this task.'),[]) ?>
 
-    <?= Link::userPickerSelfSelect('#taskUserPicker'); ?>
+    <?= Link::userPickerSelfSelect('#taskAssignedUserPicker'); ?>
 
+    <br>
 
     <?= $form->field($taskForm->task, 'responsibleUsers')->widget(UserPickerField::class, [
         'id' => 'taskResponsibleUserPicker',

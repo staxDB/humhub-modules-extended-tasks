@@ -9,6 +9,11 @@
 namespace humhub\modules\task;
 
 //use humhub\modules\task\integration\calendar\TaskCalendar;
+use humhub\modules\task\models\Task;
+use humhub\modules\task\models\TaskAssigned;
+use humhub\modules\task\models\TaskItem;
+use humhub\modules\task\models\TaskReminder;
+use humhub\modules\task\models\TaskResponsible;
 use Yii;
 use yii\base\Object;
 
@@ -60,6 +65,64 @@ class Events extends Object
                 'icon' => '<i class="fa fa-tasks"></i>',
                 'isActive' => (Yii::$app->controller->module && Yii::$app->controller->module->id == 'task'),
             ]);
+        }
+    }
+
+    /**
+     * Callback to validate module database records.
+     *
+     * @param Event $event
+     * @throws \Exception
+     */
+    public static function onIntegrityCheck($event)
+    {
+        $integrityController = $event->sender;
+        $integrityController->showTestHeadline("Tasks Module - Entries (" . Task::find()->count() . " entries)");
+
+        // check for taskItems without task
+        foreach (TaskItem::find()->all() as $taskItem) {
+            if ($taskItem->task === null) {
+                if ($integrityController->showFix("Deleting task item id " . $taskItem->id . " without existing task!")) {
+                    $taskItem->delete();
+                }
+            }
+        }
+
+        // check for task responsible users without task or existing user
+        foreach (TaskResponsible::find()->all() as $taskResponsible) {
+            if ($taskResponsible->task === null) {
+                if ($integrityController->showFix("Deleting task responsible user id " . $taskResponsible->id . " without existing task!")) {
+                    $taskResponsible->delete();
+                }
+            }
+            if ($taskResponsible->user === null) {
+                if ($integrityController->showFix("Deleting task responsible user id " . $taskResponsible->id . " without existing user!")) {
+                    $taskResponsible->delete();
+                }
+            }
+        }
+
+        // check for task assigned users without task or existing user
+        foreach (TaskAssigned::find()->all() as $taskAssigned) {
+            if ($taskAssigned->task === null) {
+                if ($integrityController->showFix("Deleting task assigned user id " . $taskAssigned->id . " without existing task!")) {
+                    $taskAssigned->delete();
+                }
+            }
+            if ($taskAssigned->user === null) {
+                if ($integrityController->showFix("Deleting task assigned user id " . $taskAssigned->id . " without existing user!")) {
+                    $taskAssigned->delete();
+                }
+            }
+        }
+
+        // check for task reminders without task
+        foreach (TaskReminder::find()->all() as $taskReminder) {
+            if ($taskReminder->task === null) {
+                if ($integrityController->showFix("Deleting task reminder id " . $taskReminder->id . " without existing task!")) {
+                    $taskReminder->delete();
+                }
+            }
         }
     }
 

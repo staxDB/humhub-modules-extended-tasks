@@ -17,7 +17,7 @@ $icon = 'fa-calendar-o';
 $backUrl = $this->context->contentContainer->createUrl('/task/index');
 
 
-$participantStyle = 'display:inline-block;' ;
+$participantStyle = 'display:inline-block;';
 
 ?>
 <div class="panel-heading clearfix">
@@ -33,11 +33,11 @@ $participantStyle = 'display:inline-block;' ;
         <div class="col-sm-12 media">
             <div class="media-body clearfix">
                 <?php if ($task->scheduling) : ?>
-                <h2 style="margin:5px 0 0 0;">
-                    <?= $task->getFormattedStartDateTime(); ?>
-                    -
-                    <?= $task->getFormattedEndDateTime(); ?>
-                </h2>
+                    <h2 style="margin:5px 0 0 0;">
+                        <?= $task->getFormattedStartDateTime(); ?>
+                        -
+                        <?= $task->getFormattedEndDateTime(); ?>
+                    </h2>
                 <?php endif; ?>
                 <span class="author">
                     <?= Html::containerLink($task->content->createdBy); ?>
@@ -57,34 +57,42 @@ $participantStyle = 'display:inline-block;' ;
 
             </div>
 
-<!--        Assigned Task User-->
+            <!--        Assigned Task User-->
             <?php if ($task->hasTaskAssigned()) : ?>
-            <div>
-                <div style="<?= $participantStyle ?>">
-                    <em><strong><?= Yii::t('TaskModule.views_index_index', 'Assigned') ?>:</strong></em><br>
-                    <?php foreach ($task->taskAssignedUsers as $user) : ?>
-                        <a href="<?= $user->getUrl(); ?>">
-                            <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
-                        </a>
-                    <?php endforeach; ?>
+                <div>
+                    <div style="<?= $participantStyle ?>">
+                        <em><strong><?= Yii::t('TaskModule.views_index_index', 'Assigned') ?>:</strong></em><br>
+                        <?php foreach ($task->taskAssignedUsers as $user) : ?>
+                            <a href="<?= $user->getUrl(); ?>">
+                                <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
+            <?php else : ?>
+                <div>
+                    <div style="<?= $participantStyle ?>">
+                        <em><strong><?= Yii::t('TaskModule.views_index_index', 'Assigned') ?>:</strong></em><br>
+                        <div class="assigned-anyone">
+                            <?= Yii::t('TaskModule.views_index_index', 'Anyone can work on this task') ?>
+                        </div>
+                    </div>
+                </div>
             <?php endif ?>
 
-<!--        Responsible Task User-->
+            <!--        Responsible Task User-->
             <?php if ($task->hasTaskResponsible()) : ?>
                 <div>
-                <div style="<?= $participantStyle ?>">
-                    <em><strong><?= Yii::t('TaskModule.views_index_index', 'Responsible') ?>:</strong></em><br>
-                    <?php foreach ($task->taskResponsibleUsers as $user) : ?>
-                        <a href="<?= $user->getUrl(); ?>">
-                            <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
-                        </a>
-                    <?php endforeach; ?>
+                    <div style="<?= $participantStyle ?>">
+                        <em><strong><?= Yii::t('TaskModule.views_index_index', 'Responsible') ?>:</strong></em><br>
+                        <?php foreach ($task->taskResponsibleUsers as $user) : ?>
+                            <a href="<?= $user->getUrl(); ?>">
+                                <?= \humhub\modules\user\widgets\Image::widget(['user' => $user, 'width' => 24, 'showTooltip' => true]) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
             <?php endif ?>
-
 
 
         </div>
