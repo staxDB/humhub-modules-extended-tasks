@@ -1,7 +1,7 @@
 ## Installation
 
-- Download the [Latest Release](https://github.com/staxDB/task/releases/latest) and upload contents to **/protected/modules/task**
-- or simply clone this repo by `git clone https://github.com/staxDB/task.git` into **/protected/modules**
+- Download the [Latest Release](https://github.com/staxDB/tasks/releases/latest) and upload contents to **/protected/modules/task**
+- or simply clone this repo by `git clone https://github.com/staxDB/tasks.git` into **/protected/modules**
 
 then go to `Administration -> Modules` and **Enable** the **Tasks** module.
 
