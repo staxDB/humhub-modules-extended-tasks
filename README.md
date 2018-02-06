@@ -7,7 +7,7 @@ then go to `Administration -> Modules` and **Enable** the **Tasks** module.
 
 **_Note:_** You should also enable the module on each Space (settings) you wan't to use it.
 
-> warning: this module is a **revised version** of the Tasks module and **uses the same table names!** Therefore, the old task module **MUST be uninstalled** first.
+> **_Warning:_** this module is a **revised version** of the Tasks module and **uses the same table names!** Therefore, the old task module **MUST be uninstalled** first.
 
 
 ## Description
