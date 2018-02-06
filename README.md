@@ -12,14 +12,14 @@ then go to `Administration -> Modules` and **Enable** the **Tasks** module.
 ## Description
 This task manager is a complete revision of the simple original task module and provides advanced features.
 
-DECIDE
+DECIDE  
 You decide who is allowed to work on a task and who is not. You also assign responsible persons.
 
 STAY INFORMED  
 Keep responsible users up to date when task status gets changed. Before completing a task, responsible persons will be informed to review the task (if review is checked).
 Reminders can also be created.
 
-KEEPING AN OVERVIEW
+KEEPING AN OVERVIEW  
 Add tasks either to the assigned & responsible users calendar or add it to the space calendar.
 
 TODO
