@@ -153,12 +153,14 @@ class TaskReminder extends ActiveRecord
         }
     }
 
-    public function canSendRemind(DateTime $now, DateTime $dateTime /* start_datetime or end_datetime */, $allday = false)
+    public function canSendRemind(DateTime $now, DateTime $dateTime, $allday = false)
     {
         if ($now === '' || $dateTime === '')
             return false;
 
         $modifiedTime = clone $dateTime;
+
+//        echo ($now->format('Y-m-d H:i:s') . ', ' . $dateTime->format('Y-m-d H:i:s') . ', allday=' . $allday);
 
         if ($allday) {
             $dateTime = $dateTime->setTime('23', '59', '59');
@@ -200,6 +202,7 @@ class TaskReminder extends ActiveRecord
 
 
 
+//        echo ($modifiedTime->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s') . ' <= ' . $dateTime->format('Y-m-d H:i:s'));
 //        echo ($dateTime->format('Y-m-d H:i:s') . ' >= ' . $now->format('Y-m-d H:i:s') . ' && ' . $modifiedTime->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s'));
 //        echo ('true = '. ($dateTime > $now && $modifiedTime <= $now));
 //        die();
@@ -215,10 +218,10 @@ class TaskReminder extends ActiveRecord
         if (!$this->start_reminder_sent) {
             if (self::canSendRemind($now, $task->getStartDateTime(), $task->isAllDay())) {
                 if ($task->hasTaskAssigned()) {
-                    $task->remindAssignedUser();
+                    $task->remindAssignedUserOfStart();
                 }
                 if ($task->hasTaskResponsible()) {
-                    $task->remindResponsibleUser();
+                    $task->remindResponsibleUserOfStart();
                 }
                 $this->updateAttributes(['start_reminder_sent' => 1]);
             }
@@ -229,10 +232,10 @@ class TaskReminder extends ActiveRecord
         if (!$this->end_reminder_sent) {
             if (self::canSendRemind($now, $task->getEndDateTime(), $task->isAllDay())) {
                 if ($task->hasTaskAssigned()) {
-                    $task->remindAssignedUser();
+                    $task->remindAssignedUserOfEnd();
                 }
                 if ($task->hasTaskResponsible()) {
-                    $task->remindResponsibleUser();
+                    $task->remindResponsibleUserOfEnd();
                 }
                 $this->updateAttributes(['end_reminder_sent' => 1]);
             }

@@ -2,7 +2,10 @@
 
 namespace humhub\modules\task\models;
 
-use humhub\modules\task\notifications\Remind;
+use humhub\modules\task\notifications\RemindAssignedEnd;
+use humhub\modules\task\notifications\RemindAssignedStart;
+use humhub\modules\task\notifications\RemindResponsibleStart;
+use humhub\modules\task\notifications\RemindResponsibleEnd;
 use Yii;
 use DateInterval;
 use DateTime;
@@ -632,9 +635,9 @@ class Task extends ContentActiveRecord implements Searchable
     /**
      * Remind users
      */
-    public function remindAssignedUser()
+    public function remindAssignedUserOfStart()
     {
-        Remind::instance()
+        RemindAssignedStart::instance()
             ->from($this->content->user)
             ->about($this)
             ->sendBulk($this->taskAssignedUsers);
@@ -643,12 +646,34 @@ class Task extends ContentActiveRecord implements Searchable
     /**
      * Remind users
      */
-    public function remindResponsibleUser()
+    public function remindAssignedUserOfEnd()
     {
-        Remind::instance()
+        RemindAssignedEnd::instance()
             ->from($this->content->user)
             ->about($this)
-            ->sendBulk($this->taskResponsibleUsers);
+            ->sendBulk($this->taskAssignedUsers);
+    }
+
+    /**
+     * Remind users
+     */
+    public function remindResponsibleUserOfStart()
+    {
+        RemindResponsibleStart::instance()
+            ->from($this->content->user)
+            ->about($this)
+            ->sendBulk($this->taskAssignedUsers);
+    }
+
+    /**
+     * Remind users
+     */
+    public function remindResponsibleUserOfEnd()
+    {
+        RemindResponsibleEnd::instance()
+            ->from($this->content->user)
+            ->about($this)
+            ->sendBulk($this->taskAssignedUsers);
     }
 
 //
