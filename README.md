@@ -24,6 +24,9 @@ Add tasks either to the assigned & responsible users calendar or add it to the s
 
 TODO
 - add (multiple) reminder(s)
+- add a repeat-function
+    - recalculate the time period
+    - before a task will be reset, check if it is completed --> if not, notify assigned and responsible users and do not reset the task (skip repeat)!
 - add TaskResults (add text or upload files) for users who are assigned / responsible
 - add to (assigned & responsible) user profile calendar!!
 - prevent guest users & Non-Space-Members working on task
