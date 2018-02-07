@@ -44,7 +44,11 @@ class m180114_210903_initial extends humhub\components\Migration
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'remind_mode' => 'tinyint(4) DEFAULT 0',
+            'start_reminder_sent' => 'tinyint(4) NOT NULL DEFAULT 0',
+            'end_reminder_sent' => 'tinyint(4) NOT NULL DEFAULT 0'
         ), '');
+
+
     }
 
     public function down()

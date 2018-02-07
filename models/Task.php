@@ -2,6 +2,7 @@
 
 namespace humhub\modules\task\models;
 
+use humhub\modules\task\notifications\Remind;
 use Yii;
 use DateInterval;
 use DateTime;
@@ -626,6 +627,28 @@ class Task extends ContentActiveRecord implements Searchable
     {
         // Todo
 //        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->assignedUsers);
+    }
+
+    /**
+     * Remind users
+     */
+    public function remindAssignedUser()
+    {
+        Remind::instance()
+            ->from($this->content->user)
+            ->about($this)
+            ->sendBulk($this->taskAssignedUsers);
+    }
+
+    /**
+     * Remind users
+     */
+    public function remindResponsibleUser()
+    {
+        Remind::instance()
+            ->from($this->content->user)
+            ->about($this)
+            ->sendBulk($this->taskResponsibleUsers);
     }
 
 //

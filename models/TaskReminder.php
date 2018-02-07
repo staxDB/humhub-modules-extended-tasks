@@ -14,6 +14,8 @@ use humhub\modules\user\models\User;
  * @property integer $id
  * @property integer $task_id
  * @property integer $remind_mode
+ * @property integer $start_reminder_sent
+ * @property integer $end_reminder_sent
  */
 class TaskReminder extends ActiveRecord
 {
@@ -69,7 +71,7 @@ class TaskReminder extends ActiveRecord
     {
         return [
             [['task_id', 'remind_mode'], 'required'],
-            [['task_id'], 'integer'],
+            [['task_id', 'start_reminder_sent', 'end_reminder_sent'], 'integer'],
             [['remind_mode'], 'in', 'range' => self::$remindModes],
         ];
     }
@@ -90,8 +92,9 @@ class TaskReminder extends ActiveRecord
     {
         return [
             'id' => 'ID',
-            'task_id' => Yii::t('TaskModule.models_taskreminder', 'Task'),
-            'remind_mode' => Yii::t('TaskModule.models_taskreminder', 'Remind Mode'),
+            'task_id' => Yii::t('TaskModule.models_taskReminder', 'Task'),
+            'remind_mode' => Yii::t('TaskModule.models_taskReminder', 'Remind Mode'),
+            'remind_sent' => Yii::t('TaskModule.models_task', 'Reminder sent'),
         ];
     }
 
@@ -103,15 +106,15 @@ class TaskReminder extends ActiveRecord
     public static function getRemindModeItems()
     {
         return [
-            self::REMIND_NONE => Yii::t('TaskModule.models_taskreminder', 'Do not remind'),
-            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskreminder', 'About 1 Hour before'),
-            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskreminder', 'About 2 Hours before'),
-            self::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskreminder', '1 Day before'),
-            self::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskreminder', '2 Days before'),
-            self::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskreminder', '1 Week before'),
-            self::REMIND_TWO_WEEKS => Yii::t('TaskModule.models_taskreminder', '2 Weeks before'),
-            self::REMIND_THREE_WEEKS => Yii::t('TaskModule.models_taskreminder', '3 Weeks before'),
-            self::REMIND_ONE_MONTH => Yii::t('TaskModule.models_taskreminder', '1 Month before'),
+            self::REMIND_NONE => Yii::t('TaskModule.models_taskReminder', 'Do not remind'),
+            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskReminder', 'About 1 Hour before'),
+            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskReminder', 'About 2 Hours before'),
+            self::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskReminder', '1 Day before'),
+            self::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskReminder', '2 Days before'),
+            self::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskReminder', '1 Week before'),
+            self::REMIND_TWO_WEEKS => Yii::t('TaskModule.models_taskReminder', '2 Weeks before'),
+            self::REMIND_THREE_WEEKS => Yii::t('TaskModule.models_taskReminder', '3 Weeks before'),
+            self::REMIND_ONE_MONTH => Yii::t('TaskModule.models_taskReminder', '1 Month before'),
         ];
     }
 
@@ -119,34 +122,122 @@ class TaskReminder extends ActiveRecord
     {
         switch ($this->remind_mode){
             case (self::REMIND_NONE):
-                return Yii::t('TaskModule.models_taskreminder', 'Do not remind');
+                return Yii::t('TaskModule.models_taskReminder', 'Do not remind');
                 break;
             case (self::REMIND_ONE_HOUR):
-                return Yii::t('TaskModule.models_taskreminder', 'About 1 Hour before');
+                return Yii::t('TaskModule.models_taskReminder', 'About 1 Hour before');
                 break;
             case (self::REMIND_TWO_HOURS):
-                return Yii::t('TaskModule.models_taskreminder', 'About 2 Hours before');
+                return Yii::t('TaskModule.models_taskReminder', 'About 2 Hours before');
                 break;
             case (self::REMIND_ONE_DAY):
-                return Yii::t('TaskModule.models_taskreminder', '1 Day before');
+                return Yii::t('TaskModule.models_taskReminder', '1 Day before');
                 break;
             case (self::REMIND_TWO_DAYS):
-                return Yii::t('TaskModule.models_taskreminder', '2 Days before');
+                return Yii::t('TaskModule.models_taskReminder', '2 Days before');
                 break;
             case (self::REMIND_ONE_WEEK):
-                return Yii::t('TaskModule.models_taskreminder', '1 Week before');
+                return Yii::t('TaskModule.models_taskReminder', '1 Week before');
                 break;
             case (self::REMIND_TWO_WEEKS):
-                return Yii::t('TaskModule.models_taskreminder', '2 Weeks before');
+                return Yii::t('TaskModule.models_taskReminder', '2 Weeks before');
                 break;
             case (self::REMIND_THREE_WEEKS):
-                return Yii::t('TaskModule.models_taskreminder', '3 Weeks before');
+                return Yii::t('TaskModule.models_taskReminder', '3 Weeks before');
                 break;
             case (self::REMIND_ONE_MONTH):
-                return Yii::t('TaskModule.models_taskreminder', '1 Month before');
+                return Yii::t('TaskModule.models_taskReminder', '1 Month before');
                 break;
             default:
                 return;
         }
+    }
+
+    public function canSendRemind(DateTime $now, DateTime $dateTime /* start_datetime or end_datetime */, $allday = false)
+    {
+        if ($now === '' || $dateTime === '')
+            return false;
+
+        $modifiedTime = clone $dateTime;
+
+        if ($allday) {
+            $dateTime = $dateTime->setTime('23', '59', '59');
+            $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+        }
+
+        switch ($this->remind_mode) {
+            case self::REMIND_NONE :
+                return false;
+                break;
+            case self::REMIND_ONE_HOUR :
+                $modifiedTime = $modifiedTime->modify('-1 hour');
+                break;
+            case self::REMIND_TWO_HOURS :
+                $modifiedTime = $modifiedTime->modify('-2 hour');
+                break;
+            case self::REMIND_ONE_DAY :
+                $modifiedTime = $modifiedTime->modify('-1 day');
+                break;
+            case self::REMIND_TWO_DAYS :
+                $modifiedTime = $modifiedTime->modify('-2 days');
+                break;
+            case self::REMIND_ONE_WEEK :
+                $modifiedTime = $modifiedTime->modify('-1 week');
+                break;
+            case self::REMIND_TWO_WEEKS :
+                $modifiedTime = $modifiedTime->modify('-2 weeks');
+                break;
+            case self::REMIND_THREE_WEEKS :
+                $modifiedTime = $modifiedTime->modify('-3 weeks');
+                break;
+            case self::REMIND_ONE_MONTH :
+                $modifiedTime = $modifiedTime->modify('-1 month');
+                break;
+            default:
+                return false;
+                break;
+        }
+
+
+
+//        echo ($dateTime->format('Y-m-d H:i:s') . ' >= ' . $now->format('Y-m-d H:i:s') . ' && ' . $modifiedTime->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s'));
+//        echo ('true = '. ($dateTime > $now && $modifiedTime <= $now));
+//        die();
+
+        if ($dateTime > $now && $modifiedTime <= $now)
+            return true;
+        else
+            return false;
+    }
+
+    public function handleRemind(DateTime $now, Task $task)
+    {
+        if (!$this->start_reminder_sent) {
+            if (self::canSendRemind($now, $task->getStartDateTime(), $task->isAllDay())) {
+                if ($task->hasTaskAssigned()) {
+                    $task->remindAssignedUser();
+                }
+                if ($task->hasTaskResponsible()) {
+                    $task->remindResponsibleUser();
+                }
+                $this->updateAttributes(['start_reminder_sent' => 1]);
+            }
+        }
+        elseif ($task->getStartDateTime() < $now)
+            $this->updateAttributes(['start_reminder_sent' => 1]);
+
+        if (!$this->end_reminder_sent) {
+            if (self::canSendRemind($now, $task->getEndDateTime(), $task->isAllDay())) {
+                if ($task->hasTaskAssigned()) {
+                    $task->remindAssignedUser();
+                }
+                if ($task->hasTaskResponsible()) {
+                    $task->remindResponsibleUser();
+                }
+                $this->updateAttributes(['end_reminder_sent' => 1]);
+            }
+        }
+        elseif ($task->getStartDateTime() < $now)
+            $this->updateAttributes(['end_reminder_sent' => 1]);
     }
 }

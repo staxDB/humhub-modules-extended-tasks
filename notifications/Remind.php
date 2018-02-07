@@ -10,6 +10,7 @@ namespace humhub\modules\task\notifications;
 
 use Yii;
 use humhub\modules\notification\components\BaseNotification;
+use humhub\modules\space\models\Space;
 use yii\helpers\Html;
 
 /**
@@ -19,6 +20,10 @@ use yii\helpers\Html;
  */
 class Remind extends BaseNotification
 {
+    /**
+     * @inheritdoc
+     */
+//    public $suppressSendToOriginator = false;
 
     /**
      * @inheritdoc
@@ -28,29 +33,48 @@ class Remind extends BaseNotification
     /**
      * @inheritdoc
      */
-    public $viewName = "remind";
+    public $viewName = "taskNotification";
 
     /**
-     *  @inheritdoc
+     * @inheritdoc
      */
     public function category()
     {
         return new TaskNotificationCategory();
     }
-    
-    public function html() {
-        return Yii::t('TaskModule.notifications', 'You have to work on this {task}.', [
-            '{task}' => '<strong>' . $this->getContentInfo($this->source) . '</strong>'
-        ]);
+
+    public function html()
+    {
+        if ($this->source->content->container instanceof Space) {
+            return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName}.', [
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
+                '{spaceName}' => Html::encode($this->source->content->container->displayName)
+            ]);
+        } else {
+            return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task}.', [
+                'displayName' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{task}' => '<strong>' . $this->getContentInfo($this->source, false) . '</strong>',
+            ]);
+        }
     }
 
     /**
-     *  @inheritdoc
+     * @inheritdoc
      */
     public function getMailSubject()
     {
-        return Yii::t('TaskModule.notifications', 'You have to work on this {task}.', [
-            '{task}' => '<strong>' . $this->getContentInfo($this->source) . '</strong>'
-        ]);
+        if ($this->source->content->container instanceof Space) {
+            return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName}.', [
+                '{displayName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{task}' => '<strong>' . $this->getContentInfo($this->source, false) . '</strong>',
+                '{spaceName}' => Html::encode($this->source->content->container->displayName)
+            ]);
+        } else {
+            return Yii::t('TaskModule.notifications', '{userName} reminds you to work on this {task}.', [
+                '{displayName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{task}' => '<strong>' . $this->getContentInfo($this->source, false) . '</strong>'
+            ]);
+        }
     }
 }

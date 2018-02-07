@@ -14,6 +14,7 @@ use humhub\components\ActiveRecord;
  * @property integer $task_id
  * @property integer $user_id
  */
+
 class TaskAssigned extends ActiveRecord
 {
 

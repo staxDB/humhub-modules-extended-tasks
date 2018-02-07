@@ -9,6 +9,7 @@
 namespace humhub\modules\task;
 
 //use humhub\modules\task\integration\calendar\TaskCalendar;
+use humhub\modules\task\jobs\SendReminder;
 use humhub\modules\task\models\Task;
 use humhub\modules\task\models\TaskAssigned;
 use humhub\modules\task\models\TaskItem;
@@ -124,6 +125,17 @@ class Events extends Object
                 }
             }
         }
+    }
+
+
+    public static function onCronRun($event)
+    {
+        if (Yii::$app->controller->action->id == 'hourly') {
+            Yii::$app->queue->push( new SendReminder());
+        }
+//        if (Yii::$app->controller->action->id == 'hourly') {
+//            Yii::$app->queue->push( new SendReminder() );
+//        }
     }
 
 }
