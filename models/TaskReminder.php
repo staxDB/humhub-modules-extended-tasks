@@ -30,27 +30,21 @@ class TaskReminder extends ActiveRecord
     /**
      * Remind Mode
      */
-    const REMIND_ON_EVENT = 0;
-    const REMIND_FIVE_MIN = 1;
-    const REMIND_FIFTEEN_MIN = 2;
-    const REMIND_THIRTY_MIN = 3;
-    const REMIND_ONE_HOUR = 4;
-    const REMIND_TWO_HOURS = 5;
-    const REMIND_ONE_DAY = 6;
-    const REMIND_TWO_DAYS = 7;
-    const REMIND_ONE_WEEK = 8;
-    const REMIND_TWO_WEEKS = 9;
-    const REMIND_THREE_WEEKS = 10;
-    const REMIND_ONE_MONTH = 11;
+    const REMIND_NONE = 0;
+    const REMIND_ONE_HOUR = 1;
+    const REMIND_TWO_HOURS = 2;
+    const REMIND_ONE_DAY = 3;
+    const REMIND_TWO_DAYS = 4;
+    const REMIND_ONE_WEEK = 5;
+    const REMIND_TWO_WEEKS = 6;
+    const REMIND_THREE_WEEKS = 7;
+    const REMIND_ONE_MONTH = 8;
 
     /**
      * @var array all given remind modes as array
      */
     public static $remindModes = [
-        self::REMIND_ON_EVENT,
-        self::REMIND_FIVE_MIN,
-        self::REMIND_FIFTEEN_MIN,
-        self::REMIND_THIRTY_MIN,
+        self::REMIND_NONE,
         self::REMIND_ONE_HOUR,
         self::REMIND_TWO_HOURS,
         self::REMIND_ONE_DAY,
@@ -109,12 +103,9 @@ class TaskReminder extends ActiveRecord
     public static function getRemindModeItems()
     {
         return [
-            self::REMIND_ON_EVENT => Yii::t('TaskModule.models_taskreminder', 'Remind on Deadline'),
-            self::REMIND_FIVE_MIN => Yii::t('TaskModule.models_taskreminder', '5 Minutes before'),
-            self::REMIND_FIFTEEN_MIN => Yii::t('TaskModule.models_taskreminder', '15 Minutes before'),
-            self::REMIND_THIRTY_MIN => Yii::t('TaskModule.models_taskreminder', '30 Minutes before'),
-            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskreminder', '1 Hour before'),
-            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskreminder', '2 Hours before'),
+            self::REMIND_NONE => Yii::t('TaskModule.models_taskreminder', 'Do not remind'),
+            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskreminder', 'About 1 Hour before'),
+            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskreminder', 'About 2 Hours before'),
             self::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskreminder', '1 Day before'),
             self::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskreminder', '2 Days before'),
             self::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskreminder', '1 Week before'),
@@ -127,23 +118,14 @@ class TaskReminder extends ActiveRecord
     public function getRemindMode()
     {
         switch ($this->remind_mode){
-            case (self::REMIND_ON_EVENT):
-                return Yii::t('TaskModule.models_taskreminder', 'Remind on Deadline');
-                break;
-            case (self::REMIND_FIVE_MIN):
-                return Yii::t('TaskModule.models_taskreminder', '5 Minutes before');
-                break;
-            case (self::REMIND_FIFTEEN_MIN):
-                return Yii::t('TaskModule.models_taskreminder', '15 Minutes before');
-                break;
-            case (self::REMIND_THIRTY_MIN):
-                return Yii::t('TaskModule.models_taskreminder', '30 Minutes before');
+            case (self::REMIND_NONE):
+                return Yii::t('TaskModule.models_taskreminder', 'Do not remind');
                 break;
             case (self::REMIND_ONE_HOUR):
-                return Yii::t('TaskModule.models_taskreminder', '1 Hour before');
+                return Yii::t('TaskModule.models_taskreminder', 'About 1 Hour before');
                 break;
             case (self::REMIND_TWO_HOURS):
-                return Yii::t('TaskModule.models_taskreminder', '2 Hours before');
+                return Yii::t('TaskModule.models_taskreminder', 'About 2 Hours before');
                 break;
             case (self::REMIND_ONE_DAY):
                 return Yii::t('TaskModule.models_taskreminder', '1 Day before');
