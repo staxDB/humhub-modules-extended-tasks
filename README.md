@@ -24,6 +24,7 @@ Add tasks either to the assigned & responsible users calendar or add it to the s
 
 TODO
 - add (multiple) reminder(s)
+    - prevent a user who is responsible and assigned from receiving double notification!
 - add a repeat-function
     - recalculate the time period
     - before a task will be reset, check if it is completed --> if not, notify assigned and responsible users and do not reset the task (skip repeat)!
