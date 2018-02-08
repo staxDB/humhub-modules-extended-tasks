@@ -54,7 +54,7 @@ class RemindResponsibleEnd extends BaseNotification
             ]);
         } else {
             return Yii::t('TaskModule.notifications', '{userName}, task {task} ends at {dateTime}.', [
-                'displayName' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
                 '{dateTime}' => Html::encode($this->source->formattedEndDateTime)
             ]);
@@ -68,14 +68,14 @@ class RemindResponsibleEnd extends BaseNotification
     {
         if ($this->source->content->container instanceof Space) {
             return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} ends at {dateTime}.', [
-                '{displayName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
                 '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
                 '{dateTime}' => Html::encode($this->source->formattedEndDateTime)
             ]);
         } else {
             return Yii::t('TaskModule.notifications', '{userName}, task {task} ends at {dateTime}.', [
-                '{displayName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
                 '{dateTime}' => Html::encode($this->source->formattedEndDateTime)
             ]);

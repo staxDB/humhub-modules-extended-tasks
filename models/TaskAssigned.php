@@ -13,6 +13,7 @@ use humhub\components\ActiveRecord;
  * @property integer $id
  * @property integer $task_id
  * @property integer $user_id
+ * @property integer $request_sent
  */
 
 class TaskAssigned extends ActiveRecord
@@ -33,7 +34,7 @@ class TaskAssigned extends ActiveRecord
     {
         return [
             ['task_id', 'required'],
-            [['task_id', 'user_id'], 'integer'],
+            [['task_id', 'user_id', 'request_sent'], 'integer'],
         ];
     }
 
@@ -45,7 +46,8 @@ class TaskAssigned extends ActiveRecord
         return [
             'id' => 'ID',
             'task_id' => 'Task',
-            'user_id' => 'User'
+            'user_id' => 'User',
+            'request_sent' => 'Extend deadline request'
         ];
     }
 
@@ -60,6 +62,11 @@ class TaskAssigned extends ActiveRecord
     public function getTask()
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
+    }
+
+    public function hasRequestedExtension()
+    {
+        return boolval($this->request_sent);
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace humhub\modules\task\models;
 
+use humhub\modules\task\notifications\ExtensionRequest;
 use humhub\modules\task\notifications\RemindAssignedEnd;
 use humhub\modules\task\notifications\RemindAssignedStart;
 use humhub\modules\task\notifications\RemindResponsibleStart;
@@ -678,6 +679,17 @@ class Task extends ContentActiveRecord implements Searchable
             ->sendBulk($this->taskAssignedUsers);
     }
 
+    /**
+     * Remind users
+     */
+    public function sendExtensionRequest()
+    {
+        ExtensionRequest::instance()
+            ->from(Yii::$app->user->getIdentity())
+            ->about($this)
+            ->sendBulk($this->taskResponsibleUsers);
+    }
+
 //
 //    public function newItem($title = null)
 //    {
@@ -956,6 +968,17 @@ class Task extends ContentActiveRecord implements Searchable
      * handle task specific permissions
      * @return bool
      */
+    public function canRequestExtension()
+    {
+        if (!$this->scheduling)
+            return false;
+        return ( (!self::isTaskResponsible() && self::hasTaskResponsible() && ( self::isTaskAssigned() || self::canAnyoneProcessTask() ) && ( !(self::isCompleted() || self::isPending()) )) );
+    }
+
+    /**
+     * handle task specific permissions
+     * @return bool
+     */
     public function canChangeStatus()
     {
         return ( (self::isTaskResponsible() || self::isTaskAssigned() || self::canAnyoneProcessTask()) && !(self::isCompleted()) );
@@ -988,10 +1011,10 @@ class Task extends ContentActiveRecord implements Searchable
      * handle task specific permissions
      * @return bool
      */
-//    public function canResetTask()
-//    {
-//        return (self::isTaskResponsible());
-//    }
+    public function canResetTask()
+    {
+        return (self::isTaskResponsible() && !($this->status === self::STATUS_COMPLETED));
+    }
 
     /**
      * send link for change-status button

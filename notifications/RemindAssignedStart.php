@@ -54,7 +54,7 @@ class RemindAssignedStart extends BaseNotification
             ]);
         } else {
             return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} which starts at {dateTime}.', [
-                'displayName' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
                 '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
             ]);
@@ -68,14 +68,14 @@ class RemindAssignedStart extends BaseNotification
     {
         if ($this->source->content->container instanceof Space) {
             return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName} which starts at {dateTime}.', [
-                '{displayName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
                 '{dateTime}' => Html::encode($this->source->formattedStartDateTime),
                 '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
             ]);
         } else {
             return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} which starts at {dateTime}.', [
-                '{displayName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
                 '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
             ]);

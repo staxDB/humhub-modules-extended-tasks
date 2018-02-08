@@ -180,7 +180,7 @@ class IndexController extends ContentContainerController
         ]);
     }
 
-    public function actionEdit($id = null, $itemId = null, $cal = false)
+    public function actionEdit($id = null, $cal = false)
     {
         if (!$id) {
             $taskForm = new TaskForm(['cal' => $cal]);
@@ -272,8 +272,44 @@ class IndexController extends ContentContainerController
         throw new HttpException(400, "Could not save! " . print_r($taskForm->getErrors()));
     }
 
-    public function actionExtend()
+    /**
+     * @param $id
+     * @return string
+     * @throws HttpException
+     * @throws \yii\base\Exception
+     */
+    public function actionExtend($id)
     {
+        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
+
+        if(!$task) {
+            throw new HttpException(404);
+        }
+
+        $taskAssigned = $task->getTaskAssigned()->where(['task_assigned.user_id' => Yii::$app->user->id])->one();
+        if(!$taskAssigned) {
+            throw new HttpException(404);
+        }
+
+        if( !$task->content->canView() && !$task->canRequestExtension() ) {
+            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+//            $this->view->error(Yii::t('TaskModule.results', 'You have insufficient permissions to perform that operation!'));
+        }
+
+        // todo: notify responsible users for extension
+
+        if ($taskAssigned->hasRequestedExtension()) {
+            $this->view->error(Yii::t('TaskModule.results', 'Already requested'));
+        }
+        else {
+            $task->sendExtensionRequest();
+            $taskAssigned->updateAttributes(['request_sent' => 1]);
+            $this->view->success(Yii::t('TaskModule.results', 'Request sent'));
+        }
+
+        return $this->htmlRedirect($this->contentContainer->createUrl('view', [
+            'id' => $task->id,
+        ]));
 
     }
 

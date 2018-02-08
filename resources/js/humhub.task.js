@@ -310,6 +310,30 @@ humhub.module('task', function (module, require, $) {
 
 
 
+
+    /**
+     * Action respond to calendar entry (participation)
+     * @param evt
+     */
+    var extensionrequest = function(evt) {
+        evt.block = action.BLOCK_MANUAL;
+        client.post(evt).then(function(response) {
+            if(response.success) {
+                var dropdownLink = Widget.closest(evt.$trigger);
+                dropdownLink.reload().then(function() {
+                    dropdownLink.hide();
+                    module.log.success('request sent');
+                });
+            } else {
+                module.log.error(e, true);
+                evt.finish();
+            }
+        }).catch(function(e) {
+            module.log.error(e, true);
+            evt.finish();
+        });
+    };
+
     module.export({
         ItemList: ItemList,
         Item: Item,
@@ -317,7 +341,8 @@ humhub.module('task', function (module, require, $) {
         editTask:editTask,
         sendNotification: sendNotification,
         TaskFilter: TaskFilter,
-        Form: Form
+        Form: Form,
+        extensionrequest:extensionrequest
     });
 })
 ;

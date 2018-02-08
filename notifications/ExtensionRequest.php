@@ -18,7 +18,7 @@ use yii\helpers\Html;
  *
  * @since 0.5
  */
-class RemindResponsibleStart extends BaseNotification
+class ExtensionRequest extends BaseNotification
 {
     /**
      * @inheritdoc
@@ -46,17 +46,15 @@ class RemindResponsibleStart extends BaseNotification
     public function html()
     {
         if ($this->source->content->container instanceof Space) {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} starts at {dateTime}.', [
+            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task} in space {spaceName}.', [
                 '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
             ]);
         } else {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} starts at {dateTime}.', [
+            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task}.', [
                 '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false)))
             ]);
         }
     }
@@ -67,17 +65,15 @@ class RemindResponsibleStart extends BaseNotification
     public function getMailSubject()
     {
         if ($this->source->content->container instanceof Space) {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} starts at {dateTime}.', [
+            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task} in space {spaceName}.', [
                 '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
                 '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
             ]);
         } else {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} starts at {dateTime}.', [
+            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task}.', [
                 '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false)))
             ]);
         }
     }

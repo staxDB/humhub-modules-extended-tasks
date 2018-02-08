@@ -24,6 +24,7 @@ class m180114_210903_initial extends humhub\components\Migration
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'user_id' => 'int(11) NOT NULL',
+            'request_sent' => 'tinyint(4) DEFAULT 0',
         ), '');
 
         $this->createTable('task_responsible', array(
