@@ -3,7 +3,7 @@
 /* @var $task \humhub\modules\task\models\Task */
 /* @var $filterResult boolean */
 ?>
-<?php if ($task->hasItems()) : ?>
+<?php if (/*$task->hasItems()*/ true) : ?>
     <!--    Progress Bar    -->
     <?php
     $percent = round($task->getPercent());

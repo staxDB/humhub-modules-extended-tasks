@@ -28,10 +28,7 @@ use humhub\widgets\ModalButton;
                     <?= ModalButton::asLink(Yii::t('TaskModule.base', 'Edit'))->post($editUrl)->icon('fa-edit')->visible($canEdit) ?>
                 </li>
                 <li>
-                    <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Print task'), $printUrl)->icon('fa-print')->options(['target' => '_blank']);?>
-                </li>
-                <li>
-                    <?= ModalButton::asLink(Yii::t('TaskModule.views_index_index', 'Share task'))->load($shareUrl)->icon('fa-share-alt')?>
+                    <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Request deadline extension'), $extensionRequestUrl)->icon('fa-clock')->options(['target' => '_blank'])->visible($canRequestExtension);?>
                 </li>
                 <li>
                     <?= Link::asLink(Yii::t('TaskModule.base', 'Delete'))->action('ui.modal.post', $deleteUrl)->icon('fa-trash')

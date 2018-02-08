@@ -43,15 +43,14 @@ class TaskMenu extends \yii\base\Widget
 
         $deleteUrl = $this->contentContainer->createUrl('/task/index/delete', ['id' => $this->task->id]);
         $editUrl = $this->contentContainer->createUrl('/task/index/edit', ['id' => $this->task->id]);
-        $printUrl = $this->contentContainer->createUrl('/task/index/print', ['id' => $this->task->id]);
-        $shareUrl = $this->contentContainer->createUrl('/task/index/share', ['id' => $this->task->id]);
+        $extensionRequestUrl = $this->contentContainer->createUrl('/task/index/extension', ['id' => $this->task->id]);
 
         return $this->render('taskMenuDropdown', [
                     'deleteUrl' => $deleteUrl,
                     'editUrl' => $editUrl,
-                    'printUrl' => $printUrl,
-                    'shareUrl' => $shareUrl,
                     'canEdit' => $this->canEdit,
+                    'extensionRequestUrl' => $extensionRequestUrl,
+                    'canRequestExtension' => ($this->task->isUserAssigned() && !$this->task->isUserResponsible())
         ]);
     }
 

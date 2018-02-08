@@ -180,17 +180,6 @@ class IndexController extends ContentContainerController
         ]);
     }
 
-    // Todo
-    public function actionPrint($id)
-    {
-        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
-
-        return $this->renderPartial("print", [
-                    'task' => $task,
-                    'contentContainer' => $this->contentContainer
-        ]);
-    }
-
     public function actionEdit($id = null, $itemId = null, $cal = false)
     {
         if (!$id) {
@@ -260,34 +249,6 @@ class IndexController extends ContentContainerController
     }
 
     // Todo
-    public function actionShare($id)
-    {
-        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
-
-        if(!$task->content->canView()) {
-            throw new HttpException(403);
-        }
-
-        return $this->renderAjax('share', ['task' => $task, 'contentContainer' => $this->contentContainer, 'canEdit' => $this->canEdit()]);
-    }
-
-    // Todo
-    public function actionGetIcs($id, $type = null)
-    {
-        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
-
-        if(!$task) {
-            throw new HttpException(404);
-        }
-
-        if(!$task->content->canView()) {
-            throw new HttpException(403);
-        }
-
-        return $this->renderAjax('getICS', ['task' => $task, 'type' => $type, 'contentContainer' => $this->contentContainer]);
-    }
-
-    // Todo
     public function actionCalendarUpdate($id)
     {
         $this->forcePostRequest();
@@ -311,24 +272,9 @@ class IndexController extends ContentContainerController
         throw new HttpException(400, "Could not save! " . print_r($taskForm->getErrors()));
     }
 
-    // Todo
-    public function actionSendInviteNotifications($id)
+    public function actionExtend()
     {
-        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
 
-        if(!$task) {
-            throw new HttpException(404);
-        }
-
-        if(!$this->canEdit()) {
-            throw new HttpException(403);
-        }
-
-        $task->inviteUser();
-
-        return $this->asJson([
-            'success' => true
-        ]);
     }
 
     /**

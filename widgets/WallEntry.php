@@ -20,7 +20,7 @@ class WallEntry extends \humhub\modules\content\widgets\WallEntry
 
     public function getEditUrl()
     {
-        return $this->contentObject->content->container->createUrl('/meeting/index/edit', ['id' => $this->contentObject->id]);
+        return $this->contentObject->content->container->createUrl('/task/index/edit', ['id' => $this->contentObject->id]);
     }
 
     public function isInModal()
