@@ -217,12 +217,7 @@ class TaskReminder extends ActiveRecord
     {
         if (!$this->start_reminder_sent) {
             if (self::canSendRemind($now, $task->getStartDateTime(), $task->isAllDay())) {
-                if ($task->hasTaskAssigned()) {
-                    $task->remindAssignedUserOfStart();
-                }
-                if ($task->hasTaskResponsible()) {
-                    $task->remindResponsibleUserOfStart();
-                }
+                $task->remindUserOfStart();
                 $this->updateAttributes(['start_reminder_sent' => 1]);
             }
         }
@@ -231,12 +226,7 @@ class TaskReminder extends ActiveRecord
 
         if (!$this->end_reminder_sent) {
             if (self::canSendRemind($now, $task->getEndDateTime(), $task->isAllDay())) {
-                if ($task->hasTaskAssigned()) {
-                    $task->remindAssignedUserOfEnd();
-                }
-                if ($task->hasTaskResponsible()) {
-                    $task->remindResponsibleUserOfEnd();
-                }
+                $task->remindUserOfEnd();
                 $this->updateAttributes(['end_reminder_sent' => 1]);
             }
         }

@@ -796,45 +796,23 @@ class Task extends ContentActiveRecord implements Searchable
     /**
      * Remind users
      */
-    public function remindAssignedUserOfStart()
+    public function remindUserOfStart()
     {
-        RemindAssignedStart::instance()
-            ->from($this->content->user)
-            ->about($this)
-            ->sendBulk($this->taskAssignedUsers);
+        if (self::hasTaskAssigned())
+            RemindAssignedStart::instance()->from($this->content->user)->about($this)->sendBulk($this->taskAssignedUsers);
+        if (self::hasTaskResponsible())
+            RemindResponsibleStart::instance()->from($this->content->user)->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
      * Remind users
      */
-    public function remindAssignedUserOfEnd()
+    public function remindUserOfEnd()
     {
-        RemindAssignedEnd::instance()
-            ->from($this->content->user)
-            ->about($this)
-            ->sendBulk($this->taskAssignedUsers);
-    }
-
-    /**
-     * Remind users
-     */
-    public function remindResponsibleUserOfStart()
-    {
-        RemindResponsibleStart::instance()
-            ->from($this->content->user)
-            ->about($this)
-            ->sendBulk($this->taskResponsibleUsers);
-    }
-
-    /**
-     * Remind users
-     */
-    public function remindResponsibleUserOfEnd()
-    {
-        RemindResponsibleEnd::instance()
-            ->from($this->content->user)
-            ->about($this)
-            ->sendBulk($this->taskResponsibleUsers);
+        if (self::hasTaskAssigned())
+            RemindAssignedEnd::instance()->from($this->content->user)->about($this)->sendBulk($this->taskAssignedUsers);
+        if (self::hasTaskResponsible())
+            RemindResponsibleEnd::instance()->from($this->content->user)->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
