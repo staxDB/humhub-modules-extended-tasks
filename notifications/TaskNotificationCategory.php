@@ -41,7 +41,7 @@ class TaskNotificationCategory extends NotificationCategory
      */
     public function getDescription()
     {
-        return Yii::t('TaskModule.notifications', 'Receive Notifications for Tasks (Create, Update, Change Status).');
+        return Yii::t('TaskModule.notifications', 'Receive Notifications for Tasks (Updates, Reminders, Status changes ...).');
     }
 
     /**

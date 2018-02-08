@@ -182,9 +182,12 @@ class IndexController extends ContentContainerController
 
     public function actionEdit($id = null, $cal = false)
     {
+        $newTask = false;
+
         if (!$id) {
             $taskForm = new TaskForm(['cal' => $cal]);
             $taskForm->createNew($this->contentContainer);
+            $newTask = true;
         } else {
             $taskForm = new TaskForm([
                 'task' => Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one(),
@@ -204,6 +207,8 @@ class IndexController extends ContentContainerController
             if($cal) {
                 return ModalClose::widget(['saved' => true]);
             }
+            if($newTask)
+                $taskForm->task->notifyCreated();
 
             return $this->htmlRedirect($this->contentContainer->createUrl('view', ['id' => $taskForm->task->id]));
         }
@@ -358,7 +363,7 @@ class IndexController extends ContentContainerController
         $task->resetItems();
         $task->confirm($results);
 
-        if ($task->status === Task::STATUS_PENDING)
+        if ($task->isPending())
             $task->changeStatus(Task::STATUS_IN_PROGRESS);
 
         return $this->render("task", [
@@ -384,6 +389,27 @@ class IndexController extends ContentContainerController
 
         if ($task->changeStatus($status))
             $this->view->success(Yii::t('TaskModule.results', 'Success'));
+        else
+            $this->view->error(Yii::t('TaskModule.results', 'Error'));
+
+        return $this->redirect($this->contentContainer->createUrl('/task/index/view', ['id' => $task->id]));
+
+    }
+
+    public function actionRejectReview($id)
+    {
+        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
+
+        if(!$task) {
+            throw new HttpException(404);
+        }
+
+        if(!$task->content->canView() && !$task->canChangeStatus()) {
+            throw new HttpException(403);
+        }
+
+        if ($task->changeStatus(Task::STATUS_IN_PROGRESS))
+            $this->view->success(Yii::t('TaskModule.results', 'Saved'));
         else
             $this->view->error(Yii::t('TaskModule.results', 'Error'));
 

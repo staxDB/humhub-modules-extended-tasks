@@ -10,7 +10,6 @@ namespace humhub\modules\task\notifications;
 
 use Yii;
 use humhub\modules\notification\components\BaseNotification;
-use humhub\modules\space\models\Space;
 use yii\helpers\Html;
 
 /**
@@ -18,12 +17,12 @@ use yii\helpers\Html;
  *
  * @since 0.5
  */
-class RemindAssignedStart extends BaseNotification
+class NotifyResponsible extends BaseNotification
 {
     /**
      * @inheritdoc
      */
-    public $suppressSendToOriginator = false;
+    public $suppressSendToOriginator = true;
 
     /**
      * @inheritdoc
@@ -36,32 +35,29 @@ class RemindAssignedStart extends BaseNotification
     public $viewName = "taskNotification";
 
     /**
-     * @inheritdoc
+     *  @inheritdoc
      */
     public function category()
     {
         return new TaskNotificationCategory();
     }
-
-    public function html()
-    {
-        return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName} which starts at {dateTime}.', [
+    
+    public function html() {
+        return Yii::t('TaskModule.views_notifications_invited', '{userName} assigned you as responsible person in task {task} from space {spaceName}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-            '{dateTime}' => Html::encode($this->source->formattedStartDateTime),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
         ]);
     }
 
     /**
-     * @inheritdoc
+     *  @inheritdoc
      */
     public function getMailSubject()
     {
-        return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName} which starts at {dateTime}.', [
+        return Yii::t('TaskModule.views_notifications_invited', '{userName} assigned you as responsible person in task {task} from space {spaceName}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-            '{dateTime}' => Html::encode($this->source->formattedStartDateTime),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
         ]);
     }

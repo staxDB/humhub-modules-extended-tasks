@@ -45,20 +45,12 @@ class RemindResponsibleStart extends BaseNotification
 
     public function html()
     {
-        if ($this->source->content->container instanceof Space) {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} starts at {dateTime}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
-            ]);
-        } else {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} starts at {dateTime}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
-            ]);
-        }
+        return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} starts at {dateTime}.', [
+            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+            '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
+            '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
+            '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+        ]);
     }
 
     /**
@@ -66,19 +58,11 @@ class RemindResponsibleStart extends BaseNotification
      */
     public function getMailSubject()
     {
-        if ($this->source->content->container instanceof Space) {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} starts at {dateTime}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
-            ]);
-        } else {
-            return Yii::t('TaskModule.notifications', '{userName}, task {task} starts at {dateTime}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
-            ]);
-        }
+        return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} starts at {dateTime}.', [
+            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+            '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
+            '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
+            '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+        ]);
     }
 }

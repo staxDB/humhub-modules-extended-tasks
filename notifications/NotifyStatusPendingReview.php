@@ -18,7 +18,7 @@ use yii\helpers\Html;
  *
  * @since 0.5
  */
-class RemindAssignedStart extends BaseNotification
+class NotifyStatusPendingReview extends BaseNotification
 {
     /**
      * @inheritdoc
@@ -45,10 +45,9 @@ class RemindAssignedStart extends BaseNotification
 
     public function html()
     {
-        return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName} which starts at {dateTime}.', [
+        return Yii::t('TaskModule.notifications', '{userName} requests you to review Task {task} in space {spaceName}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-            '{dateTime}' => Html::encode($this->source->formattedStartDateTime),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
         ]);
     }
@@ -58,10 +57,9 @@ class RemindAssignedStart extends BaseNotification
      */
     public function getMailSubject()
     {
-        return Yii::t('TaskModule.notifications', '{userName} reminds you to work on Task {task} in space {spaceName} which starts at {dateTime}.', [
+        return Yii::t('TaskModule.notifications', '{userName} requests you to review Task {task} in space {spaceName}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-            '{dateTime}' => Html::encode($this->source->formattedStartDateTime),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
         ]);
     }

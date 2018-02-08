@@ -69,12 +69,15 @@ $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
         <?php endif; ?>
 
         <?php if ($task->canSeeStatusButton()) : ?>
-            <?= Button::success( $task->getStatusLabel() )->link( $task->getStatusLink() )->sm()->icon('fa-check-square')->loader(true); ?>
+            <?php if ($task->isPendingReview()) : ?>
+                <?= Button::danger($task->getRejectReviewLabel())->link($task->getRejectReviewLink())->sm()->icon('fa-ban')->loader(true); ?>
+            <?php endif; ?>
+            <?= Button::success($task->getStatusLabel())->link($task->getStatusLink())->sm()->icon('fa-check-square')->loader(true); ?>
             <hr>
         <?php endif; ?>
 
         <?php if ($task->content->canView()) : // If the task is private and non space members are invited the task is visible, but not commentable etc. ?>
-<!--            <hr style="margin-bottom: 0;"> -->
+            <!--            <hr style="margin-bottom: 0;"> -->
             <?= WallEntryAddons::widget([
                 'object' => $task
             ]); ?>

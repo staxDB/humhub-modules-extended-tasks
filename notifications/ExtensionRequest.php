@@ -45,18 +45,11 @@ class ExtensionRequest extends BaseNotification
 
     public function html()
     {
-        if ($this->source->content->container instanceof Space) {
-            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task} in space {spaceName}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
-            ]);
-        } else {
-            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false)))
-            ]);
-        }
+        return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task} in space {spaceName}.', [
+            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+            '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
+            '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
+        ]);
     }
 
     /**
@@ -64,17 +57,10 @@ class ExtensionRequest extends BaseNotification
      */
     public function getMailSubject()
     {
-        if ($this->source->content->container instanceof Space) {
-            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task} in space {spaceName}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-                '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
-            ]);
-        } else {
-            return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task}.', [
-                '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-                '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false)))
-            ]);
-        }
+        return Yii::t('TaskModule.notifications', '{userName} requests a deadline extension for task {task} in space {spaceName}.', [
+            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+            '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
+            '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
+        ]);
     }
 }

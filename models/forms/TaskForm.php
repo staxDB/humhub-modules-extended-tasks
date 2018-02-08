@@ -238,8 +238,6 @@ class TaskForm extends Model
      */
     public function save()
     {
-        $isNew = $this->task->isNewRecord;
-
         if(!$this->validate()) {
             return false;
         }

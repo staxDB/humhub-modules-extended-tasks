@@ -3,12 +3,6 @@ use humhub\modules\task\models\Task;
 
 ?>
 
-<?php if (/*$task->isToday()*/ false) : ?>
-    <div class="label label-danger <?= $right ? 'pull-right' : '' ?>"><?= Yii::t('TaskModule.views_index_index', 'Today'); ?></div>
-<?php elseif (/*$task->isTomorrow()*/ false) : ?>
-    <div class="label label-warning <?= $right ? 'pull-right' : '' ?>"><?= Yii::t('TaskModule.views_index_index', 'Tomorrow'); ?></div>
-<?php endif; ?>
-
 <?php if ($task->status == Task::STATUS_PENDING) : ?>
     <div id="taskStatus" class="label label-default <?= $right ? 'pull-right' : '' ?>"><?= '<i class="fa fa-info-circle"></i> ' . Yii::t('TaskModule.views_index_index', 'Pending'); ?></div>
 <?php elseif ($task->status == Task::STATUS_IN_PROGRESS) : ?>

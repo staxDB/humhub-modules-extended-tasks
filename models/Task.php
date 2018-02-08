@@ -2,7 +2,17 @@
 
 namespace humhub\modules\task\models;
 
+use humhub\modules\notification\models\Notification;
 use humhub\modules\task\notifications\ExtensionRequest;
+use humhub\modules\task\notifications\ExtensionRequestRejected;
+use humhub\modules\task\notifications\NotifyAssigned;
+use humhub\modules\task\notifications\NotifyResponsible;
+use humhub\modules\task\notifications\NotifyStatusCompleted;
+use humhub\modules\task\notifications\NotifyStatusCompletedAfterReview;
+use humhub\modules\task\notifications\NotifyStatusInProgress;
+use humhub\modules\task\notifications\NotifyStatusPendingReview;
+use humhub\modules\task\notifications\NotifyStatusRejectedAfterReview;
+use humhub\modules\task\notifications\NotifyStatusReset;
 use humhub\modules\task\notifications\RemindAssignedEnd;
 use humhub\modules\task\notifications\RemindAssignedStart;
 use humhub\modules\task\notifications\RemindResponsibleStart;
@@ -19,6 +29,7 @@ use humhub\modules\task\widgets\WallEntry;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\user\models\User;
 use humhub\modules\search\interfaces\Searchable;
+use yii\base\InvalidConfigException;
 use yii\data\Sort;
 use yii\db\ActiveQuery;
 use humhub\modules\task\CalendarUtils;
@@ -101,6 +112,7 @@ class Task extends ContentActiveRecord implements Searchable
         self::CAL_MODE_SPACE
     ];
 
+
     /**
      * @return string the associated database table name
      */
@@ -177,132 +189,42 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
-     * Returns an ActiveQuery for all assigned task users of this task.
-     *
-     * @return \yii\db\ActiveQuery
+     * @inheritdoc
      */
-    public function getTaskAssigned()
+    public function getUrl()
     {
-        $query = $this->hasMany(TaskAssigned::className(), ['task_id' => 'id']);
-        return $query;
+        return $this->content->container->createUrl('/task/index/view', ['id' => $this->id]);
     }
 
-    public function hasTaskAssigned()
+    public static function findPendingTasks(ContentContainerActiveRecord $container)
     {
-        return !empty($this->taskAssigned);
+        return self::find()
+            ->contentContainer($container)
+            ->orderBy([new Expression('-task.end_datetime DESC')])
+            ->readable()
+            ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED]);
     }
 
     /**
-     * Returns an ActiveQuery for all assigned user models of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-
-    public function getTaskAssignedUsers()
-    {
-        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskAssigned');
-    }
-
-    /**
-     * Returns an ActiveQuery for all responsible task users of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTaskResponsible()
-    {
-        $query = $this->hasMany(TaskResponsible::className(), ['task_id' => 'id']);
-        return $query;
-    }
-
-    public function hasTaskResponsible()
-    {
-        return !empty($this->taskResponsible);
-    }
-
-    /**
-     * Returns an ActiveQuery for all responsible user models of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTaskResponsibleUsers()
-    {
-        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskResponsible');
-    }
-
-
-    /**
-     * Returns an ActiveQuery for all assigned task users of this task.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTaskReminder()
-    {
-        $query = $this->hasMany(TaskReminder::className(), ['task_id' => 'id']);
-        return $query;
-    }
-
-    public function hasTaskReminder()
-    {
-        return !empty($this->taskReminder);
-    }
-
-
-    /**
-     * Returns an ActiveQuery for all task items of this task.
-     *
+     * @param ContentContainerActiveRecord $container
      * @return ActiveQuery
+     * @throws \yii\base\Exception
      */
-    public function getItems()
+    public static function findPastTasks(ContentContainerActiveRecord $container)
     {
-        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
+        return self::find()
+            ->contentContainer($container)
+            ->orderBy(['task.end_datetime' => SORT_DESC])
+            ->readable()
+            ->andWhere(['<', 'task.end_datetime', date('Y-m-d')]);
     }
 
-    public function hasItems()
+    public static function findReadable(ContentContainerActiveRecord $container)
     {
-        // Todo check task_items and subtask-Items
-        return !empty($this->items);
-    }
-
-    public function saveNewItems()
-    {
-        if ($this->newItems == null) {
-            return;
-        }
-
-        foreach ($this->newItems as $itemText) {
-            $this->addItem($itemText);
-        }
-
-        // Reset cached items
-        unset($this->items);
-    }
-
-    public function addItem($itemText)
-    {
-        if (trim($itemText) === '') {
-            return;
-        }
-
-        $item = new TaskItem();
-        $item->task_id = $this->id;
-        $item->title = $itemText;
-        $item->save();
-        return $item;
-    }
-
-    public function updateItems()
-    {
-        if (!isset($this->editItems))
-            return;
-
-        foreach ($this->items as $item) {
-            if (!array_key_exists($item->id, $this->editItems)) {
-                $item->delete();
-            } else if ($item->title !== $this->editItems[$item->id]) {
-                $item->title = $this->editItems[$item->id];
-                $item->update();
-            }
-        }
+        return self::find()
+            ->contentContainer($container)
+            ->orderBy(['task.end_datetime' => SORT_DESC])
+            ->readable();
     }
 
     /**
@@ -390,25 +312,33 @@ class Task extends ContentActiveRecord implements Searchable
         return true;
     }
 
+
+    // ###########  handle assigned users  ###########
+
     /**
-     * Sets the newItems array, which is used for creating and updating (afterSave)
-     * the task, by saving all valid item title contained in the given array.
-     * @param type $newItemArr
+     * Returns an ActiveQuery for all assigned task users of this task.
+     *
+     * @return \yii\db\ActiveQuery
      */
-    public function setNewItems($newItemArr)
+    public function getTaskAssigned()
     {
-        $this->newItems = TaskItem::filterValidItems($newItemArr);
+        $query = $this->hasMany(TaskAssigned::className(), ['task_id' => 'id']);
+        return $query;
+    }
+
+    public function hasTaskAssigned()
+    {
+        return !empty($this->taskAssigned);
     }
 
     /**
-     * Sets the editItems array, which is used for updating (afterSave)
-     * the task. The given array has to contain task item ids as key and an title
-     * as values.
-     * @param type $editItemArr
+     * Returns an ActiveQuery for all assigned user models of this task.
+     *
+     * @return \yii\db\ActiveQuery
      */
-    public function setEditItems($editItemArr)
+    public function getTaskAssignedUsers()
     {
-        $this->editItems = TaskItem::filterValidItems($editItemArr);
+        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskAssigned');
     }
 
     public function isTaskAssigned($user = null)
@@ -445,6 +375,35 @@ class Task extends ContentActiveRecord implements Searchable
         return false;
     }
 
+
+    // ###########  handle responsible users  ###########
+
+    /**
+     * Returns an ActiveQuery for all responsible task users of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskResponsible()
+    {
+        $query = $this->hasMany(TaskResponsible::className(), ['task_id' => 'id']);
+        return $query;
+    }
+
+    public function hasTaskResponsible()
+    {
+        return !empty($this->taskResponsible);
+    }
+
+    /**
+     * Returns an ActiveQuery for all responsible user models of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskResponsibleUsers()
+    {
+        return $this->hasMany(User::class, ['id' => 'user_id'])->via('taskResponsible');
+    }
+
     public function isTaskResponsible($user = null)
     {
         if (!$user && !Yii::$app->user->isGuest) {
@@ -479,6 +438,25 @@ class Task extends ContentActiveRecord implements Searchable
         return false;
     }
 
+
+    // ###########  handle reminder  ###########
+
+    /**
+     * Returns an ActiveQuery for all assigned task users of this task.
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTaskReminder()
+    {
+        $query = $this->hasMany(TaskReminder::className(), ['task_id' => 'id']);
+        return $query;
+    }
+
+    public function hasTaskReminder()
+    {
+        return !empty($this->taskReminder);
+    }
+
     public function isTaskReminder($remind_mode)
     {
         if (!$remind_mode) {
@@ -507,85 +485,168 @@ class Task extends ContentActiveRecord implements Searchable
         return false;
     }
 
+
+    // ###########  handle task items  ###########
+
     /**
-     * @inheritdoc
+     * Returns an ActiveQuery for all task items of this task.
+     *
+     * @return ActiveQuery
      */
-    public function getUrl()
+    public function getItems()
     {
-        return $this->content->container->createUrl('/task/index/view', ['id' => $this->id]);
+        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
     }
 
-    public static function findPendingTasks(ContentContainerActiveRecord $container)
+    public function hasItems()
     {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy([new Expression('-task.end_datetime DESC')])
-            ->readable()
-            ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED]);
+        // Todo check task_items and subtask-Items
+        return !empty($this->items);
     }
 
-    public static function GetUsersOpenTasks()
+    public function saveNewItems()
     {
-        $query = self::find();
-        $query->leftJoin('task_assigned', 'task.id=task_assigned.task_id');
-        $query->where(['task_assigned.user_id' => Yii::$app->user->id, 'task.status' => self::STATUS_PENDING]);
-
-        return $query->all();
-    }
-
-    // todo
-    public function isOverdue()
-    {
-        if (!$this->hasDeadline()) {
-            return false;
+        if ($this->newItems == null) {
+            return;
         }
 
-        return (strtotime($this->end_datetime) < time());
+        foreach ($this->newItems as $itemText) {
+            $this->addItem($itemText);
+        }
+
+        // Reset cached items
+        unset($this->items);
+    }
+
+    public function addItem($itemText)
+    {
+        if (trim($itemText) === '') {
+            return;
+        }
+
+        $item = new TaskItem();
+        $item->task_id = $this->id;
+        $item->title = $itemText;
+        $item->save();
+        return $item;
+    }
+
+    public function updateItems()
+    {
+        if (!isset($this->editItems))
+            return;
+
+        foreach ($this->items as $item) {
+            if (!array_key_exists($item->id, $this->editItems)) {
+                $item->delete();
+            } else if ($item->title !== $this->editItems[$item->id]) {
+                $item->title = $this->editItems[$item->id];
+                $item->update();
+            }
+        }
     }
 
     /**
-     * @param ContentContainerActiveRecord $container
-     * @return ActiveQuery
-     * @throws \yii\base\Exception
+     * Sets the newItems array, which is used for creating and updating (afterSave)
+     * the task, by saving all valid item title contained in the given array.
+     * @param type $newItemArr
      */
-    public static function findPastTasks(ContentContainerActiveRecord $container)
+    public function setNewItems($newItemArr)
     {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy(['task.end_datetime' => SORT_DESC])
-            ->readable()
-            ->andWhere(['<', 'task.end_datetime', date('Y-m-d')]);
+        $this->newItems = TaskItem::filterValidItems($newItemArr);
     }
 
-    public static function findReadable(ContentContainerActiveRecord $container)
+    /**
+     * Sets the editItems array, which is used for updating (afterSave)
+     * the task. The given array has to contain task item ids as key and an title
+     * as values.
+     * @param type $editItemArr
+     */
+    public function setEditItems($editItemArr)
     {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy(['task.end_datetime' => SORT_DESC])
-            ->readable();
+        $this->editItems = TaskItem::filterValidItems($editItemArr);
     }
 
+    /**
+     * @param array $items
+     * @throws \yii\db\Exception
+     */
+    public function confirm($items = array())
+    {
+        foreach ($items as $itemID) {
+            $item = TaskItem::findOne(['id' => $itemID, 'task_id' => $this->id]);
+            if ($item) {
+                $item->completed = 1;
+                $item->save();
+            }
+        }
+    }
+
+    /**
+     * @throws \yii\db\Exception
+     */
+    public function completeItems()
+    {
+        Yii::$app->db->createCommand()
+            ->update(
+                TaskItem::tableName(),
+                ['completed' => 1], //columns and values
+                ['task_id' => $this->id] //condition, similar to where()
+            )
+            ->execute();
+    }
+
+    /**
+     * Returns the total number of confirmed users got this message
+     *
+     * @return int
+     */
+    public function getConfirmedCount()
+    {
+        return $this->getItems()->where(['completed' => true])->count();
+    }
+
+
+    // ###########  handle status  ###########
+
+    /**
+     * @param $newStatus
+     * @return bool
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     */
     public function changeStatus($newStatus)
     {
         if (!in_array($newStatus, self::$statuses))
             return false;
 
         switch ($newStatus) {
-            case Task::STATUS_IN_PROGRESS:
-                // Todo: Notify responsible Person, e.g. creator
-                break;
 
-            case Task::STATUS_PENDING_REVIEW:
-                if (!$this->review)
+            case Task::STATUS_PENDING:
+                if (!(self::isCompleted()))
                     return false;
-                // Todo: Notify responsible Person, e.g. creator
+                self::notifyReset();
                 break;
-
+            case Task::STATUS_IN_PROGRESS:
+                if (self::isPendingReview())
+                    self::notifyRejectedReview();
+                elseif (self::isPending())
+                    self::notifyInProgress();
+                else
+                    return false;
+                break;
+            case Task::STATUS_PENDING_REVIEW:
+                if (!$this->review || !(self::isInProgress()))
+                    return false;
+                self::notifyPendingReview();
+                break;
             case Task::STATUS_COMPLETED:
+                if (!(self::isInProgress() || self::isPendingReview()))
+                    return false;
                 if ($this->hasItems()) {
                     $this->completeItems();
                 }
-                // Todo: Notify responsible Person, e.g. assigned persons or creator (if finisher is not creator)
+                self::notifyCompleted();
                 break;
         }
         // Todo: example notification and activity
@@ -601,38 +662,135 @@ class Task extends ContentActiveRecord implements Searchable
 //                $notification->send($this->content->user);
 //            }
 
-        // Try to delete TaskFinishedNotification if exists
-//            $notification = new \humhub\modules\task\notifications\Finished();
-//            $notification->source = $this;
-//            $notification->delete($this->content->user);
-//        }
-
         $this->updateAttributes(['status' => $newStatus]);
 
         return true;
     }
 
-    public function hasDeadline()
+    /**
+     * Returns an array of statusItems.
+     * Primary used in TaskFilter
+     *
+     * @return array
+     */
+    public static function getStatusItems()
     {
-        if ($this->end_datetime != '0000-00-00 00:00:00' && $this->end_datetime != '' && $this->end_datetime != 'NULL') {
-            return true;
-        }
-        return false;
+        return [
+            self::STATUS_PENDING => Yii::t('TaskModule.views_index_index', 'Pending'),
+            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.views_index_index', 'In Progress'),
+            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.views_index_index', 'Pending Review'),
+            self::STATUS_COMPLETED => Yii::t('TaskModule.views_index_index', 'Completed'),
+            self::STATUS_ALL => Yii::t('TaskModule.views_index_index', 'All'),
+        ];
     }
 
-    public function hasSubTasks()
+    public function isPending()
     {
-        // Todo check task_items and subtask-Items
-        return !empty($this->subTasks);
+        return ($this->status === self::STATUS_PENDING);
+    }
+
+    public function isInProgress()
+    {
+        return ($this->status === self::STATUS_IN_PROGRESS);
+    }
+
+    public function isPendingReview()
+    {
+        return ($this->status === self::STATUS_PENDING_REVIEW);
+    }
+
+    public function isCompleted()
+    {
+        return ($this->status === self::STATUS_COMPLETED);
     }
 
     /**
-     * Invite user to this task
+     * send link for change-status button
+     * @return string $statusLink
      */
-    public function inviteUser()
+    public function getStatusLink()
     {
-        // Todo
-//        Invite::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->assignedUsers);
+        switch ($this->status) {
+            case self::STATUS_PENDING:
+                $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_IN_PROGRESS]);
+                break;
+            case self::STATUS_IN_PROGRESS:
+                if ($this->review)
+                    $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_PENDING_REVIEW]);
+                else
+                    $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_COMPLETED]);
+                break;
+            case self::STATUS_PENDING_REVIEW:
+                $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_COMPLETED]);
+                break;
+            default :
+                $statusLink = '';
+        }
+
+        return $statusLink;
+    }
+
+    /**
+     * send label for change-status button
+     * @return string $statusLabel
+     */
+    public function getStatusLabel()
+    {
+        switch ($this->status) {
+            case Task::STATUS_PENDING:
+                $statusLabel = Yii::t('TaskModule.views_index_index', 'Begin Task');
+                break;
+            case Task::STATUS_IN_PROGRESS:
+                if ($this->review)
+                    $statusLabel = Yii::t('TaskModule.views_index_index', 'Let Task Review');
+                else
+                    $statusLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
+                break;
+            case Task::STATUS_PENDING_REVIEW:
+                $statusLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
+                break;
+            default :
+                $statusLabel = '';
+        }
+
+        return $statusLabel;
+    }
+
+    /**
+     * send link for change-status button
+     * @return string $statusLink
+     */
+    public function getRejectReviewLink()
+    {
+        if (self::isPendingReview() && self::canReviewTask())
+            return $this->content->container->createUrl('/task/index/reject-review', ['id' => $this->id]);
+        return '';
+    }
+
+    /**
+     * send label for change-status button
+     * @return string $statusLabel
+     */
+    public function getRejectReviewLabel()
+    {
+        if (self::isPendingReview() && self::canReviewTask())
+            return Yii::t('TaskModule.views_index_index', 'Reject review');
+        return '';
+    }
+
+
+    // ###########  handle notifications  ###########
+
+    /**
+     * Notify users about created task
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function notifyCreated()
+    {
+//        if (self::hasTaskAssigned())
+            NotifyAssigned::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+//        if (self::hasTaskResponsible())
+            NotifyResponsible::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
@@ -680,51 +838,85 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
-     * Remind users
+     * Request deadline extension
+     * @throws \yii\base\InvalidConfigException
      */
     public function sendExtensionRequest()
     {
-        ExtensionRequest::instance()
-            ->from(Yii::$app->user->getIdentity())
-            ->about($this)
-            ->sendBulk($this->taskResponsibleUsers);
-    }
-
-//
-//    public function newItem($title = null)
-//    {
-//        return new TaskItem($this->content->container, $this->content->visibility, [
-//            'task_id' => $this->id,
-//            'title' => $title,
-//        ]);
-//    }
-
-    /** TODO
-     * Returns an ActiveQuery for all available sub-tasks.
-     *
-     * @return ActiveQuery
-     */
-    public function getSubTasks()
-    {
-        return $this->hasMany(self::class, ['id' => 'parent_task_id']);
+        if ($this->hasTaskResponsible())
+            ExtensionRequest::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
-     * Returns an array of statusItems.
-     * Primary used in TaskFilter
-     *
-     * @return array
+     * Reject deadline extension request
+     * @param User $requestingUser
+     * @throws \yii\base\InvalidConfigException
      */
-    public static function getStatusItems()
+    public function rejectExtensionRequest(User $requestingUser)
     {
-        return [
-            self::STATUS_PENDING => Yii::t('TaskModule.views_index_index', 'Pending'),
-            self::STATUS_IN_PROGRESS => Yii::t('TaskModule.views_index_index', 'In Progress'),
-            self::STATUS_PENDING_REVIEW => Yii::t('TaskModule.views_index_index', 'Pending Review'),
-            self::STATUS_COMPLETED => Yii::t('TaskModule.views_index_index', 'Completed'),
-            self::STATUS_ALL => Yii::t('TaskModule.views_index_index', 'All'),
-        ];
+        if (!empty($requestingUser)) {
+            if ($this->isTaskAssigned($requestingUser))
+                ExtensionRequestRejected::instance()->from(Yii::$app->user->getIdentity())->about($this)->send($requestingUser);
+        }
     }
+
+    /**
+     * Notify users about status change
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function notifyReset()
+    {
+        if ($this->hasTaskAssigned())
+            NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+
+        if ($this->hasTaskResponsible())
+            NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+    }
+
+    /**
+     * Notify users about status change
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function notifyInProgress()
+    {
+        if ($this->hasTaskResponsible())
+            NotifyStatusInProgress::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+    }
+
+    /**
+     * Notify users about status change
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function notifyPendingReview()
+    {
+        if ($this->review && $this->hasTaskResponsible())
+            NotifyStatusPendingReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+    }
+
+    /**
+     * Notify users about status change
+     */
+    public function notifyCompleted()
+    {
+        if ($this->review && $this->hasTaskAssigned())
+            NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+        elseif ($this->hasTaskResponsible())
+            NotifyStatusCompleted::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+    }
+
+    /**
+     * Notify users about status change
+     * @param User $requestingUser
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function notifyRejectedReview()
+    {
+        if ($this->review && $this->hasTaskAssigned())
+            NotifyStatusRejectedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+    }
+
+
+    // ###########  handle calendar entries  ###########
 
     /**
      * Returns an array of calendarModes.
@@ -756,6 +948,9 @@ class Task extends ContentActiveRecord implements Searchable
                 return;
         }
     }
+
+
+    // ###########  handle datetime  ###########
 
     /**
      * @inheritdoc
@@ -833,6 +1028,9 @@ class Task extends ContentActiveRecord implements Searchable
         return (boolean)$this->all_day;
     }
 
+
+    // ###########  handle extends  ###########
+
     /**
      * @inheritdoc
      */
@@ -855,7 +1053,26 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
 
+    // ###########  handle reset  ###########
+
     /**
+     * Handles task reset
+     *
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function reset()
+    {
+        if (self::hasItems()) {
+            self::resetItems();
+        }
+        self::changeStatus(self::STATUS_PENDING);
+        self::resetDateTimes();
+    }
+
+    /**
+     * Resets items
+     *
      * @throws \yii\db\Exception
      */
     public function resetItems()
@@ -869,94 +1086,41 @@ class Task extends ContentActiveRecord implements Searchable
             ->execute();
     }
 
-    public function reset()
-    {
-        if (self::hasItems()) {
-            self::resetItems();
-        }
-        self::changeStatus(self::STATUS_PENDING);
-        self::resetDateTimes();
-    }
-
     /**
-     * @throws \yii\db\Exception
+     * Resets start_datetime & end_datetime
+     *
+     * @throws \yii\base\InvalidConfigException
      */
-    public function completeItems()
+    protected function resetDateTimes()
     {
-        Yii::$app->db->createCommand()
-            ->update(
-                TaskItem::tableName(),
-                ['completed' => 1], //columns and values
-                ['task_id' => $this->id] //condition, similar to where()
-            )
-            ->execute();
+        if (!$this->scheduling)
+            return;
+
+        // calculate duration between start and end
+        $newStart = $this->getStartDateTime();
+        $interval = $newStart->diff($this->getEndDateTime());
+
+        $newStart->setDate(date("Y"), date("m"), date("d"));
+
+        $temp = clone $newStart;
+        $newEnd = $temp->add($interval);
+        unset($temp);
+
+        $dateFormat = 'php:Y-m-d H:i:s';
+
+        self::updateAttributes([
+            'start_datetime' => Yii::$app->formatter->asDateTime($newStart, $dateFormat),
+            'end_datetime' => Yii::$app->formatter->asDateTime($newEnd, $dateFormat),
+        ]);
     }
 
+
+    // ###########  handle task-permissions  ###########
+
     /**
-     * checks if a user is assigned to task
-     * @param User|null $user
+     * handle task specific permissions
      * @return bool
      */
-    public function isUserAssigned(User $user = null)
-    {
-        if ($user === null) {
-            $user = Yii::$app->user->getIdentity();
-        }
-
-        if (!$this->hasTaskAssigned()) {
-            return false;
-        }
-
-        return !empty($this->getTaskAssignedUsers()->where(['id' => $user->id])->one());
-
-    }
-
-    /**
-     * checks if a user is responsible for task
-     * @param User|null $user
-     * @return bool
-     */
-    public function isUserResponsible(User $user = null)
-    {
-        if ($user === null) {
-            $user = Yii::$app->user->getIdentity();
-        }
-
-        if (!$this->hasTaskResponsible()) {
-            return false;
-        }
-
-        return !empty($this->getTaskResponsibleUsers()->where(['id' => $user->id])->one());
-
-    }
-
-
-    /**
-     * @param array $items
-     * @throws \yii\db\Exception
-     */
-    public function confirm($items = array())
-    {
-        foreach ($items as $itemID) {
-            $item = TaskItem::findOne(['id' => $itemID, 'task_id' => $this->id]);
-            if ($item) {
-                $item->completed = 1;
-                $item->save();
-            }
-        }
-    }
-
-
-    public function isCompleted()
-    {
-        return ($this->status === self::STATUS_COMPLETED);
-    }
-
-    public function isPending()
-    {
-        return ($this->status === self::STATUS_PENDING);
-    }
-
     public function canAnyoneProcessTask()
     {
         return (!$this->hasTaskAssigned() && $this->content->getSpace()->isMember());
@@ -988,6 +1152,7 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function canChangeStatus()
     {
+        return true;
         return ((self::isTaskResponsible() || self::isTaskAssigned() || self::canAnyoneProcessTask()) && !(self::isCompleted()));
     }
 
@@ -1006,78 +1171,29 @@ class Task extends ContentActiveRecord implements Searchable
      */
     public function canSeeStatusButton()
     {
-        if ($this->isCompleted())
+        if (self::isCompleted())
             return false;
-        elseif ($this->review)
-            return $this->canReviewTask();
-        return $this->canChangeStatus();
+        elseif ($this->review && self::isPendingReview())
+            return self::canReviewTask();
+        return self::canChangeStatus();
     }
 
     /**
-     * Todo
      * handle task specific permissions
      * @return bool
      */
     public function canResetTask()
     {
-        return (self::isTaskResponsible() && ($this->status === self::STATUS_COMPLETED));
-    }
-
-    /**
-     * send link for change-status button
-     * @return string $statusLink
-     */
-    public function getStatusLink()
-    {
-        switch ($this->status) {
-            case Task::STATUS_PENDING:
-                $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_IN_PROGRESS]);
-                break;
-            case Task::STATUS_IN_PROGRESS:
-                if ($this->review)
-                    $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_PENDING_REVIEW]);
-                else
-                    $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_COMPLETED]);
-                break;
-            case Task::STATUS_PENDING_REVIEW:
-                $statusLink = $this->content->container->createUrl('/task/index/status', ['id' => $this->id, 'status' => self::STATUS_COMPLETED]);
-                break;
-            default :
-                $statusLink = '';
-        }
-
-        return $statusLink;
-    }
-
-    /**
-     * send label for change-status button
-     * @return string $statusLabel
-     */
-    public function getStatusLabel()
-    {
-        switch ($this->status) {
-            case Task::STATUS_PENDING:
-                $statusLabel = Yii::t('TaskModule.views_index_index', 'Begin Task');
-                break;
-            case Task::STATUS_IN_PROGRESS:
-                if ($this->review)
-                    $statusLabel = Yii::t('TaskModule.views_index_index', 'Let Task Review');
-                else
-                    $statusLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
-                break;
-            case Task::STATUS_PENDING_REVIEW:
-                $statusLabel = Yii::t('TaskModule.views_index_index', 'Finish Task');
-                break;
-            default :
-                $statusLabel = '';
-        }
-
-        return $statusLabel;
+        return (self::isTaskResponsible() && (self::isCompleted()));
     }
 
 
+
+
+    // ###########  handle view-specific  ###########
+
     /**
-     * Returns the percentage of tasj confirmed this message
+     * Returns the percentage of task
      *
      * @return int
      */
@@ -1096,28 +1212,25 @@ class Task extends ContentActiveRecord implements Searchable
 
 
         $counter = $this->getConfirmedCount();
-        if ($this->status === self::STATUS_IN_PROGRESS)
+        if (self::isInProgress())
             $counter += 1;
-        elseif ($this->status === self::STATUS_COMPLETED && !$this->review)
+        elseif (self::isCompleted() && !$this->review)
             $counter += 2;
-        elseif ($this->status === self::STATUS_PENDING_REVIEW && $this->review)
+        elseif (self::isPendingReview() && $this->review)
             $counter += 2;
-        elseif ($this->status === self::STATUS_COMPLETED && $this->review)
+        elseif (self::isCompleted() && $this->review)
             $counter += 3;
 
         return $counter / $denominator * 100;
     }
 
     /**
-     * Returns the total number of confirmed users got this message
+     * Returns additional labels
      *
-     * @return int
+     * @param array $labels
+     * @param bool $includeContentName
+     * @return Label[]|string[]
      */
-    public function getConfirmedCount()
-    {
-        return $this->getItems()->where(['completed' => true])->count();
-    }
-
     public function getLabels($labels = [], $includeContentName = true)
     {
         switch ($this->status) {
@@ -1137,32 +1250,34 @@ class Task extends ContentActiveRecord implements Searchable
                 break;
         }
 
-        return parent::getLabels($labels, $includeContentName); // TODO: Change the autogenerated stub
+        return parent::getLabels($labels, $includeContentName);
     }
 
+
+    // ###########  Todo  ###########
+
     /**
-     * @throws \yii\base\InvalidConfigException
+     * Returns an ActiveQuery for all available sub-tasks.
+     *
+     * @return ActiveQuery
      */
-    protected function resetDateTimes()
+    public function getSubTasks()
     {
-        if (!$this->scheduling)
-            return;
+        return $this->hasMany(self::class, ['id' => 'parent_task_id']);
+    }
 
-        // calculate duration between start and end
-        $newStart = $this->getStartDateTime();
-        $interval = $newStart->diff($this->getEndDateTime());
+    public function hasSubTasks()
+    {
+        // Todo check task_items and subtask-Items
+        return !empty($this->subTasks);
+    }
 
-        $newStart->setDate(date("Y"), date("m"), date("d"));
+    public function isOverdue()
+    {
+        if (!$this->scheduling) {
+            return false;
+        }
 
-        $temp = clone $newStart;
-        $newEnd = $temp->add($interval);
-        unset($temp);
-
-        $dateFormat = 'php:Y-m-d H:i:s';
-
-        self::updateAttributes([
-            'start_datetime' => Yii::$app->formatter->asDateTime($newStart, $dateFormat),
-            'end_datetime' => Yii::$app->formatter->asDateTime($newEnd, $dateFormat),
-        ]);
+        return (strtotime($this->end_datetime) < time() && !$this->isCompleted());
     }
 }
