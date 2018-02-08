@@ -243,11 +243,6 @@ class IndexController extends ContentContainerController
         }
     }
 
-    public function canEdit()
-    {
-        return $this->contentContainer->getPermissionManager()->can(new ManageTasks());
-    }
-
     // Todo
     public function actionCalendarUpdate($id)
     {
@@ -293,10 +288,7 @@ class IndexController extends ContentContainerController
 
         if( !$task->content->canView() && !$task->canRequestExtension() ) {
             throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
-//            $this->view->error(Yii::t('TaskModule.results', 'You have insufficient permissions to perform that operation!'));
         }
-
-        // todo: notify responsible users for extension
 
         if ($taskAssigned->hasRequestedExtension()) {
             $this->view->error(Yii::t('TaskModule.results', 'Already requested'));
@@ -306,6 +298,32 @@ class IndexController extends ContentContainerController
             $taskAssigned->updateAttributes(['request_sent' => 1]);
             $this->view->success(Yii::t('TaskModule.results', 'Request sent'));
         }
+
+        return $this->htmlRedirect($this->contentContainer->createUrl('view', [
+            'id' => $task->id,
+        ]));
+
+    }
+
+    /**
+     * @param $id
+     * @return string
+     * @throws HttpException
+     * @throws \yii\base\Exception
+     */
+    public function actionReset($id)
+    {
+        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
+
+        if(!$task) {
+            throw new HttpException(404);
+        }
+
+        if( !$task->content->canView() && !$task->canResetTask() ) {
+            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+        }
+
+        $task->reset();
 
         return $this->htmlRedirect($this->contentContainer->createUrl('view', [
             'id' => $task->id,
@@ -393,6 +411,11 @@ class IndexController extends ContentContainerController
         }
 
         return $task;
+    }
+
+    public function canEdit()
+    {
+        return $this->contentContainer->getPermissionManager()->can(new ManageTasks());
     }
 
 }

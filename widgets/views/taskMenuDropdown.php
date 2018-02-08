@@ -36,6 +36,9 @@ use humhub\widgets\ModalButton;
                 <li>
                     <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Request extension'), $extensionRequestUrl)->icon('fa-clock-o')->visible($canRequestExtension);?>
                 </li>
+                <li>
+                    <?= Button::asLink(Yii::t('TaskModule.views_index_index', 'Reset Task'), $resetUrl)->icon('fa-undo')->visible($canReset);?>
+                </li>
             </ul>
         </li>
     </ul>
