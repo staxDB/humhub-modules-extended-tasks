@@ -823,7 +823,7 @@ class Task extends ContentActiveRecord implements Searchable
         RemindResponsibleStart::instance()
             ->from($this->content->user)
             ->about($this)
-            ->sendBulk($this->taskAssignedUsers);
+            ->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
@@ -834,7 +834,7 @@ class Task extends ContentActiveRecord implements Searchable
         RemindResponsibleEnd::instance()
             ->from($this->content->user)
             ->about($this)
-            ->sendBulk($this->taskAssignedUsers);
+            ->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
