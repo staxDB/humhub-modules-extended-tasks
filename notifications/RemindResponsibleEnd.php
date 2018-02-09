@@ -45,7 +45,7 @@ class RemindResponsibleEnd extends BaseNotification
 
     public function html()
     {
-        return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} ends at {dateTime}.', [
+        return Yii::t('TaskModule.notifications', '{userName}: task {task} in space {spaceName} ends at {dateTime}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
@@ -59,7 +59,7 @@ class RemindResponsibleEnd extends BaseNotification
      */
     public function getMailSubject()
     {
-        return Yii::t('TaskModule.notifications', '{userName}, task {task} in space {spaceName} ends at {dateTime}.', [
+        return Yii::t('TaskModule.notifications', '{userName}: task {task} in space {spaceName} ends at {dateTime}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),

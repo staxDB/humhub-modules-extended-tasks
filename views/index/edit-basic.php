@@ -21,10 +21,14 @@ use yii\jui\DatePicker;
     <?= $form->field($taskForm, 'is_public')->checkbox() ?>
     <?= $form->field($taskForm->task, 'scheduling')->checkbox(['data-action-change' => 'toggleScheduling']) ?>
 
-    <?= $form->field($taskForm->task, 'subTasks')->widget(TaskPickerField::class, [
-        'id' => 'subTaskPicker',
-        'selection' => $taskForm->task->subTasks,
-        'url' => $taskForm->getSubTaskPickerUrl(),
-        'placeholder' => Yii::t('TaskModule.views_index_edit', 'Add sub tasks')
-    ]) ?>
+    <?php
+//    Todo
+//    echo $form->field($taskForm->task, 'subTasks')->widget(TaskPickerField::class, [
+//        'id' => 'subTaskPicker',
+//        'selection' => $taskForm->task->subTasks,
+//        'url' => $taskForm->getSubTaskPickerUrl(),
+//        'placeholder' => Yii::t('TaskModule.views_index_edit', 'Add sub tasks')
+//    ])
+    ?>
+
 </div>
