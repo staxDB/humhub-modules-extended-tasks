@@ -18,7 +18,7 @@ use yii\helpers\Html;
  *
  * @since 0.5
  */
-class RemindResponsibleStart extends BaseNotification
+class RemindEnd extends BaseNotification
 {
     /**
      * @inheritdoc
@@ -33,7 +33,7 @@ class RemindResponsibleStart extends BaseNotification
     /**
      * @inheritdoc
      */
-    public $viewName = "taskNotification";
+    public $viewName = "remind.php";
 
     /**
      * @inheritdoc
@@ -45,12 +45,12 @@ class RemindResponsibleStart extends BaseNotification
 
     public function html()
     {
-        return Yii::t('TaskModule.notifications', '{userName}: task {task} in space {spaceName} starts at {dateTime}.', [
-            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+        return Yii::t('TaskModule.notifications', 'Task {task} in space {spaceName} ends at {dateTime}.', [
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
-            '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+            '{dateTime}' => Html::encode($this->source->formattedEndDateTime)
         ]);
+
     }
 
     /**
@@ -58,11 +58,10 @@ class RemindResponsibleStart extends BaseNotification
      */
     public function getMailSubject()
     {
-        return Yii::t('TaskModule.notifications', '{userName}: task {task} in space {spaceName} starts at {dateTime}.', [
-            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
-            '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
-            '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName)),
-            '{dateTime}' => Html::encode($this->source->formattedStartDateTime)
+        return Yii::t('TaskModule.notifications', 'Task {task} in space {spaceName} ends at {dateTime}.', [
+            '{task}' => Html::encode($this->getContentInfo($this->source, false)),
+            '{spaceName}' => Html::encode($this->source->content->container->displayName),
+            '{dateTime}' => Html::encode($this->source->formattedEndDateTime)
         ]);
     }
 }

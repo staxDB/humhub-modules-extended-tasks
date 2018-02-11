@@ -1,4 +1,8 @@
 <?php
+
+use humhub\modules\task\widgets\MailContentEntry;
+
+
 /**
  * @link https://www.humhub.org/
  * @copyright Copyright (c) 2017 HumHub GmbH & Co. KG
@@ -38,17 +42,20 @@
     <tr>
         <td>
             <?=
-            humhub\widgets\mails\MailContentEntry::widget([
+            MailContentEntry::widget([
                 'originator' => $originator,
-                'content' => $contentContainer->content,
+                'content' => $html,
                 'date' => $date,
-                'space' => $space
+                'space' => $space,
+                'isReminder' => false,
+                'source' => $source
             ])
             ?>
         </td>
     </tr>
     <tr>
-        <td height="10"></td>
+        <td height="10">
+        </td>
     </tr>
     <tr>
         <td>

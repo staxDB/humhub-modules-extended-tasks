@@ -58,7 +58,7 @@ class NotifyStatusPendingReview extends BaseNotification
     public function getMailSubject()
     {
         return Yii::t('TaskModule.notifications', '{userName} requests you to review Task {task} in space {spaceName}.', [
-            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+            '{userName}' => Html::encode($this->originator->displayName),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
         ]);

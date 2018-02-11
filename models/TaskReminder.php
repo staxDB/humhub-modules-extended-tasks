@@ -244,7 +244,7 @@ class TaskReminder extends ActiveRecord
                 return true;
             }
         }
-        elseif ($task->getStartDateTime() < $now)
+        if ($task->getStartDateTime() < $now)
             $this->updateAttributes(['start_reminder_sent' => 1]);
 
         if (!$this->end_reminder_sent) {
@@ -254,7 +254,7 @@ class TaskReminder extends ActiveRecord
                 return true;
             }
         }
-        elseif ($task->getStartDateTime() < $now)
+        if ($task->getEndDateTime() < $now)
             $this->updateAttributes(['end_reminder_sent' => 1]);
 
         return false;

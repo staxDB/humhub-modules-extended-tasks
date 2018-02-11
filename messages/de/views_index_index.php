@@ -28,8 +28,7 @@ return array (
     'Let Task Review' => 'Prüfen lassen',
     'Finish Task' => 'Aufgabe abschließen',
     'Reset Task' => 'Aufgabe zurücksetzen',
-    'Print task' => 'Aufgabe Drucken',
-    'Share task' => 'Aufgabe teilen',
+    'Reject review' => 'Prüfung verwerfen'
 
 
 );

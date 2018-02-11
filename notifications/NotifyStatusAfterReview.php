@@ -58,7 +58,7 @@ class NotifyStatusAfterReview extends BaseNotification
     public function getMailSubject()
     {
         return Yii::t('TaskModule.notifications', '{userName} marked Task {task} in space {spaceName} as completed.', [
-            '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
+            '{userName}' => Html::encode($this->originator->displayName),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
         ]);

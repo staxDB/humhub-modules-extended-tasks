@@ -13,10 +13,8 @@ use humhub\modules\task\notifications\NotifyStatusInProgress;
 use humhub\modules\task\notifications\NotifyStatusPendingReview;
 use humhub\modules\task\notifications\NotifyStatusRejectedAfterReview;
 use humhub\modules\task\notifications\NotifyStatusReset;
-use humhub\modules\task\notifications\RemindAssignedEnd;
-use humhub\modules\task\notifications\RemindAssignedStart;
-use humhub\modules\task\notifications\RemindResponsibleStart;
-use humhub\modules\task\notifications\RemindResponsibleEnd;
+use humhub\modules\task\notifications\RemindEnd;
+use humhub\modules\task\notifications\RemindStart;
 use Yii;
 use DateInterval;
 use DateTime;
@@ -782,13 +780,28 @@ class Task extends ContentActiveRecord implements Searchable
     // ###########  handle notifications  ###########
 
     /**
+     * Filters responsible users from the list of assigned users
+     *
+     * @return array|User[]
+     */
+    private function filterResponsibleAssigned()
+    {
+        $responsible = $this->getTaskResponsibleUsers()->select(['id']);
+
+        $filteredAssigned = $this->getTaskAssignedUsers()
+            ->where(['not in', 'id' ,$responsible])
+            ->all();
+        return $filteredAssigned;
+    }
+
+    /**
      * Notify users about created task
      * @throws \yii\base\InvalidConfigException
      */
     public function notifyCreated()
     {
 //        if (self::hasTaskAssigned())
-            NotifyAssigned::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+            NotifyAssigned::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
 //        if (self::hasTaskResponsible())
             NotifyResponsible::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
     }
@@ -799,9 +812,9 @@ class Task extends ContentActiveRecord implements Searchable
     public function remindUserOfStart()
     {
         if (self::hasTaskAssigned())
-            RemindAssignedStart::instance()->from($this->content->user)->about($this)->sendBulk($this->taskAssignedUsers);
+            RemindStart::instance()->from($this->content->user)->about($this)->sendBulk(self::filterResponsibleAssigned());
         if (self::hasTaskResponsible())
-            RemindResponsibleStart::instance()->from($this->content->user)->about($this)->sendBulk($this->taskResponsibleUsers);
+            RemindStart::instance()->from($this->content->user)->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
@@ -810,9 +823,9 @@ class Task extends ContentActiveRecord implements Searchable
     public function remindUserOfEnd()
     {
         if (self::hasTaskAssigned())
-            RemindAssignedEnd::instance()->from($this->content->user)->about($this)->sendBulk($this->taskAssignedUsers);
+            RemindEnd::instance()->from($this->content->user)->about($this)->sendBulk(self::filterResponsibleAssigned());
         if (self::hasTaskResponsible())
-            RemindResponsibleEnd::instance()->from($this->content->user)->about($this)->sendBulk($this->taskResponsibleUsers);
+            RemindEnd::instance()->from($this->content->user)->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
@@ -845,7 +858,7 @@ class Task extends ContentActiveRecord implements Searchable
     public function notifyReset()
     {
         if ($this->hasTaskAssigned())
-            NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+            NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
 
         if ($this->hasTaskResponsible())
             NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
@@ -877,7 +890,7 @@ class Task extends ContentActiveRecord implements Searchable
     public function notifyCompleted()
     {
         if ($this->review && $this->hasTaskAssigned())
-            NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+            NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
         elseif ($this->hasTaskResponsible())
             NotifyStatusCompleted::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
     }
@@ -890,7 +903,7 @@ class Task extends ContentActiveRecord implements Searchable
     public function notifyRejectedReview()
     {
         if ($this->review && $this->hasTaskAssigned())
-            NotifyStatusRejectedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskAssignedUsers);
+            NotifyStatusRejectedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
     }
 
 

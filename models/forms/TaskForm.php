@@ -15,6 +15,7 @@
 
 namespace humhub\modules\task\models\forms;
 
+use humhub\modules\task\models\TaskReminder;
 use Yii;
 use yii\base\Model;
 use DateInterval;
@@ -128,6 +129,7 @@ class TaskForm extends Model
     public function checkAllDay()
     {
         Yii::$app->formatter->timeZone = $this->timeZone;
+        
         if($this->task->all_day) {
             $date = new DateTime('now', new DateTimeZone($this->timeZone));
             $date->setTime(0,0);
@@ -300,12 +302,14 @@ class TaskForm extends Model
         $endTime = new DateTime($end, new DateTimeZone($sourceTimeZone));
 
         Yii::$app->formatter->timeZone = $targetTimeZone;
+
+        // Todo: check if this is really necessary
         // Fix FullCalendar EndTime
-        if (CalendarUtils::isFullDaySpan($startTime, $endTime, true)) {
-            // In Fullcalendar the EndTime is the moment AFTER the event so we substract one second
-            $endTime->sub(new DateInterval("PT1S"));
-            $this->task->all_day = 1;
-        }
+//        if (CalendarUtils::isFullDaySpan($startTime, $endTime, true)) {
+//            // In Fullcalendar the EndTime is the moment AFTER the event so we substract one second
+//            $endTime->sub(new DateInterval("PT1S"));
+//            $this->task->all_day = 1;
+//        }
 
         $this->start_date = Yii::$app->formatter->asDateTime($startTime, $dateFormat);
         $this->start_time = Yii::$app->formatter->asTime($startTime, $this->getTimeFormat());
@@ -345,6 +349,20 @@ class TaskForm extends Model
     public function getContentContainer()
     {
         return $this->task->content->container;
+    }
+
+    public function getRemindModeItems()
+    {
+        return [
+            TaskReminder::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskReminder', 'About 1 Hour before'),
+            TaskReminder::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskReminder', 'About 2 Hours before'),
+            TaskReminder::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskReminder', '1 Day before'),
+            TaskReminder::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskReminder', '2 Days before'),
+            TaskReminder::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskReminder', '1 Week before'),
+            TaskReminder::REMIND_TWO_WEEKS => Yii::t('TaskModule.models_taskReminder', '2 Weeks before'),
+            TaskReminder::REMIND_THREE_WEEKS => Yii::t('TaskModule.models_taskReminder', '3 Weeks before'),
+            TaskReminder::REMIND_ONE_MONTH => Yii::t('TaskModule.models_taskReminder', '1 Month before'),
+        ];
     }
 
     // Todo: Create function in controller
