@@ -12,4 +12,5 @@ return array (
     '{userName} has re-opened task {task} in space {spaceName}.' => '{userName} hat Aufgabe {task} im Space {spaceName} wieder geöffnet.',
     'Task {task} in space {spaceName} ends at {dateTime}.' => 'Aufgabe {task} im Space {spaceName} endet am {dateTime}.',
     'Task {task} in space {spaceName} starts at {dateTime}.' => 'Aufgabe {task} im Space {spaceName} beginnt am {dateTime}.',
+    'Reminder' => 'Erinnerung',
 );

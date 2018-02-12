@@ -23,8 +23,8 @@ $deleteUrl = $contentContainer->createUrl('/task/index/delete', ['id' => $task->
     </div>
     <div class="modal-footer">
         <?php if($canManageEntries): ?>
-            <?= ModalButton::primary(Yii::t('CalendarModule.base', 'Edit'))->load($editUrl)->loader(true); ?>
+            <?= ModalButton::primary(Yii::t('TaskModule.base', 'Edit'))->load($editUrl)->loader(true); ?>
         <?php endif; ?>
-        <?= ModalButton::cancel(Yii::t('CalendarModule.base', 'Close')) ?>
+        <?= ModalButton::cancel(Yii::t('TaskModule.base', 'Close')) ?>
     </div>
 <?php ModalDialog::end(); ?>

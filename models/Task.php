@@ -4,8 +4,8 @@ namespace humhub\modules\task\models;
 
 use humhub\modules\notification\models\Notification;
 use humhub\modules\task\notifications\ExtensionRequest;
-use humhub\modules\task\notifications\ExtensionRequestRejected;
 use humhub\modules\task\notifications\NotifyAssigned;
+use humhub\modules\task\notifications\NotifyChangedDateTime;
 use humhub\modules\task\notifications\NotifyResponsible;
 use humhub\modules\task\notifications\NotifyStatusCompleted;
 use humhub\modules\task\notifications\NotifyStatusCompletedAfterReview;
@@ -45,6 +45,7 @@ use humhub\widgets\Label;
  * @property string $title
  * @property string $description
  * @property integer $review
+ * @property integer $request_sent
  * @property integer $scheduling
  * @property integer $all_day
  * @property string $start_datetime
@@ -154,7 +155,7 @@ class Task extends ContentActiveRecord implements Searchable
             }"],
             [['start_datetime'], DbDateValidator::className()],
             [['end_datetime'], DbDateValidator::className()],
-            [['all_day', 'scheduling', 'review'], 'integer'],
+            [['all_day', 'scheduling', 'review', 'request_sent'], 'integer'],
             [['cal_mode'], 'in', 'range' => self::$calModes],
             [['assignedUsers', 'description', 'responsibleUsers', 'selectedReminders'], 'safe'],
             [['title'], 'string', 'max' => 255],
@@ -171,6 +172,7 @@ class Task extends ContentActiveRecord implements Searchable
             'title' => Yii::t('TaskModule.models_task', 'Title'),
             'description' => Yii::t('TaskModule.models_task', 'Description'),
             'review' => Yii::t('TaskModule.models_task', 'Review by responsible user required'),
+            'request_sent' => Yii::t('TaskModule.models_task', 'Extend deadline request'),
             'scheduling' => Yii::t('TaskModule.models_task', 'Scheduling'),
             'all_day' => Yii::t('TaskModule.models_task', 'All Day'),
             'start_datetime' => Yii::t('TaskModule.models_task', 'Start'),
@@ -239,6 +241,12 @@ class Task extends ContentActiveRecord implements Searchable
             $this->end_datetime = new Expression("NULL");
         }
 
+        if ($this->isAttributeChanged('start_datetime', true) || $this->isAttributeChanged('end_datetime', true)) {
+            if ($this->request_sent) {
+                $this->request_sent = 0;
+            }
+        }
+
         return parent::beforeSave($insert);
     }
 
@@ -303,6 +311,10 @@ class Task extends ContentActiveRecord implements Searchable
 
         if (!$insert) {
             $this->updateItems();
+
+            if (array_key_exists('start_datetime', $changedAttributes) || array_key_exists('end_datetime', $changedAttributes)) {
+                self::notifyDateTimeChanged();
+            }
         }
 
         $this->saveNewItems();
@@ -789,7 +801,7 @@ class Task extends ContentActiveRecord implements Searchable
         $responsible = $this->getTaskResponsibleUsers()->select(['id']);
 
         $filteredAssigned = $this->getTaskAssignedUsers()
-            ->where(['not in', 'id' ,$responsible])
+            ->where(['not in', 'id', $responsible])
             ->all();
         return $filteredAssigned;
     }
@@ -801,9 +813,9 @@ class Task extends ContentActiveRecord implements Searchable
     public function notifyCreated()
     {
 //        if (self::hasTaskAssigned())
-            NotifyAssigned::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
+        NotifyAssigned::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
 //        if (self::hasTaskResponsible())
-            NotifyResponsible::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+        NotifyResponsible::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
     }
 
     /**
@@ -839,15 +851,17 @@ class Task extends ContentActiveRecord implements Searchable
     }
 
     /**
-     * Reject deadline extension request
-     * @param User $requestingUser
+     * Notify users about status change
      * @throws \yii\base\InvalidConfigException
      */
-    public function rejectExtensionRequest(User $requestingUser)
+    public function notifyDateTimeChanged()
     {
-        if (!empty($requestingUser)) {
-            if ($this->isTaskAssigned($requestingUser))
-                ExtensionRequestRejected::instance()->from(Yii::$app->user->getIdentity())->about($this)->send($requestingUser);
+        if (!empty($this->taskAssignedUsers)) {
+            NotifyChangedDateTime::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
+        }
+
+        if (!empty($this->taskResponsibleUsers)) {
+            NotifyChangedDateTime::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
         }
     }
 
@@ -998,6 +1012,31 @@ class Task extends ContentActiveRecord implements Searchable
         return $result;
     }
 
+    public function getFormattedDateTime($timeZone = null, $format = 'short')
+    {
+        if ($timeZone) {
+            Yii::$app->formatter->timeZone = $timeZone;
+        }
+
+        if (!$this->scheduling)
+            $result = Yii::t('TaskModule.views_index_index', 'No Scheduling set for this Task');
+        else {
+            $result = Yii::t('TaskModule.views_index_index', 'Deadline at');
+            if ($this->all_day) {
+                $result .= ' ' . Yii::$app->formatter->asDate($this->getEndDateTime(), $format);
+            }
+            else {
+                $result .= ' ' . Yii::$app->formatter->asDatetime($this->getEndDateTime(), $format);
+            }
+        }
+
+        if ($timeZone) {
+            Yii::$app->i18n->autosetLocale();
+        }
+
+        return $result;
+    }
+
     // TODO calc remaining days for notifications
     public function getRemainingDays()
     {
@@ -1043,6 +1082,13 @@ class Task extends ContentActiveRecord implements Searchable
         ];
     }
 
+
+    // ###########  handle deadline extension  ###########
+
+    public function hasRequestedExtension()
+    {
+        return (boolean)($this->request_sent);
+    }
 
     // ###########  handle reset  ###########
 
@@ -1134,7 +1180,7 @@ class Task extends ContentActiveRecord implements Searchable
     {
         if (!$this->scheduling)
             return false;
-        return ((!self::isTaskResponsible() && self::hasTaskResponsible() && (self::isTaskAssigned() || self::canAnyoneProcessTask()) && (!(self::isCompleted() || self::isPending()))));
+        return ((!self::isTaskResponsible() && self::hasTaskResponsible() && (self::isTaskAssigned() || self::canAnyoneProcessTask()) && (!(self::isCompleted() || self::isPending())) && (!self::hasRequestedExtension())));
     }
 
     /**

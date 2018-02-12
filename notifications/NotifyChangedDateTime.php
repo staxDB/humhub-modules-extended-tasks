@@ -18,12 +18,12 @@ use yii\helpers\Html;
  *
  * @since 0.5
  */
-class ExtensionRequestRejected extends BaseNotification
+class NotifyChangedDateTime extends BaseNotification
 {
     /**
      * @inheritdoc
      */
-    public $suppressSendToOriginator = false;
+    public $suppressSendToOriginator = true;
 
     /**
      * @inheritdoc
@@ -45,7 +45,7 @@ class ExtensionRequestRejected extends BaseNotification
 
     public function html()
     {
-        return Yii::t('TaskModule.notifications', '{userName} has rejected your deadline extension request for task {task} in space {spaceName}.', [
+        return Yii::t('TaskModule.notifications', '{userName} has changed deadline for task {task} in space {spaceName}.', [
             '{userName}' => Html::tag('strong', Html::encode($this->originator->displayName)),
             '{task}' => Html::tag('strong', Html::encode($this->getContentInfo($this->source, false))),
             '{spaceName}' => Html::tag('strong', Html::encode($this->source->content->container->displayName))
@@ -57,7 +57,7 @@ class ExtensionRequestRejected extends BaseNotification
      */
     public function getMailSubject()
     {
-        return Yii::t('TaskModule.notifications', '{userName} has rejected your deadline extension request for task {task} in space {spaceName}.', [
+        return Yii::t('TaskModule.notifications', '{userName} has changed deadline for task {task} in space {spaceName}.', [
             '{userName}' => Html::encode($this->originator->displayName),
             '{task}' => Html::encode($this->getContentInfo($this->source, false)),
             '{spaceName}' => Html::encode($this->source->content->container->displayName)

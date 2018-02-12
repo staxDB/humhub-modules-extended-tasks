@@ -18,13 +18,13 @@ class m180114_210903_initial extends humhub\components\Migration
             'cal_mode' => 'tinyint(4) NOT NULL DEFAULT 0',
             'time_zone' => 'varchar(60) DEFAULT NULL',
             'parent_task_id' => 'int(11) DEFAULT NULL',
+            'request_sent' => 'tinyint(4) DEFAULT 0',
         ), '');
 
         $this->createTable('task_assigned', array(
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'user_id' => 'int(11) NOT NULL',
-            'request_sent' => 'tinyint(4) DEFAULT 0',
         ), '');
 
         $this->createTable('task_responsible', array(

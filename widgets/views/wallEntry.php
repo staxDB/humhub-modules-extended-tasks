@@ -20,17 +20,27 @@ use humhub\widgets\ModalButton;
                     <a href="<?= $task->getUrl(); ?>"><?= Html::encode($task->title); ?></a>
                 </h4>
                 <h5>
-                    <?php if ($task->scheduling) : ?>
-                        <?= Yii::t('TaskModule.views_index_index', 'Deadline at') ?>
-                        <?= $task->getFormattedEndDateTime() ?>
-                    <?php else : ?>
-                        <?= Yii::t('TaskModule.views_index_index', 'No Scheduling set for this Task') ?>
-                    <?php endif; ?>
+                    <?= $task->getFormattedDateTime() ?>
                 </h5>
+
                 <div>
                     <?= \humhub\modules\task\widgets\TaskPercentageBar::widget(['task' => $task, 'filterResult' => false])?>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+
+        <strong><i class="fa fa-users"></i> <?= Yii::t('TaskModule.widgets_views_wallentry', 'Assignments:'); ?></strong><br>
+        <div style="font-style: italic; font-size: 13px;">
+            <?php if ($task->isTaskResponsible()) : ?>
+                <i class="fa fa-check"></i>
+                <?= Yii::t('TaskModule.widgets_views_wallentry', 'You are responsible!') ?>
+            <?php elseif ($task->isTaskAssigned()) : ?>
+                <i class="fa fa-check"></i>
+                <?= Yii::t('TaskModule.widgets_views_wallentry', 'You are assigned!') ?>
+            <?php endif; ?>
         </div>
     </div>
 

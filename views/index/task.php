@@ -14,7 +14,7 @@ use humhub\modules\task\models\Task;
 
 \humhub\modules\task\assets\Assets::register($this);
 
-$canEdit = $task->content->canEdit();
+$canEdit = (boolean)($task->content->canEdit() || $task->isTaskResponsible());
 $printUrl = $contentContainer->createUrl('print', ['id' => $task->id]);
 $shareLink = $contentContainer->createUrl('share', ['id' => $task->id]);
 

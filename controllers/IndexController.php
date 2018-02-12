@@ -295,12 +295,12 @@ class IndexController extends ContentContainerController
             throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
         }
 
-        if ($taskAssigned->hasRequestedExtension()) {
+        if ($task->hasRequestedExtension()) {
             $this->view->error(Yii::t('TaskModule.results', 'Already requested'));
         }
         else {
             $task->sendExtensionRequest();
-            $taskAssigned->updateAttributes(['request_sent' => 1]);
+            $task->updateAttributes(['request_sent' => 1]);
             $this->view->success(Yii::t('TaskModule.results', 'Request sent'));
         }
 

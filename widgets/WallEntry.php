@@ -47,23 +47,23 @@ class WallEntry extends \humhub\modules\content\widgets\WallEntry
         $this->controlsOptions['prevent'] = [\humhub\modules\content\widgets\EditLink::class , \humhub\modules\content\widgets\DeleteLink::class];
         $result = parent::getContextMenu();
 
-        $this->addControl($result, [
-            'class' => WallEntryControlLink::class,
-            'label' => Yii::t('MeetingModule.base', 'Edit'),
-            'icon' => 'fa-pencil',
-            'data-action-click' => 'meeting.editMeeting',
-            'data-action-url' => $this->contentObject->content->container->createUrl('/meeting/index/edit', ['id' => $this->contentObject->id, 'cal' => true]),
-            'sortOrder' => 100
-        ]);
-
-        $this->addControl($result, [
-            'class' => WallEntryControlLink::class,
-            'label' => Yii::t('MeetingModule.base', 'Delete'),
-            'icon' => 'fa-trash',
-            'data-action-click' => 'meeting.deleteMeeting',
-            'data-action-url' => $this->contentObject->content->container->createUrl('/meeting/index/delete', ['id' => $this->contentObject->id, 'cal' => true]),
-            'sortOrder' => 100
-        ]);
+//        $this->addControl($result, [
+//            'class' => WallEntryControlLink::class,
+//            'label' => Yii::t('MeetingModule.base', 'Edit'),
+//            'icon' => 'fa-pencil',
+//            'data-action-click' => 'task.editTask',
+//            'data-action-url' => $this->contentObject->content->container->createUrl('/task/index/edit', ['id' => $this->contentObject->id, 'cal' => true]),
+//            'sortOrder' => 100
+//        ]);
+//
+//        $this->addControl($result, [
+//            'class' => WallEntryControlLink::class,
+//            'label' => Yii::t('MeetingModule.base', 'Delete'),
+//            'icon' => 'fa-trash',
+//            'data-action-click' => 'task.deleteTask',
+//            'data-action-url' => $this->contentObject->content->container->createUrl('/task/index/delete', ['id' => $this->contentObject->id, 'cal' => true]),
+//            'sortOrder' => 100
+//        ]);
 
         return $result;
     }
