@@ -317,12 +317,12 @@ class IndexController extends ContentContainerController
         }
 
         if ($task->hasRequestedExtension()) {
-            $this->view->error(Yii::t('TaskModule.results', 'Already requested'));
+            $this->view->error(Yii::t('TaskModule.controller', 'Already requested'));
         }
         else {
             $task->sendExtensionRequest();
             $task->updateAttributes(['request_sent' => 1]);
-            $this->view->success(Yii::t('TaskModule.results', 'Request sent'));
+            $this->view->success(Yii::t('TaskModule.controller', 'Request sent'));
         }
 
         return $this->htmlRedirect($this->contentContainer->createUrl('view', [
@@ -409,9 +409,9 @@ class IndexController extends ContentContainerController
         }
 
         if ($task->changeStatus($status))
-            $this->view->success(Yii::t('TaskModule.results', 'Success'));
+            $this->view->success(Yii::t('TaskModule.controller', 'Saved'));
         else
-            $this->view->error(Yii::t('TaskModule.results', 'Error'));
+            $this->view->error(Yii::t('TaskModule.controller', 'Error'));
 
         return $this->redirect($this->contentContainer->createUrl('/task/index/view', ['id' => $task->id]));
 
@@ -430,9 +430,9 @@ class IndexController extends ContentContainerController
         }
 
         if ($task->changeStatus(Task::STATUS_IN_PROGRESS))
-            $this->view->success(Yii::t('TaskModule.results', 'Saved'));
+            $this->view->success(Yii::t('TaskModule.controller', 'Saved'));
         else
-            $this->view->error(Yii::t('TaskModule.results', 'Error'));
+            $this->view->error(Yii::t('TaskModule.controller', 'Error'));
 
         return $this->redirect($this->contentContainer->createUrl('/task/index/view', ['id' => $task->id]));
 
