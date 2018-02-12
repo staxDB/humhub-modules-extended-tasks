@@ -262,6 +262,10 @@ class IndexController extends ContentContainerController
 
         $taskForm = new TaskForm(['task' => $task]);
 
+        //Set newAnswers, and editAnswers which will be saved by afterSave of the poll class
+//        $taskForm->task->setNewItems(Yii::$app->request->post('newItems'));
+//        $taskForm->task->setEditItems(Yii::$app->request->post('items'));
+
         if ($taskForm->updateTime(Yii::$app->request->post('start'), Yii::$app->request->post('end'))) {
             return $this->asJson(['success' => true]);
         }

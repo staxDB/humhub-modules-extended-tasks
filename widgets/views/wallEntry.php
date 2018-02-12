@@ -30,19 +30,25 @@ use humhub\widgets\ModalButton;
         </div>
     </div>
 
-    <div class="col-md-12">
+    <?php
+    $assigned = $task->isTaskAssigned();
+    $responsible = $task->isTaskResponsible();
+    ?>
 
+    <?php if ($responsible || $assigned) : ?>
+    <div class="col-md-12">
         <strong><i class="fa fa-users"></i> <?= Yii::t('TaskModule.widgets_views_wallentry', 'Assignments:'); ?></strong><br>
         <div style="font-style: italic; font-size: 13px;">
-            <?php if ($task->isTaskResponsible()) : ?>
+            <?php if ($responsible) : ?>
                 <i class="fa fa-check"></i>
                 <?= Yii::t('TaskModule.widgets_views_wallentry', 'You are responsible!') ?>
-            <?php elseif ($task->isTaskAssigned()) : ?>
+            <?php elseif ($assigned) : ?>
                 <i class="fa fa-check"></i>
                 <?= Yii::t('TaskModule.widgets_views_wallentry', 'You are assigned!') ?>
             <?php endif; ?>
         </div>
     </div>
+    <?php endif; ?>
 
     <div class="col-md-12" style="margin-top: 10px;">
         <?= ModalButton::primary(Yii::t('TaskModule.widgets_views_wallentry', 'Open Task'))->close()->link($task->getUrl())->sm() ?>

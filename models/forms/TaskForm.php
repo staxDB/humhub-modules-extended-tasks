@@ -350,7 +350,11 @@ class TaskForm extends Model
     {
         $this->task->time_zone = Yii::$app->formatter->timeZone;
         $this->translateDateTimes($start, $end, null, null, 'php:Y-m-d H:i:s');
-        return $this->save();
+
+        $this->task->start_datetime = $this->start_date;
+        $this->task->end_datetime = $this->end_date;
+
+        return $this->task->updateAttributes(['start_datetime' => $this->task->start_datetime, 'end_datetime' => $this->task->end_datetime]);
     }
 
     public function getContentContainer()

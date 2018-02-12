@@ -208,6 +208,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             ->leftJoin('task_assigned', 'task.id=task_assigned.task_id AND task_assigned.user_id=:user_id', [':user_id' => $user->id])
             ->leftJoin('task_responsible', 'task.id=task_responsible.task_id AND task_responsible.user_id=:user_id', [':user_id' => $user->id])
             ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
+            ->orWhere(['task_assigned.user_id' => $user->id])
+            ->orWhere(['task_responsible.user_id' => $user->id])
             ->orderBy([new Expression('-task.end_datetime DESC')])
             ->readable()
             ->all();
@@ -987,7 +989,6 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
 //            'backgroundColor' => Html::encode($this->color),
             'allDay' => $this->all_day,
             'updateUrl' => $this->content->container->createUrl('/task/index/edit-ajax', ['id' => $this->id]),
-//            'updateUrl' => $this->content->container->createUrl('/task/index/calendar-update', ['id' => $this->id]),
             'viewUrl' => $this->content->container->createUrl('/task/index/modal', ['id' => $this->id, 'cal' => '1']),
 //            'start' => Yii::$app->formatter->asDatetime($this->start_datetime, 'php:c'),
             'start' => $this->getStartDateTime(),
@@ -1018,7 +1019,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Responsible'))->right();
         elseif (self::isTaskAssigned())
             return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Assigned'))->right();
-
+        elseif (self::canAnyoneProcessTask())
+            return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'For all'))->right();
         return null;
     }
 
