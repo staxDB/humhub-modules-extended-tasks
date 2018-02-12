@@ -10,12 +10,14 @@ namespace humhub\modules\task;
 
 //use humhub\modules\task\integration\calendar\TaskCalendar;
 use humhub\modules\task\jobs\SendReminder;
+use humhub\modules\task\models\SnippetModuleSettings;
 use humhub\modules\task\models\Task;
 use humhub\modules\task\models\TaskAssigned;
 use humhub\modules\task\models\TaskItem;
 use humhub\modules\task\models\TaskReminder;
 use humhub\modules\task\models\TaskResponsible;
 use humhub\modules\task\integration\calendar\TaskCalendar;
+use humhub\modules\task\widgets\MyTasks;
 use Yii;
 use yii\base\Object;
 
@@ -49,6 +51,19 @@ class Events extends Object
 
         if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
             TaskCalendar::addItems($event);
+        }
+    }
+
+    public static function onDashboardSidebarInit($event)
+    {
+        if (Yii::$app->user->isGuest) {
+            return;
+        }
+
+        $settings = SnippetModuleSettings::instantiate();
+
+        if ($settings->showMyTasksSnippet()) {
+            $event->sender->addWidget(MyTasks::className(), [], ['sortOrder' => $settings->myTasksSnippetSortOrder]);
         }
     }
 

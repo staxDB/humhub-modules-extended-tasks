@@ -196,6 +196,23 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         return $this->content->container->createUrl('/task/index/view', ['id' => $this->id]);
     }
 
+    public static function findUserTasks(User $user = null)
+    {
+        if (!$user && !Yii::$app->user->isGuest) {
+            $user = Yii::$app->user->getIdentity();
+        } else if (!$user) {
+            return [];
+        }
+
+        return self::find()
+            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id AND task_assigned.user_id=:user_id', [':user_id' => $user->id])
+            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id AND task_responsible.user_id=:user_id', [':user_id' => $user->id])
+            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
+            ->orderBy([new Expression('-task.end_datetime DESC')])
+            ->readable()
+            ->all();
+    }
+
     public static function findPendingTasks(ContentContainerActiveRecord $container)
     {
         return self::find()
@@ -974,6 +991,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             'viewUrl' => $this->content->container->createUrl('/task/index/modal', ['id' => $this->id, 'cal' => '1']),
 //            'start' => Yii::$app->formatter->asDatetime($this->start_datetime, 'php:c'),
             'start' => $this->getStartDateTime(),
+
             'end' => $end,
         ];
     }
@@ -996,19 +1014,10 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getBadge()
     {
-//        $assigned = $this->getTaskAssigned();
-//        $responsible = $this->findParticipant();
-//
-//        if($participant && $this->isParticipationAllowed()) {
-//            switch($participant->participation_state) {
-//                case CalendarEntryParticipant::PARTICIPATION_STATE_ACCEPTED:
-//                    return Label::success(Yii::t('CalendarModule.base', 'Attending'))->right();
-//                case CalendarEntryParticipant::PARTICIPATION_STATE_MAYBE:
-//                    if($this->allow_maybe) {
-//                        return Label::success(Yii::t('CalendarModule.base', 'Interested'))->right();
-//                    }
-//            }
-//        }
+        if (self::isTaskResponsible())
+            return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Responsible'))->right();
+        elseif (self::isTaskAssigned())
+            return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Assigned'))->right();
 
         return null;
     }
