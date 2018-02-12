@@ -1298,7 +1298,6 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function canChangeStatus()
     {
-        return true;
         return ((self::isTaskResponsible() || self::isTaskAssigned() || self::canAnyoneProcessTask()) && !(self::isCompleted()));
     }
 

@@ -52,6 +52,16 @@ class Module extends ContentContainerModule
         ]);
     }
 
+    public function getName()
+    {
+        return Yii::t('TaskModule.base', 'Tasks');
+    }
+
+    public function getDescription()
+    {
+        return Yii::t('TaskModule.base', '“Tasks” is a complete task manager, which enables you to easily create tasks, define checklists and assign users and responsible users.');
+    }
+
     /**
      * @inheritdoc
      */

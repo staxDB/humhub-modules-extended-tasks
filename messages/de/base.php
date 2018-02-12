@@ -12,4 +12,5 @@ return array(
     'Move down' => 'Nach unten verschieben',
     'Move up' => 'Nach oben verschieben',
     'Shift to other task' => 'Anderer Aufgabe zuordnen',
+    '“Tasks” is a complete task manager, which enables you to easily create tasks, define checklists and assign users and responsible users.' => '“Tasks” ist ein kompletter Taskmanager, der es Ihnen ermöglicht, auf einfache Weise Aufgaben zu erstellen, Checklisten zu definieren und Benutzer sowie verantwortliche Personen zuzuordnen.'
 );

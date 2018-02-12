@@ -1,14 +1,27 @@
 {
     "id": "task",
     "name": "Tasks",
-    "description": "“Tasks” is a complete task manager, which enables you to easily create tasks, define agendas, invite participants, minute the results and delegate tasks.",
+    "description": "“Tasks” is a complete task manager, which enables you to easily create tasks, define checklists and assign users and responsible users.",
     "keywords": [
-        "task",
-        "agenda"
+        "task"
     ],
     "humhub": {
-        "minVersion": "1.2.3"
+        "minVersion": "1.2.4"
     },
     "version": "0.1",
-    "screenshots": ["assets/screen1.jpg", "assets/screen2.jpg", "assets/screen3.jpg", "assets/screen4.jpg"]
+    "screenshots": [
+        "assets/screen1.jpg",
+        "assets/screen2.jpg",
+        "assets/screen3.jpg",
+        "assets/screen4.jpg",
+        "assets/screen5.jpg",
+        "assets/screen6.jpg",
+        "assets/screen7.jpg",
+        "assets/screen8.jpg",
+        "assets/screen9.jpg",
+        "assets/screen10.jpg",
+        "assets/screen11.jpg",
+        "assets/screen12.jpg",
+        "assets/screen13.jpg"
+    ]
 }
