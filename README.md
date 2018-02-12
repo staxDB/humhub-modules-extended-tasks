@@ -21,15 +21,12 @@ Reminders can also be created.
 
 KEEPING AN OVERVIEW  
 Add tasks either to the assigned & responsible users calendar or add it to the space calendar.
+Also you can use the myTasks-Snippet to keep an overview of tasks, you can work on!
 
 TODO
-- add (multiple) reminder(s)
-    - prevent a user who is responsible and assigned from receiving double notification!
 - add a repeat-function
     - recalculate the time period
     - before a task will be reset, check if it is completed --> if not, notify assigned and responsible users and do not reset the task (skip repeat)!
 - add TaskResults (add text or upload files) for users who are assigned / responsible
-- add to (assigned & responsible) user profile calendar!!
-- prevent guest users & Non-Space-Members working on task
 - log some result-statistics to give out a user-performance overview
-- test every kind of error! (maybe someone can write some tests)
+- testing (maybe someone can write tests for this module)
