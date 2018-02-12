@@ -25,7 +25,7 @@ $emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', 'Start now, by 
     <div class="panel-heading">
         <i class="fa fa-calendar-o"></i> <?= Yii::t('TaskModule.views_index_index', '<strong>Next</strong> tasks'); ?>
         <?php if ($canEdit) : ?>
-            <?= ModalButton::success(Yii::t('TaskModule.views_index_index', 'New task'))->post($createUrl)->sm()->icon('fa-plus')->right();?>
+            <?= ModalButton::success(Yii::t('TaskModule.views_index_index', 'New task'))->post($createUrl)->sm()->icon('fa-plus')->right(); ?>
         <?php endif; ?>
     </div>
 
@@ -56,25 +56,24 @@ $emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', 'Start now, by 
     </div>
 
     <div class="task-filter">
-        <?php $form = ActiveForm::begin(['action' => $filterUrl,  'options' => [ 'data-ui-widget' => 'task.TaskFilter', 'data-ui-init' => ''], 'enableClientValidation' => false]) ?>
-                <?= $form->field($filter, 'title')->textInput(['id' => 'taskfilter-title', 'placeholder' => Yii::t('TaskModule.views_index_index', 'Filter tasks by title')])->label(false) ?>
+        <?php $form = ActiveForm::begin(['action' => $filterUrl, 'options' => ['data-ui-widget' => 'task.TaskFilter', 'data-ui-init' => ''], 'enableClientValidation' => false]) ?>
+        <?= $form->field($filter, 'title')->textInput(['id' => 'taskfilter-title', 'placeholder' => Yii::t('TaskModule.views_index_index', 'Filter tasks by title')])->label(false) ?>
         <div id="task-filter-loader" class="pull-right"></div>
 
-                <div class="checkbox-filter">
-                    <?= $form->field($filter, 'past')->checkbox(['style' => 'float:left']); ?>
-                </div>
-                <div class="checkbox-filter">
-                    <?= $form->field($filter, 'taskAssigned')->checkbox(['style' => 'float:left']); ?>
-                </div>
-                <div class="checkbox-filter">
-                    <?= $form->field($filter, 'taskResponsible')->checkbox(['style' => 'float:left']); ?>
-                </div>
-                <div class="checkbox-filter">
-                    <?= $form->field($filter, 'own')->checkbox(['style' => 'float:left']); ?>
-                </div>
-                <div class="dropdown-filter">
-                    <?= $form->field($filter, 'status')->dropDownList(Task::getStatusItems())->label(false); ?>
-                </div>
+        <div class="row" style="padding-left: 10px; display: inline-block;">
+            <div class="checkbox-filter">
+                <?= $form->field($filter, 'taskAssigned')->checkbox(['style' => 'float:left']); ?>
+            </div>
+            <div class="checkbox-filter">
+                <?= $form->field($filter, 'taskResponsible')->checkbox(['style' => 'float:left']); ?>
+            </div>
+            <div class="checkbox-filter">
+                <?= $form->field($filter, 'own')->checkbox(['style' => 'float:left']); ?>
+            </div>
+            <div class="dropdown-filter">
+                <?= $form->field($filter, 'status')->dropDownList(Task::getStatusItems())->label(false); ?>
+            </div>
+        </div>
         <?php ActiveForm::end() ?>
     </div>
 

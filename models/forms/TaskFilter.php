@@ -39,11 +39,6 @@ class TaskFilter extends Model
     /**
      * @var int
      */
-    public $past = 0;
-
-    /**
-     * @var int
-     */
     public $status = Task::STATUS_ALL;
 
     /**
@@ -65,7 +60,7 @@ class TaskFilter extends Model
     {
         return [
             ['title', 'string'],
-            [['past', 'taskAssigned', 'taskResponsible', 'own', 'status'], 'integer']
+            [['taskAssigned', 'taskResponsible', 'own', 'status'], 'integer']
         ];
     }
 
@@ -73,7 +68,6 @@ class TaskFilter extends Model
     {
         return [
             'title' => Yii::t('TaskModule.models_forms_TaskFilter', 'Filter tasks'),
-            'past' => Yii::t('TaskModule.models_forms_TaskFilter', 'Only past tasks'),
             'status' => Yii::t('TaskModule.models_forms_TaskFilter', 'Status'),
             'taskAssigned' => Yii::t('TaskModule.models_forms_TaskFilter', 'I\'m assigned'),
             'taskResponsible' => Yii::t('TaskModule.models_forms_TaskFilter', 'I\'m responsible'),
@@ -85,11 +79,7 @@ class TaskFilter extends Model
     {
         $user = Yii::$app->user->getIdentity();
 
-        if($this->past) {
-            $query = Task::findPastTasks($this->contentContainer);
-        } else {
-            $query = Task::findReadable($this->contentContainer);
-        }
+        $query = Task::findReadable($this->contentContainer);
 
         if($this->status != Task::STATUS_ALL) {
             $query->andWhere(['task.status' => $this->status]);

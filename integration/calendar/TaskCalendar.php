@@ -27,7 +27,7 @@ class TaskCalendar extends Object
     /**
      * Default color of task type calendar items.
      */
-    const DEFAULT_COLOR = '#2c99d6';
+    const DEFAULT_COLOR = '#F4778E';
 
     const ITEM_TYPE_KEY = 'task';
 
@@ -40,7 +40,7 @@ class TaskCalendar extends Object
         $event->addType(static::ITEM_TYPE_KEY, [
             'title' => Yii::t('TaskModule.base', 'Task'),
             'color' => static::DEFAULT_COLOR,
-            'icon' => 'fa-calendar-o'
+            'icon' => 'fa-tasks'
         ]);
     }
 
@@ -49,21 +49,19 @@ class TaskCalendar extends Object
      */
     public static function addItems($event)
     {
-        /* @var $tasks Task[] */
-        $tasks = TaskCalendarQuery::findForEvent($event);
+       /* @var $tasks Task[] */
+       $tasks = TaskCalendarQuery::find()
+           ->container($event->contentContainer)
+           ->from($event->start)->to($event->end)
+           ->filter($event->filters)
+           ->limit($event->limit)
+           ->query()->where(['task.scheduling' => 1])
+           ->andWhere(['task.cal_mode' => Task::CAL_MODE_SPACE])
+           ->all();
 
         $items = [];
         foreach ($tasks as $task) {
-            $items[] = [
-                'start' => $task->getBeginDateTime(),
-                'end' => $task->getEndDateTime(),
-                'title' => $task->title,
-                'editable' => true,
-                'icon' => 'fa-calendar-o',
-                'viewUrl' => $task->content->container->createUrl('/task/index/modal', ['id' => $task->id, 'cal' => true]),
-                'openUrl' => $task->content->getUrl(),
-                'updateUrl' => $task->content->container->createUrl('/task/index/calendar-update', ['id' => $task->id]),
-            ];
+            $items[] = $task->getFullCalendarArray();
         }
 
         $event->addItems(static::ITEM_TYPE_KEY, $items);

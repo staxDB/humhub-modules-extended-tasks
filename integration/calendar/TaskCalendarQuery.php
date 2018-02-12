@@ -25,16 +25,18 @@ class TaskCalendarQuery extends AbstractCalendarQuery
      */
     protected static $recordClass = Task::class;
 
-    public $startField = 'date';
-    public $endField = 'date';
-    public $dateFormat = 'Y-m-d';
+    public $startField = 'start_datetime';
+    public $endField = 'end_datetime';
+    public $dateFormat = 'Y-m-d H:i:s';
 
     /**
      * @inheritdoc
      */
     public function filterIsParticipant()
     {
-        $this->_query->leftJoin('task_participant', 'task.id=task_participant.task_id AND task_participant.user_id=:userId', [':userId' => $this->_user->id]);
-        $this->_query->andWhere('task_participant.id IS NOT NULL');
+        $this->_query->leftJoin('task_assigned', 'task.id=task_assigned.task_id AND task_assigned.user_id=:userId', [':userId' => $this->_user->id]);
+        $this->_query->leftJoin('task_responsible', 'task.id=task_responsible.task_id AND task_responsible.user_id=:userId', [':userId' => $this->_user->id]);
     }
+
+
 }

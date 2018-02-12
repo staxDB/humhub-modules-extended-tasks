@@ -15,6 +15,7 @@ use humhub\modules\task\models\TaskAssigned;
 use humhub\modules\task\models\TaskItem;
 use humhub\modules\task\models\TaskReminder;
 use humhub\modules\task\models\TaskResponsible;
+use humhub\modules\task\integration\calendar\TaskCalendar;
 use Yii;
 use yii\base\Object;
 
@@ -26,30 +27,30 @@ use yii\base\Object;
  */
 class Events extends Object
 {
-//    /**
-//     * @param $event \humhub\modules\calendar\interfaces\CalendarItemTypesEvent
-//     * @return mixed
-//     */
-//    public static function onGetCalendarItemTypes($event)
-//    {
-//        $contentContainer = $event->contentContainer;
-//
-//        if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
-//            TaskCalendar::addItemTypes($event);
-//        }
-//    }
-//
-//    /**
-//     * @param $event \humhub\modules\calendar\interfaces\CalendarItemsEvent;
-//     */
-//    public static function onFindCalendarItems($event)
-//    {
-//        $contentContainer = $event->contentContainer;
-//
-//        if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
-//            TaskCalendar::addItems($event);
-//        }
-//    }
+    /**
+     * @param $event \humhub\modules\calendar\interfaces\CalendarItemTypesEvent
+     * @return mixed
+     */
+    public static function onGetCalendarItemTypes($event)
+    {
+        $contentContainer = $event->contentContainer;
+
+        if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
+            TaskCalendar::addItemTypes($event);
+        }
+    }
+
+    /**
+     * @param $event \humhub\modules\calendar\interfaces\CalendarItemsEvent;
+     */
+    public static function onFindCalendarItems($event)
+    {
+        $contentContainer = $event->contentContainer;
+
+        if(!$contentContainer || $contentContainer->isModuleEnabled('task')) {
+            TaskCalendar::addItems($event);
+        }
+    }
 
     public static function onSpaceMenuInit($event)
     {

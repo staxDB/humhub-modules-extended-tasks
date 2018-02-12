@@ -305,11 +305,11 @@ class TaskForm extends Model
 
         // Todo: check if this is really necessary
         // Fix FullCalendar EndTime
-//        if (CalendarUtils::isFullDaySpan($startTime, $endTime, true)) {
-//            // In Fullcalendar the EndTime is the moment AFTER the event so we substract one second
-//            $endTime->sub(new DateInterval("PT1S"));
-//            $this->task->all_day = 1;
-//        }
+        if (CalendarUtils::isFullDaySpan($startTime, $endTime, true)) {
+            // In Fullcalendar the EndTime is the moment AFTER the event so we substract one second
+            $endTime->sub(new DateInterval("PT1S"));
+            $this->task->all_day = 1;
+        }
 
         $this->start_date = Yii::$app->formatter->asDateTime($startTime, $dateFormat);
         $this->start_time = Yii::$app->formatter->asTime($startTime, $this->getTimeFormat());
@@ -344,6 +344,13 @@ class TaskForm extends Model
     public function getTaskResponsiblePickerUrl()
     {
         return $this->task->content->container->createUrl('/task/index/task-assigned-picker', ['id' => $this->task->id]);
+    }
+
+    public function updateTime($start = null, $end = null)
+    {
+        $this->task->time_zone = Yii::$app->formatter->timeZone;
+        $this->translateDateTimes($start, $end, null, null, 'php:Y-m-d H:i:s');
+        return $this->save();
     }
 
     public function getContentContainer()

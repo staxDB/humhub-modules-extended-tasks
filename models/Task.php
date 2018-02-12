@@ -2,6 +2,7 @@
 
 namespace humhub\modules\task\models;
 
+use humhub\modules\calendar\interfaces\CalendarItem;
 use humhub\modules\notification\models\Notification;
 use humhub\modules\task\notifications\ExtensionRequest;
 use humhub\modules\task\notifications\NotifyAssigned;
@@ -15,6 +16,7 @@ use humhub\modules\task\notifications\NotifyStatusRejectedAfterReview;
 use humhub\modules\task\notifications\NotifyStatusReset;
 use humhub\modules\task\notifications\RemindEnd;
 use humhub\modules\task\notifications\RemindStart;
+use humhub\libs\Html;
 use Yii;
 use DateInterval;
 use DateTime;
@@ -56,7 +58,7 @@ use humhub\widgets\Label;
  * @property string $time_zone The timeZone this entry was saved, note the dates itself are always saved in app timeZone
  */
 //class Task extends ContentActiveRecord implements Searchable
-class Task extends ContentActiveRecord implements Searchable
+class Task extends ContentActiveRecord implements Searchable, CalendarItem
 {
 
     /**
@@ -99,15 +101,13 @@ class Task extends ContentActiveRecord implements Searchable
      * Cal Modes
      */
     const CAL_MODE_NONE = 0;
-    const CAL_MODE_USERS = 1;
-    const CAL_MODE_SPACE = 2;
+    const CAL_MODE_SPACE = 1;
 
     /**
      * @var array all given cal modes as array
      */
     public static $calModes = [
         self::CAL_MODE_NONE,
-        self::CAL_MODE_USERS,
         self::CAL_MODE_SPACE
     ];
 
@@ -203,20 +203,6 @@ class Task extends ContentActiveRecord implements Searchable
             ->orderBy([new Expression('-task.end_datetime DESC')])
             ->readable()
             ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED]);
-    }
-
-    /**
-     * @param ContentContainerActiveRecord $container
-     * @return ActiveQuery
-     * @throws \yii\base\Exception
-     */
-    public static function findPastTasks(ContentContainerActiveRecord $container)
-    {
-        return self::find()
-            ->contentContainer($container)
-            ->orderBy(['task.end_datetime' => SORT_DESC])
-            ->readable()
-            ->andWhere(['<', 'task.end_datetime', date('Y-m-d')]);
     }
 
     public static function findReadable(ContentContainerActiveRecord $container)
@@ -932,7 +918,6 @@ class Task extends ContentActiveRecord implements Searchable
     {
         return [
             self::CAL_MODE_NONE => Yii::t('TaskModule.models_task', 'Don\'t add to calendar'),
-            self::CAL_MODE_USERS => Yii::t('TaskModule.models_task', 'Add in users calendar'),
             self::CAL_MODE_SPACE => Yii::t('TaskModule.models_task', 'Add to space calendar'),
         ];
     }
@@ -943,15 +928,89 @@ class Task extends ContentActiveRecord implements Searchable
             case (self::CAL_MODE_NONE):
                 return Yii::t('TaskModule.models_task', 'Don\'t add to calendar');
                 break;
-            case (self::CAL_MODE_USERS):
-                return Yii::t('TaskModule.models_task', 'Add in users calendar');
-                break;
             case (self::CAL_MODE_SPACE):
                 return Yii::t('TaskModule.models_task', 'Add to space calendar');
                 break;
             default:
                 return;
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFullCalendarArray()
+    {
+//        $end = Yii::$app->formatter->asDatetime($this->end_datetime, 'php:c');
+//
+//        if ($this->all_day) {
+//            // Note: In fullcalendar the end time is the moment AFTER the event.
+//            // But we store the exact event time 00:00:00 - 23:59:59 so add some time to the full day event.
+//            $endDateTime = new DateTime($this->end_datetime);
+//            $endDateTime->add(new DateInterval('PT2H'));
+//            $end = $endDateTime->format('Y-m-d');
+//        }
+
+        $end = $this->getEndDateTime();
+
+        if ($this->all_day) {
+            $end = $end->modify('+1 minute');
+        }
+
+        if(!Yii::$app->user->isGuest) {
+            Yii::$app->formatter->timeZone = Yii::$app->user->getIdentity()->time_zone;
+        }
+
+        $title = Html::encode($this->title);
+
+        return [
+            'id' => $this->id,
+            'title' => $title,
+            'editable' => ($this->content->canEdit() || self::isTaskResponsible()),
+//            'backgroundColor' => Html::encode($this->color),
+            'allDay' => $this->all_day,
+            'updateUrl' => $this->content->container->createUrl('/task/index/edit-ajax', ['id' => $this->id]),
+//            'updateUrl' => $this->content->container->createUrl('/task/index/calendar-update', ['id' => $this->id]),
+            'viewUrl' => $this->content->container->createUrl('/task/index/modal', ['id' => $this->id, 'cal' => '1']),
+//            'start' => Yii::$app->formatter->asDatetime($this->start_datetime, 'php:c'),
+            'start' => $this->getStartDateTime(),
+            'end' => $end,
+        ];
+    }
+
+
+    /**
+     * Access url of the source content or other view
+     *
+     * @return string the timezone this item was originally saved, note this is
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Returns a badge for the snippet
+     *
+     * @return string the timezone this item was originally saved, note this is
+     */
+    public function getBadge()
+    {
+//        $assigned = $this->getTaskAssigned();
+//        $responsible = $this->findParticipant();
+//
+//        if($participant && $this->isParticipationAllowed()) {
+//            switch($participant->participation_state) {
+//                case CalendarEntryParticipant::PARTICIPATION_STATE_ACCEPTED:
+//                    return Label::success(Yii::t('CalendarModule.base', 'Attending'))->right();
+//                case CalendarEntryParticipant::PARTICIPATION_STATE_MAYBE:
+//                    if($this->allow_maybe) {
+//                        return Label::success(Yii::t('CalendarModule.base', 'Interested'))->right();
+//                    }
+//            }
+//        }
+
+        return null;
     }
 
 

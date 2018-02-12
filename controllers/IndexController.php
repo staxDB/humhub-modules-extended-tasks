@@ -248,6 +248,27 @@ class IndexController extends ContentContainerController
         }
     }
 
+    public function actionEditAjax($id)
+    {
+        $task = Task::find()->contentContainer($this->contentContainer)->where(['task.id' => $id])->one();
+
+        if (!$task) {
+            throw new HttpException('404');
+        }
+
+        if (!($task->content->canEdit() || $task->isTaskResponsible())) {
+            throw new HttpException('403');
+        }
+
+        $taskForm = new TaskForm(['task' => $task]);
+
+        if ($taskForm->updateTime(Yii::$app->request->post('start'), Yii::$app->request->post('end'))) {
+            return $this->asJson(['success' => true]);
+        }
+
+        throw new HttpException(400, "Could not save! " . print_r($task->getErrors()));
+    }
+
     // Todo
     public function actionCalendarUpdate($id)
     {
@@ -259,13 +280,13 @@ class IndexController extends ContentContainerController
             throw new HttpException('404');
         }
 
-        if (!($task->content->canEdit())) {
+        if (!($task->content->canEdit() || $task->isTaskResponsible())) {
             throw new HttpException('403');
         }
 
         $taskForm = new TaskForm(['task' => $task]);
 
-        if ($taskForm->updateTime(Yii::$app->request->post('start'), Yii::$app->request->post('end'))) {
+        if ($taskForm->updateDateTime(Yii::$app->request->post('start'), Yii::$app->request->post('end'))) {
             return $this->asJson(['success' => true]);
         }
 
