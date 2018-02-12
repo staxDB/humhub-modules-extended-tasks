@@ -63,7 +63,7 @@ class Events extends Object
         $settings = SnippetModuleSettings::instantiate();
 
         if ($settings->showMyTasksSnippet()) {
-            $event->sender->addWidget(MyTasks::className(), [], ['sortOrder' => $settings->myTasksSnippetSortOrder]);
+            $event->sender->addWidget(MyTasks::className(), ['limit' => $settings->myTasksSnippetMaxItems]);
         }
     }
 

@@ -39,4 +39,26 @@ class TaskCalendarQuery extends AbstractCalendarQuery
     }
 
 
+
+    /**
+     * Builds and executes the filter query.
+     * This method will filter out entries not readable by the current logged in user.
+     * @return [] result
+     */
+    public function all()
+    {
+        $this->_query->andWhere(['task.scheduling' => 1])
+            ->andWhere(['task.cal_mode' => Task::CAL_MODE_SPACE]);
+
+        try {
+            if (!$this->_built) {
+                $this->setupQuery();
+            }
+
+            return $this->_query->all();
+        } catch(FilterNotSupportedException $e) {
+            return [];
+        }
+    }
+
 }

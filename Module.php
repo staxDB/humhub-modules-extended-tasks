@@ -4,6 +4,7 @@ namespace humhub\modules\task;
 
 
 use Yii;
+use yii\helpers\Url;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\task\models\Task;
 use humhub\modules\space\models\Space;
@@ -42,6 +43,13 @@ class Module extends ContentContainerModule
     public function getContentContainerDescription(ContentContainerActiveRecord $container)
     {
         return Yii::t('TaskModule.base', 'Adds a task manager to this space.');
+    }
+
+    public function getConfigUrl()
+    {
+        return Url::to([
+            '/task/config/'
+        ]);
     }
 
     /**

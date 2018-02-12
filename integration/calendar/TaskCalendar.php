@@ -49,15 +49,7 @@ class TaskCalendar extends Object
      */
     public static function addItems($event)
     {
-       /* @var $tasks Task[] */
-       $tasks = TaskCalendarQuery::find()
-           ->container($event->contentContainer)
-           ->from($event->start)->to($event->end)
-           ->filter($event->filters)
-           ->limit($event->limit)
-           ->query()->where(['task.scheduling' => 1])
-           ->andWhere(['task.cal_mode' => Task::CAL_MODE_SPACE])
-           ->all();
+       $tasks = TaskCalendarQuery::findForEvent($event);
 
         $items = [];
         foreach ($tasks as $task) {

@@ -31,12 +31,12 @@ class MyTasks extends Widget
      *
      * @var int
      */
-    public $daysInFuture = 7;
+    public $limit = 5;
 
     public function run()
     {
         $settings = SnippetModuleSettings::instantiate();
-        $taskEntries = Task::findUserTasks();
+        $taskEntries = Task::findUserTasks(null, $this->limit);
 
         if (empty($taskEntries)) {
             return;

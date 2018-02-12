@@ -196,7 +196,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         return $this->content->container->createUrl('/task/index/view', ['id' => $this->id]);
     }
 
-    public static function findUserTasks(User $user = null)
+    public static function findUserTasks(User $user = null, $limit = 5)
     {
         if (!$user && !Yii::$app->user->isGuest) {
             $user = Yii::$app->user->getIdentity();
@@ -204,15 +204,54 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             return [];
         }
 
-        return self::find()
-            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id AND task_assigned.user_id=:user_id', [':user_id' => $user->id])
-            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id AND task_responsible.user_id=:user_id', [':user_id' => $user->id])
+        $query1 = self::find()
             ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
-            ->orWhere(['task_assigned.user_id' => $user->id])
-            ->orWhere(['task_responsible.user_id' => $user->id])
+            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id', [])
+            ->andWhere(['task_responsible.user_id' => $user->id]);
+
+        $query2 = self::find()
+            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
+            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
+            ->andWhere(['task_assigned.user_id' => $user->id]);
+
+        $query3 = self::find()
+            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
+            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id', [])
+            ->where('ISNULL(task_responsible.task_id)');
+
+        $query4 = self::find()
+            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
+            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
+            ->where('ISNULL(task_assigned.task_id)');
+
+        $query5 = $query1->union($query2)->union($query3)->union($query4)
             ->orderBy([new Expression('-task.end_datetime DESC')])
-            ->readable()
+            ->readable();
+
+        return self::find()
+            ->select('*')
+            ->from([
+                $query5,
+            ])
+            ->limit($limit)
             ->all();
+
+//
+//        return $query1->union($query2)->union($query3)->union($query4)
+//            ->limit(2)
+//            ->orderBy([new Expression('-task.end_datetime DESC')])
+//            ->readable()
+//            ->all();
+
+//        return self::find()
+//            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
+//            ->where(['task_assigned.user_id' => $user->id])
+//            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id', [])
+//            ->where(['task_responsible.user_id' => $user->id])
+//            ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED])
+//            ->orderBy([new Expression('-task.end_datetime DESC')])
+//            ->readable()
+//            ->all();
     }
 
     public static function findPendingTasks(ContentContainerActiveRecord $container)
