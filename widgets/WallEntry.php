@@ -9,6 +9,9 @@
 namespace humhub\modules\task\widgets;
 
 use humhub\modules\content\widgets\WallEntryControlLink;
+use humhub\modules\task\assets\Assets;
+use humhub\modules\content\widgets\EditLink;
+use humhub\modules\content\widgets\DeleteLink;
 use Yii;
 
 /**
@@ -33,7 +36,7 @@ class WallEntry extends \humhub\modules\content\widgets\WallEntry
      */
     public function run()
     {
-        \humhub\modules\meeting\assets\Assets::register($this->view);
+        Assets::register($this->view);
         return $this->render('wallEntry', ['task' => $this->contentObject, 'justEdited' => $this->justEdited]);
     }
 
@@ -44,7 +47,7 @@ class WallEntry extends \humhub\modules\content\widgets\WallEntry
         }
 
         // TODO: remove this after simplestream modal edit/delete runs as expected
-        $this->controlsOptions['prevent'] = [\humhub\modules\content\widgets\EditLink::class , \humhub\modules\content\widgets\DeleteLink::class];
+        $this->controlsOptions['prevent'] = [EditLink::class , DeleteLink::class];
         $result = parent::getContextMenu();
 
 //        $this->addControl($result, [
