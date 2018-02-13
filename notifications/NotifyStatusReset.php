@@ -23,7 +23,7 @@ class NotifyStatusReset extends BaseNotification
     /**
      * @inheritdoc
      */
-    public $suppressSendToOriginator = false;
+    public $suppressSendToOriginator = true;
 
     /**
      * @inheritdoc
