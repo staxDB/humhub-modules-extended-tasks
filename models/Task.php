@@ -976,7 +976,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     {
         return [
             self::CAL_MODE_NONE => Yii::t('TaskModule.models_task', 'Don\'t add to calendar'),
-            self::CAL_MODE_SPACE => Yii::t('TaskModule.models_task', 'Add to space calendar'),
+            self::CAL_MODE_SPACE => Yii::t('TaskModule.models_task', 'Add Deadline to space calendar'),
         ];
     }
 
@@ -1011,27 +1011,35 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
 
         $end = $this->getEndDateTime();
 
-        if ($this->all_day) {
-            $end = $end->modify('+1 minute');
-        }
+//        $start = $this->getEndDateTime();
+
+//        if ($this->all_day) {
+//            $start = $start->setTime('00', '00', '00');
+//            $end = $end->modify('+1 minute');
+//        }
+//        else {
+//            $start = $start->modify('-1 hour');
+////            $start = $start->setTime('00', '00', '00');
+//        }
 
         if(!Yii::$app->user->isGuest) {
             Yii::$app->formatter->timeZone = Yii::$app->user->getIdentity()->time_zone;
         }
 
-        $title = Html::encode($this->title);
+        $title = Yii::t('TaskModule.models_task', 'Deadline: ') . Html::encode($this->title);
 
         return [
             'id' => $this->id,
             'title' => $title,
-            'editable' => ($this->content->canEdit() || self::isTaskResponsible()),
+//            'editable' => ($this->content->canEdit() || self::isTaskResponsible()),
+            'editable' => false,
 //            'backgroundColor' => Html::encode($this->color),
             'allDay' => $this->all_day,
             'updateUrl' => $this->content->container->createUrl('/task/index/edit-ajax', ['id' => $this->id]),
             'viewUrl' => $this->content->container->createUrl('/task/index/modal', ['id' => $this->id, 'cal' => '1']),
 //            'start' => Yii::$app->formatter->asDatetime($this->start_datetime, 'php:c'),
-            'start' => $this->getStartDateTime(),
-
+//            'start' => $this->getStartDateTime(),
+            'start' => $end,
             'end' => $end,
         ];
     }

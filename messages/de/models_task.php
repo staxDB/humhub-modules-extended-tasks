@@ -17,5 +17,6 @@ return array (
     'Reminders' => 'Erinnerungen',
     'Scheduling' => 'Zeitplanung',
     'Don\'t add to calendar' => 'Nicht zum Kalender hinzufügen',
-    'Add to space calendar' => 'Dem Space-Kalender hinzufügen',
+    'Add Deadline to space calendar' => 'Deadline im Space-Kalender hinzufügen',
+    'Deadline: ' => 'Deadline: '
 );
