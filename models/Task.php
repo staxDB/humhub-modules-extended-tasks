@@ -1050,6 +1050,13 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         return null;
     }
 
+    public function getOverdueBadge()
+    {
+        if (self::isOverdue())
+            return Label::danger(Yii::t('TaskModule.views_index_index', 'Overdue'))->options(['style' => 'margin-right: 3px;'])->right();
+        return null;
+    }
+
 
     // ###########  handle datetime  ###########
 

@@ -23,6 +23,7 @@ use humhub\libs\Helpers;
                         <div class="media">
                             <div class="media-body  text-break">
                                 <?=  $entry->getBadge() ?>
+                                <?=  $entry->getOverdueBadge() ?>
                                 <strong>
                                     <?= Helpers::trimText(Html::encode($entry->getTitle()), 60) ?>
                                 </strong>
