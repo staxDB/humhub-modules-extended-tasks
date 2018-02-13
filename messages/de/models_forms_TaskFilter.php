@@ -1,7 +1,7 @@
 <?php
 return array (
     'Filter tasks' => 'Aufgaben filtern',
-    'Only past tasks' => 'Nur vergangene Aufgaben',
+    'Overdue' => 'Überfällig',
     'I\'m assigned' => 'Ich bin zugeordnet',
     'I\'m responsible' => 'Ich bin verantworlich',
     'Created by me' => 'Von mir erstellt'

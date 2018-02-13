@@ -62,6 +62,9 @@ $emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', 'Start now, by 
 
         <div class="row" style="padding-left: 10px; display: inline-block;">
             <div class="checkbox-filter">
+                <?= $form->field($filter, 'overdue')->checkbox(['style' => 'float:left']); ?>
+            </div>
+            <div class="checkbox-filter">
                 <?= $form->field($filter, 'taskAssigned')->checkbox(['style' => 'float:left']); ?>
             </div>
             <div class="checkbox-filter">

@@ -44,6 +44,11 @@ class TaskFilter extends Model
     /**
      * @var int
      */
+    public $overdue = false;
+
+    /**
+     * @var int
+     */
     public $taskAssigned;
 
     /**
@@ -60,7 +65,7 @@ class TaskFilter extends Model
     {
         return [
             ['title', 'string'],
-            [['taskAssigned', 'taskResponsible', 'own', 'status'], 'integer']
+            [['taskAssigned', 'taskResponsible', 'own', 'status', 'overdue'], 'integer']
         ];
     }
 
@@ -69,6 +74,7 @@ class TaskFilter extends Model
         return [
             'title' => Yii::t('TaskModule.models_forms_TaskFilter', 'Filter tasks'),
             'status' => Yii::t('TaskModule.models_forms_TaskFilter', 'Status'),
+            'overdue' => Yii::t('TaskModule.models_forms_TaskFilter', 'Overdue'),
             'taskAssigned' => Yii::t('TaskModule.models_forms_TaskFilter', 'I\'m assigned'),
             'taskResponsible' => Yii::t('TaskModule.models_forms_TaskFilter', 'I\'m responsible'),
             'own' => Yii::t('TaskModule.models_forms_TaskFilter', 'Created by me'),
@@ -80,6 +86,10 @@ class TaskFilter extends Model
         $user = Yii::$app->user->getIdentity();
 
         $query = Task::findReadable($this->contentContainer);
+
+        if($this->overdue) {
+            $query->andWhere('task.end_datetime < DATE(NOW())');
+        }
 
         if($this->status != Task::STATUS_ALL) {
             $query->andWhere(['task.status' => $this->status]);
