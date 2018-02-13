@@ -24,7 +24,7 @@ use \yii\helpers\Html;
         </h4>
         
         <div class="help-block">
-            <?= Yii::t('TaskModule.config', 'Adds an snippet with your tasks to the dashboard.') ?>
+            <?= Yii::t('TaskModule.config', 'Shows a widget with tasks on the dashboard where you are assigned/responsible.') ?>
         </div>
         
         <?= $form->field($model, 'myTasksSnippetShow')->checkbox(); ?>
