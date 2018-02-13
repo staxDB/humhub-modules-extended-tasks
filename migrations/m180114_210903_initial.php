@@ -8,6 +8,7 @@ class m180114_210903_initial extends humhub\components\Migration
         $this->createTable('task', array(
             'id' => 'pk',
             'title' => 'varchar(255) NOT NULL',
+            'color' => 'varchar(7)',
             'description' => 'TEXT NULL',
             'review' => 'tinyint(4) NOT NULL',
             'scheduling' => 'tinyint(4) NOT NULL',

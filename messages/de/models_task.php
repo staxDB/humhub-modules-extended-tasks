@@ -2,6 +2,7 @@
 return array (
     'Task' => 'Aufgabe',
     'Title' => 'Titel',
+    'Color' => 'Farbe',
     'Description' => 'Beschreibung',
     'Review by responsible user required' => 'Überprüfung durch verantwortliche Person erforderlich',
     'Start' => 'Start',

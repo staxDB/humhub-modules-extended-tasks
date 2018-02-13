@@ -13,16 +13,19 @@ use humhub\widgets\TimeAgo;
 
 $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
 //$icon = !$task->isToday() && $task->isPast() ? 'fa-calendar-check-o' : 'fa-calendar-o';
-$icon = 'fa-calendar-o';
+$icon = 'fa-tasks';
 $backUrl = $this->context->contentContainer->createUrl('/task/index');
 
 
 $participantStyle = 'display:inline-block;';
+$color = $task->color ? $task->color : $this->theme->variable('info');
 
 ?>
 <div class="panel-heading clearfix">
-    <div>
-        <strong><i class="fa <?= $icon ?>"></i> <?= Html::encode($task->title); ?></strong>
+    <div class="task-head" style="padding-left:5px; border-left: 5px solid <?= $color ?>">
+        <div>
+            <strong><i class="fa <?= $icon ?>"></i> <?= Html::encode($task->title); ?></strong>
+        </div>
     </div>
 
     <?= TaskMenu::widget(['task' => $task,

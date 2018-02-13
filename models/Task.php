@@ -45,6 +45,7 @@ use humhub\widgets\Label;
  * The followings are the available columns in table 'task':
  * @property integer $id
  * @property string $title
+ * @property string $color
  * @property string $description
  * @property integer $review
  * @property integer $request_sent
@@ -148,6 +149,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     {
         return [
             [['title'], 'required'],
+            [['color'], 'string', 'max' => 7],
             [['start_datetime', 'end_datetime'], 'required', 'when' => function ($model) {
                 return $model->scheduling == 1;
             }, 'whenClient' => "function (attribute, value) {
@@ -170,6 +172,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         return [
             'id' => 'ID',
             'title' => Yii::t('TaskModule.models_task', 'Title'),
+            'color' => Yii::t('TaskModule.models_task', 'Color'),
             'description' => Yii::t('TaskModule.models_task', 'Description'),
             'review' => Yii::t('TaskModule.models_task', 'Review by responsible user required'),
             'request_sent' => Yii::t('TaskModule.models_task', 'Extend deadline request'),
@@ -1008,16 +1011,15 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         $title = Yii::t('TaskModule.models_task', 'Deadline: ') . Html::encode($this->title);
 
         return [
-            'id' => $this->id,
+//            'id' => $this->id,
             'title' => $title,
 //            'editable' => ($this->content->canEdit() || self::isTaskResponsible()),
             'editable' => false,
-//            'backgroundColor' => Html::encode($this->color),
+            'color' => Html::encode($this->color),
             'allDay' => $this->all_day,
             'updateUrl' => $this->content->container->createUrl('/task/index/edit-ajax', ['id' => $this->id]),
             'viewUrl' => $this->content->container->createUrl('/task/index/modal', ['id' => $this->id, 'cal' => '1']),
-//            'start' => Yii::$app->formatter->asDatetime($this->start_datetime, 'php:c'),
-//            'start' => $this->getStartDateTime(),
+            'openUrl' => $this->content->container->createUrl('/task/index/view', ['id' => $this->id]),
             'start' => $end,
             'end' => $end,
         ];
@@ -1041,19 +1043,17 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getBadge()
     {
-        if (self::isTaskResponsible())
-            return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Responsible'))->right();
-        elseif (self::isTaskAssigned())
-            return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Assigned'))->right();
-        elseif (self::canAnyoneProcessTask())
-            return Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'For all'))->right();
-        return null;
-    }
+//        $return = null;
+//        if (self::isTaskResponsible())
+//            $return = Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Responsible'))->color($this->color)->right();
+//        elseif (self::isTaskAssigned())
+//            $return = Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Assigned'))->color($this->color)->right();
+//        elseif (self::canAnyoneProcessTask())
+//            $return = Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'For all'))->color($this->color)->right();
 
-    public function getOverdueBadge()
-    {
         if (self::isOverdue())
-            return Label::danger(Yii::t('TaskModule.views_index_index', 'Overdue'))->options(['style' => 'margin-right: 3px;'])->right();
+            return Label::danger(Yii::t('TaskModule.views_index_index', 'Overdue'))->icon('fa fa-exclamation-triangle')->options(['style' => 'margin-right: 3px;'])->right();
+
         return null;
     }
 

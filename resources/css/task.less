@@ -5,7 +5,7 @@
     background-color: #f7f7f7;
 
     .assigned-anyone {
-      font-size:14px;
+      font-size: 14px;
       font-style: italic;
       margin: 2px;
       color: #7a7a7a;
@@ -15,53 +15,58 @@
   .panel-heading .media {
     .updated {
       color: #bebebe;
-      font-size:11px;
-      font-weight:bold;
+      font-size: 11px;
+      font-weight: bold;
     }
     .author a {
       color: #bebebe;
-      font-size:11px;
+      font-size: 11px;
     }
   }
 }
 
 .task-overview {
-    li {
-      cursor: pointer;
+  li {
+    cursor: pointer;
+  }
+
+  li:last-child {
+    border-bottom: 0px;
+  }
+
+  .panel-body {
+    padding: 10px 0 !important;
+  }
+
+  .media-list {
+
+    .progress {
+      margin-top: 2px;
+      margin-bottom: 3px;
     }
 
-    li:last-child {
-      border-bottom:0px;
+    .summary, .empty {
+      font-size: 12px;
+      color: #bac2c7;
+      padding-left: 10px;
     }
 
-    .panel-body {
-      padding: 10px 0 !important;
-    }
-
-
-    .media-list {
-      .summary, .empty {
-        font-size:12px;
-        color: #bac2c7;
-        padding-left:10px;
+    .pagination {
+      margin-bottom: 0px;
+      li {
+        border: 0px;
+        padding: 0px;
       }
 
-      .pagination {
-        margin-bottom:0px;
-        li {
-          border:0px;
-          padding:0px;
-        }
-
-        li:hover {
-          border: 0px;
-        }
+      li:hover {
+        border: 0px;
       }
     }
+  }
 
   .task-filter {
-    background-color:#f7f7f7;
-    padding:10px 10px 0px 10px;
+    background-color: #f7f7f7;
+    padding: 10px 10px 0px 10px;
 
     #task-filter-loader {
       padding-top: 12px;
@@ -69,51 +74,53 @@
 
     .row {
       padding-left: 10px;
-      display: inline-flex;
+      //display: inline-flex;
+      display: inline-block;
       margin-bottom: 10px;
     }
 
     .dropdown-filter {
-      //display:inline-block;
+      display:inline-block;
 
       .form-group {
         margin: -7px;
         .form-control {
-          display: initial !important;
-          line-height: 16px;
-          height: auto;
-          width: 140px;
-          max-width: 200px;
+          //display: initial !important;
+          //line-height: 16px;
+          //height: auto;
+          //width: 140px;
+          //max-width: 200px;
           padding: 0px 20px 0px 8px;
-          margin-left: 10px;
+          margin-left: 12px;
         }
       }
     }
 
     .checkbox-filter {
-      //display:inline-block;
+      display:inline-block;
 
       .regular-checkbox:not(:checked) + .regular-checkbox-box {
         background-color: #fff;
       }
 
       .form-group {
-        margin:0px;
+        margin: 0px;
         .checkbox {
-          margin:0px !important;
+          margin: 0px !important;
         }
       }
     }
   }
 }
+
 #task-list-loader {
-  float:right;
+  float: right;
 }
 
 #task-items {
   list-style: none;
-  padding:0px;
-  margin:0px;
+  padding: 0px;
+  margin: 0px;
 
   //.task-item {
   //  .regular-checkbox:checked + span {
@@ -121,6 +128,7 @@
   //  }
   //}
 }
+
 //.task-item {
 //  .regular-checkbox:checked + span {
 //    text-decoration: line-through;
@@ -143,7 +151,7 @@
   h1.task-item-time-range {
     font-size: 17px;
     color: @colorInfo;
-    display:inline-block;
+    display: inline-block;
   }
 
   h1.task-item-title {
@@ -154,9 +162,9 @@
     color: #aeaeae;
   }
 
-  .task-item-head  {
-    cursor:move;
-    display:inline-block;
+  .task-item-head {
+    cursor: move;
+    display: inline-block;
   }
 
   //.task-item-container {
@@ -313,10 +321,22 @@
 
 }
 
-.wall-entry .media .task-assignment {
-    font-style: italic;
-    padding-bottom: 2px;
-    font-size: 13px;
+.wall-entry .media .task {
+
+  .progress {
+    margin-top: 2px;
+    margin-bottom: 3px;
+  }
+
+  .task-assignment {
+    margin-top: 12px;
+
+    div {
+      font-style: italic;
+      padding-bottom: 2px;
+      font-size: 13px;
+    }
+  }
 }
 
 .wall-entry-controls, .wall-entry-controls a {
@@ -346,7 +366,7 @@
 }
 
 .bootstrap-timepicker-widget .form-control {
-  padding:0px;
+  padding: 0px;
 }
 
 .select2-container--humhub .select2-selection--multiple .select2-selection__choice .picker-close {

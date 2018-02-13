@@ -14,7 +14,7 @@
 
     $color = "progress-bar-info";
     ?>
-    <div class="col-md-5" style="padding-left: 0; padding-right: 30px;">
+    <div class="col-md-6" style="padding-left: 0; padding-right: 30px;">
     <div class="progress">
         <div id="<?= $divID; ?>"
              class="progress-bar <?= $color; ?>"

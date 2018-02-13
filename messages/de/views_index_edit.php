@@ -12,6 +12,7 @@ return array (
     'Add reminder' => 'Erinnerungen hinzufügen',
 
     //edit-basic
+    'Title and Color' => 'Titel und Farbe',
     'Title of your task' => 'Titel Ihrer Aufgabe',
     'Add sub tasks' => 'Unteraufgaben hinzufügen',
 

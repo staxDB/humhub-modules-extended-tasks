@@ -17,13 +17,12 @@ use humhub\libs\Helpers;
         <hr style="margin:0px">
         <ul class="media-list">
             <?php foreach ($taskEntries as $entry) : ?>
-                <?php $color = $this->theme->variable('info')?>
+                <?php $color = $entry->color ? $entry->color : $this->theme->variable('info') ?>
                 <a href="<?= $entry->getUrl() ?>">
                     <li style="border-left: 3px solid <?= $color?>">
                         <div class="media">
                             <div class="media-body  text-break">
                                 <?=  $entry->getBadge() ?>
-                                <?=  $entry->getOverdueBadge() ?>
                                 <strong>
                                     <?= Helpers::trimText(Html::encode($entry->getTitle()), 60) ?>
                                 </strong>
