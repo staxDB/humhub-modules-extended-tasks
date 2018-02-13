@@ -11,7 +11,7 @@ return array (
     'Assigned' => 'Zugewiesen',
     'Anyone can work on this task' => 'Jeder kann an dieser Aufgabe arbeiten',
     'Responsible' => 'Verantwortlich',
-    'No Scheduling set for this Task' => 'Kein Zeitplanung für diese Aufgabe erstellt',
+    'No Scheduling set for this Task' => 'Keine Zeitplanung für diese Aufgabe erstellt',
 
     // Badge
     'Today' => 'Heute',
