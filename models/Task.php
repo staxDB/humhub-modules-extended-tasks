@@ -1043,14 +1043,6 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getBadge()
     {
-//        $return = null;
-//        if (self::isTaskResponsible())
-//            $return = Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Responsible'))->color($this->color)->right();
-//        elseif (self::isTaskAssigned())
-//            $return = Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'Assigned'))->color($this->color)->right();
-//        elseif (self::canAnyoneProcessTask())
-//            $return = Label::info(Yii::t('TaskModule.widgets_views_myTasks', 'For all'))->color($this->color)->right();
-
         if (self::isOverdue())
             return Label::danger(Yii::t('TaskModule.views_index_index', 'Overdue'))->icon('fa fa-exclamation-triangle')->options(['style' => 'margin-right: 3px;'])->right();
 
