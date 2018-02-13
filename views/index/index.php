@@ -60,7 +60,7 @@ $emptyText = ($canEdit) ? Yii::t('TaskModule.views_index_index', 'Start now, by 
         <?= $form->field($filter, 'title')->textInput(['id' => 'taskfilter-title', 'placeholder' => Yii::t('TaskModule.views_index_index', 'Filter tasks by title')])->label(false) ?>
         <div id="task-filter-loader" class="pull-right"></div>
 
-        <div class="row" style="padding-left: 10px; display: inline-block;">
+        <div class="row">
             <div class="checkbox-filter">
                 <?= $form->field($filter, 'overdue')->checkbox(['style' => 'float:left']); ?>
             </div>

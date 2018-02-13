@@ -14,7 +14,7 @@ use humhub\modules\task\models\Task;
 
 \humhub\modules\task\assets\Assets::register($this);
 
-$canEdit = (boolean)($task->content->canEdit() || $task->isTaskResponsible());
+$isResponsible = $task->isTaskResponsible();
 $printUrl = $contentContainer->createUrl('print', ['id' => $task->id]);
 $shareLink = $contentContainer->createUrl('share', ['id' => $task->id]);
 
@@ -22,7 +22,6 @@ $shareLink = $contentContainer->createUrl('share', ['id' => $task->id]);
 $actionUrl = '#';
 
 $collapse = true;
-$renderAddons = true;
 
 $this->registerJsConfig('task', [
     'text' => [
@@ -36,7 +35,7 @@ $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
 <div id="task-container" class="panel panel-default task-details">
 
     <?= $this->render('@task/views/index/task_header', [
-        'canEdit' => $canEdit,
+        'canEdit' => $isResponsible,
         'contentContainer' => $contentContainer,
         'task' => $task
     ]); ?>
@@ -60,7 +59,7 @@ $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
             <?= Html::beginForm($contentContainer->createUrl('/task/index/confirm', ['taskID' => $task->id])); ?>
 
 
-            <?= TaskItemList::widget(['task' => $task, 'canEdit' => $canEdit]) ?>
+            <?= TaskItemList::widget(['task' => $task, 'canEdit' => $isResponsible]) ?>
 
 
             <?= Html::endForm(); ?>

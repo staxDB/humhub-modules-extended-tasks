@@ -89,6 +89,7 @@ class TaskFilter extends Model
 
         if($this->overdue) {
             $query->andWhere('task.end_datetime < DATE(NOW())');
+            $query->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED]);
         }
 
         if($this->status != Task::STATUS_ALL) {
