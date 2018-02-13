@@ -2,7 +2,6 @@
 use humhub\modules\task\models\Task;
 
 ?>
-
 <?php if ($task->status == Task::STATUS_PENDING) : ?>
     <div id="taskStatus" class="label label-default <?= $right ? 'pull-right' : '' ?>"><?= '<i class="fa fa-info-circle"></i> ' . Yii::t('TaskModule.views_index_index', 'Pending'); ?></div>
 <?php elseif ($task->status == Task::STATUS_IN_PROGRESS) : ?>
@@ -11,4 +10,8 @@ use humhub\modules\task\models\Task;
     <div id="taskStatus" class="label label-warning <?= $right ? 'pull-right' : '' ?>"><?= '<i class="fa fa-exclamation-triangle"></i> ' . Yii::t('TaskModule.views_index_index', 'Pending Review'); ?></div>
 <?php elseif ($task->status == Task::STATUS_COMPLETED) : ?>
     <div id="taskStatus" class="label label-success <?= $right ? 'pull-right' : '' ?>"><?= '<i class="fa fa-check-square"></i> ' . Yii::t('TaskModule.views_index_index', 'Completed'); ?></div>
+<?php endif; ?>
+
+<?php if ($task->isOverdue()) : ?>
+    <div id="taskDeadlineStatus" class="label label-danger <?= $right ? 'pull-right' : '' ?>" <?= $right ? 'style="margin-right: 3px;"' : '' ?> ><?= '<i class="fa fa-exclamation-triangle"></i> ' . Yii::t('TaskModule.views_index_index', 'Overdue'); ?></div>
 <?php endif; ?>

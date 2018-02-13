@@ -20,6 +20,7 @@ return array (
     'In Progress' => 'In Arbeit',
     'Pending Review' => 'Zur Prüfung',
     'Completed' => 'Beendet',
+    'Overdue' => 'Überfällig',
     'All' => 'Alle',
 
     // widgets

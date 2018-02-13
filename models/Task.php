@@ -999,28 +999,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getFullCalendarArray()
     {
-//        $end = Yii::$app->formatter->asDatetime($this->end_datetime, 'php:c');
-//
-//        if ($this->all_day) {
-//            // Note: In fullcalendar the end time is the moment AFTER the event.
-//            // But we store the exact event time 00:00:00 - 23:59:59 so add some time to the full day event.
-//            $endDateTime = new DateTime($this->end_datetime);
-//            $endDateTime->add(new DateInterval('PT2H'));
-//            $end = $endDateTime->format('Y-m-d');
-//        }
-
         $end = $this->getEndDateTime();
-
-//        $start = $this->getEndDateTime();
-
-//        if ($this->all_day) {
-//            $start = $start->setTime('00', '00', '00');
-//            $end = $end->modify('+1 minute');
-//        }
-//        else {
-//            $start = $start->modify('-1 hour');
-////            $start = $start->setTime('00', '00', '00');
-//        }
 
         if(!Yii::$app->user->isGuest) {
             Yii::$app->formatter->timeZone = Yii::$app->user->getIdentity()->time_zone;
@@ -1402,6 +1381,9 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             default:
                 break;
         }
+
+        if (self::isOverdue())
+            $labels[] = Label::danger(Yii::t('TaskModule.views_index_index', 'Overdue'))->icon('fa fa-exclamation-triangle')->sortOrder(360);
 
         return parent::getLabels($labels, $includeContentName);
     }
