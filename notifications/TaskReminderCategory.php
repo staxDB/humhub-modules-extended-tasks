@@ -20,20 +20,20 @@ use humhub\modules\notification\targets\MobileTarget;
  *
  * @author buddha
  */
-class TaskNotificationCategory extends NotificationCategory
+class TaskReminderCategory extends NotificationCategory
 {
 
     /**
      * @inheritdoc
      */
-    public $id = 'task';
+    public $id = 'task_reminder';
 
     /**
      * @inheritdoc
      */
     public function getTitle()
     {
-        return Yii::t('TaskModule.base', 'Tasks');
+        return Yii::t('TaskModule.base', 'Tasks: Reminder');
     }
 
     /**
@@ -41,7 +41,7 @@ class TaskNotificationCategory extends NotificationCategory
      */
     public function getDescription()
     {
-        return Yii::t('TaskModule.notifications', 'Receive Notifications for Tasks (Deadline Updates, Status changes ...).');
+        return Yii::t('TaskModule.notifications', 'Receive Notifications for Task Reminder.');
     }
 
     /**
@@ -50,7 +50,7 @@ class TaskNotificationCategory extends NotificationCategory
     public function getDefaultSetting(BaseTarget $target)
     {
         if ($target->id === MailTarget::getId()) {
-            return false;
+            return true;
         } else if ($target->id === WebTarget::getId()) {
             return true;
         } else if ($target->id === MobileTarget::getId()) {

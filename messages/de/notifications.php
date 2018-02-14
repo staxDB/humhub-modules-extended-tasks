@@ -13,4 +13,6 @@ return array (
     'Task {task} in space {spaceName} ends at {dateTime}.' => 'Aufgabe {task} im Space {spaceName} endet am {dateTime}.',
     'Task {task} in space {spaceName} starts at {dateTime}.' => 'Aufgabe {task} im Space {spaceName} beginnt am {dateTime}.',
     'Reminder' => 'Erinnerung',
+    'Receive Notifications for Task Reminder.' => 'Benachrichtigungen für Aufgabenerinnerung erhalten.',
+    'Receive Notifications for Tasks (Deadline Updates, Status changes ...).' => 'Benachrichtigungen für Aufgaben erhalten (Fristenaktualisierungen, Statusänderungen...).'
 );

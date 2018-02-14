@@ -44,7 +44,7 @@ class TaskFilter extends Model
     /**
      * @var int
      */
-    public $overdue = false;
+    public $overdue = true;
 
     /**
      * @var int

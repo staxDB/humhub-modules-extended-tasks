@@ -36,7 +36,7 @@ if ($taskForm->task->color == null && isset($taskForm->contentContainer->color))
 //    $form->field($taskForm->task, 'title')->textInput(['placeholder' => Yii::t('TaskModule.views_index_edit', 'Title of your task')]);
     ?>
 
-    <?= $form->field($taskForm->task, 'description')->widget(MarkdownField::class, ['fileModel' => $taskForm->task, 'fileAttribute' => 'files'])->label(false) ?>
+    <?= $form->field($taskForm->task, 'description')->widget(MarkdownField::class, ['fileModel' => $taskForm->task, 'fileAttribute' => 'files']) ?>
 
 
     <?= $form->field($taskForm, 'is_public')->checkbox() ?>

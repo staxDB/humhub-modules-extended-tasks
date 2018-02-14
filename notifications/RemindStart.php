@@ -40,7 +40,7 @@ class RemindStart extends BaseNotification
      */
     public function category()
     {
-        return new TaskNotificationCategory();
+        return new TaskReminderCategory();
     }
 
     public function html()
