@@ -207,45 +207,6 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             return [];
         }
 
-//        $query1 = self::find()
-//            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
-//            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id', [])
-//            ->andWhere(['task_responsible.user_id' => $user->id]);
-//
-//        $query2 = self::find()
-//            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
-//            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
-//            ->andWhere(['task_assigned.user_id' => $user->id]);
-//
-//        $query3 = self::find()
-//            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
-//            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id', [])
-//            ->where('ISNULL(task_responsible.task_id)');
-//
-//        $query4 = self::find()
-//            ->where(['!=', 'task.status', Task::STATUS_COMPLETED])
-//            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
-//            ->where('ISNULL(task_assigned.task_id)');
-//
-//        $query5 = $query1->union($query2)->union($query3)->union($query4)
-//            ->orderBy([new Expression('-task.end_datetime DESC')])
-//            ->readable();
-
-//        return self::find()
-//            ->select('*')
-//            ->from([
-//                $query5,
-//            ])
-//            ->limit($limit)
-//            ->all();
-
-//
-//        return $query1->union($query2)->union($query3)->union($query4)
-//            ->limit(2)
-//            ->orderBy([new Expression('-task.end_datetime DESC')])
-//            ->readable()
-//            ->all();
-
         return self::find()
             ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
             ->where(['task_assigned.user_id' => $user->id])
@@ -254,6 +215,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED])
             ->orderBy([new Expression('-task.end_datetime DESC')])
             ->readable()
+            ->limit($limit)
             ->all();
     }
 
