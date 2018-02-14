@@ -5,6 +5,7 @@ return array(
     'Delete' => 'Löschen',
     'Edit' => 'Bearbeiten',
     'Close' => 'Schließen',
+    'View' => 'Vorschau',
     'Task' => 'Aufgabe',
     'View' => 'Vorschau',
     'Tasks' => 'Aufgaben',
