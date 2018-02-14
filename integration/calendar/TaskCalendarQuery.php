@@ -47,8 +47,10 @@ class TaskCalendarQuery extends AbstractCalendarQuery
      */
     public function all()
     {
-        $this->_query->andWhere(['task.scheduling' => 1])
-            ->andWhere(['task.cal_mode' => Task::CAL_MODE_SPACE]);
+        $this->_query
+            ->andWhere(['task.scheduling' => 1])
+            ->andWhere(['task.cal_mode' => Task::CAL_MODE_SPACE])
+            ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED]);
 
         try {
             if (!$this->_built) {
