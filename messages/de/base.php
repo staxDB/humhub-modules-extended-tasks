@@ -7,7 +7,6 @@ return array(
     'Close' => 'Schließen',
     'View' => 'Vorschau',
     'Task' => 'Aufgabe',
-    'View' => 'Vorschau',
     'Tasks' => 'Aufgaben',
     'Tasks: Reminder' => 'Aufgaben: Erinnerungen',
     'Shift to other task' => 'Anderer Aufgabe zuordnen',
