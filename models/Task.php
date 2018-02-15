@@ -3,7 +3,7 @@
 namespace humhub\modules\task\models;
 
 use humhub\modules\calendar\interfaces\CalendarItem;
-use humhub\modules\notification\models\Notification;
+use humhub\modules\task\activities\TaskReset;
 use humhub\modules\task\notifications\ExtensionRequest;
 use humhub\modules\task\notifications\NotifyAssigned;
 use humhub\modules\task\notifications\NotifyChangedDateTime;
@@ -29,14 +29,10 @@ use humhub\modules\task\widgets\WallEntry;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\user\models\User;
 use humhub\modules\search\interfaces\Searchable;
-use yii\base\InvalidConfigException;
-use yii\data\Sort;
 use yii\db\ActiveQuery;
 use humhub\modules\task\CalendarUtils;
 use yii\db\Exception;
 use yii\db\Expression;
-use yii\db\Query;
-use yii\helpers\Url;
 use humhub\widgets\Label;
 
 /**
@@ -885,6 +881,12 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
 
         if ($this->hasTaskResponsible())
             NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+
+        //  Create Activity
+        $activity = new TaskReset();
+        $activity->source = $this;
+        $activity->originator = Yii::$app->user->getIdentity();
+        $activity->create();
     }
 
     /**
