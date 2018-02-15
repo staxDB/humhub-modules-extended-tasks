@@ -9,6 +9,7 @@
 namespace humhub\modules\task;
 
 //use humhub\modules\task\integration\calendar\TaskCalendar;
+use humhub\modules\notification\models\Notification;
 use humhub\modules\task\jobs\SendReminder;
 use humhub\modules\task\models\SnippetModuleSettings;
 use humhub\modules\task\models\Task;
@@ -21,9 +22,12 @@ use humhub\modules\task\widgets\MyTasks;
 use Yii;
 use yii\base\Object;
 
+
+/* @var $user \humhub\modules\user\models\User */
+
 /**
  * Created by PhpStorm.
- * User: buddha
+ * User: davidborn
  * Date: 14.09.2017
  * Time: 12:12
  */
@@ -144,14 +148,46 @@ class Events extends Object
     }
 
 
+    /**
+     * Handle what happens, when user left space.
+     *
+     * @param $event
+     * @throws \Exception
+     * @throws \yii\base\Exception
+     * @throws \yii\db\StaleObjectException
+     */
+    public static function onMemberRemoved ($event)
+    {
+        $tasks = Task::find()->contentContainer($event->space)->all();
+
+        if (!empty($tasks)) {
+            foreach ($tasks as $task) {
+                if ($task->isTaskAssigned($event->user)) {
+                    $taskAssigned = $task->getTaskAssigned()->where(['task_assigned.user_id' => $event->user->id])->one();
+                    $taskAssigned->delete();
+                }
+                if ($task->isTaskResponsible($event->user)) {
+                    $taskResponsible = $task->getTaskResponsible()->where(['task_responsible.user_id' => $event->user->id])->one();
+                    $taskResponsible->delete();
+                }
+
+                // remove notifications
+//                $event->sender->className()
+//                $event->sender->getPrimaryKey()
+                $notifications = Notification::find()->where(['source_class' => Task::className(), 'source_pk' => $task->id, 'space_id' => $event->space->id])->all();
+                foreach ($notifications as $notification) {
+                    $notification->delete();
+                }
+            }
+        }
+    }
+
+
     public static function onCronRun($event)
     {
         if (Yii::$app->controller->action->id == 'hourly') {
             Yii::$app->queue->push( new SendReminder());
         }
-//        if (Yii::$app->controller->action->id == 'hourly') {
-//            Yii::$app->queue->push( new SendReminder() );
-//        }
     }
 
 }

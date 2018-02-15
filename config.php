@@ -1,12 +1,10 @@
 <?php
 
-use humhub\modules\task\Events;
 use humhub\modules\space\widgets\Menu;
 use humhub\commands\IntegrityController;
 use humhub\commands\CronController;
 use humhub\modules\dashboard\widgets\Sidebar;
-use humhub\modules\content\widgets\WallEntryAddons;
-use yii\db\BaseActiveRecord;
+use humhub\modules\space\models\Membership;
 
 return [
     'id' => 'task',
@@ -17,8 +15,7 @@ return [
         ['class' => IntegrityController::className(), 'event' => IntegrityController::EVENT_ON_RUN, 'callback' => ['humhub\modules\task\Events', 'onIntegrityCheck']],
         ['class' => CronController::className(), 'event' => CronController::EVENT_ON_HOURLY_RUN, 'callback' => ['humhub\modules\task\Events', 'onCronRun']],
         ['class' => Sidebar::className(), 'event' => Sidebar::EVENT_INIT, 'callback' => ['humhub\modules\task\Events', 'onDashboardSidebarInit']],
-
-//        ['class' => WallEntryAddons::className(), 'event' => WallEntryAddons::EVENT_INIT, 'callback' => ['humhub\modules\task\Events', 'onTaskWallEntry']],
+        ['class' => Membership::className(), 'event' => Membership::EVENT_MEMBER_REMOVED, 'callback' => ['humhub\modules\task\Events', 'onMemberRemoved']],
         ['class' => 'humhub\modules\calendar\interfaces\CalendarService', 'event' => 'getItemTypes', 'callback' => ['humhub\modules\task\Events', 'onGetCalendarItemTypes']],
         ['class' => 'humhub\modules\calendar\interfaces\CalendarService', 'event' => 'findItems', 'callback' => ['humhub\modules\task\Events', 'onFindCalendarItems']],
     ]
