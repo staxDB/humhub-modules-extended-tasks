@@ -24,7 +24,6 @@ Add tasks either to the assigned & responsible users calendar or add it to the s
 Also you can use the myTasks-Snippet to keep an overview of tasks, you can work on!
 
 TODO
-- add activities
 - add a repeat-function
     - recalculate the time period
     - before a task will be reset, check if it is completed --> if not, notify assigned and responsible users and do not reset the task (skip repeat)!
