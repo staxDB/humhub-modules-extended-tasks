@@ -3,7 +3,10 @@
 namespace humhub\modules\task\models;
 
 use humhub\modules\calendar\interfaces\CalendarItem;
+use humhub\modules\task\activities\TaskCompleted;
 use humhub\modules\task\activities\TaskReset;
+use humhub\modules\task\activities\TaskReviewed;
+use humhub\modules\task\activities\TaskStart;
 use humhub\modules\task\notifications\ExtensionRequest;
 use humhub\modules\task\notifications\NotifyAssigned;
 use humhub\modules\task\notifications\NotifyChangedDateTime;
@@ -897,6 +900,12 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     {
         if ($this->hasTaskResponsible())
             NotifyStatusInProgress::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+
+        //  Create Activity
+        $activity = new TaskStart();
+        $activity->source = $this;
+        $activity->originator = Yii::$app->user->getIdentity();
+        $activity->create();
     }
 
     /**
@@ -914,10 +923,26 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function notifyCompleted()
     {
-        if ($this->review && $this->hasTaskAssigned())
-            NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
-        elseif ($this->hasTaskResponsible())
-            NotifyStatusCompleted::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+        if ($this->review) {
+            if (self::hasTaskAssigned())
+                NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
+
+            //  Create Activity
+            $activity = new TaskReviewed();
+            $activity->source = $this;
+            $activity->originator = Yii::$app->user->getIdentity();
+            $activity->create();
+        }
+        else {
+            if (self::hasTaskResponsible())
+                NotifyStatusCompleted::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+
+            //  Create Activity
+            $activity = new TaskCompleted();
+            $activity->source = $this;
+            $activity->originator = Yii::$app->user->getIdentity();
+            $activity->create();
+        }
     }
 
     /**
