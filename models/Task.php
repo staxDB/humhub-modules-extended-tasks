@@ -631,6 +631,15 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
 
     // ###########  handle status  ###########
 
+    public function isOverdue()
+    {
+        if (!$this->scheduling) {
+            return false;
+        }
+
+        return (strtotime($this->end_datetime) < time() && !$this->isCompleted());
+    }
+
     /**
      * @param $newStatus
      * @return bool
@@ -1399,12 +1408,37 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         return !empty($this->subTasks);
     }
 
-    public function isOverdue()
-    {
-        if (!$this->scheduling) {
-            return false;
-        }
 
-        return (strtotime($this->end_datetime) < time() && !$this->isCompleted());
+    /**
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
+     */
+    public function beforeRemoveUser()
+    {
+        $notifications = Notification::find()->where(['source_class' => self::className(), 'source_pk' => $this->id, 'space_id' => $this->content->contentContainer->id])->all();
+        foreach ($notifications as $notification) {
+            $notification->delete();
+        }
+    }
+
+    /**
+     * @param $userId
+     * @return bool
+     * @throws \Exception
+     * @throws \yii\db\StaleObjectException
+     */
+    public function removeUser($userId)
+    {
+        if (empty($userId) || !isset($userId))
+            return false;
+
+        $taskAssigned = $this->getTaskAssigned()->where(['task_user.user_id' => $userId])->all();
+        foreach ($taskAssigned as $assigned) {
+            $assigned->delete();
+        }
+        $taskResponsible = $this->getTaskResponsible()->where(['task_user.user_id' => $userId])->all();
+        foreach ($taskResponsible as $responsible) {
+            $responsible->delete();
+        }
     }
 }
