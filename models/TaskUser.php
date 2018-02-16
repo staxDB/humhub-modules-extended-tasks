@@ -7,14 +7,16 @@ use humhub\modules\user\models\User;
 use humhub\components\ActiveRecord;
 
 /**
- * This is the model class for table "task_responsible".
+ * This is the model class for table "task_user".
  *
- * The followings are the available columns in table 'task_responsible':
+ * The followings are the available columns in table 'task_user':
  * @property integer $id
  * @property integer $task_id
  * @property integer $user_id
+ * @property integer $user_type
  */
-class TaskResponsible extends ActiveRecord
+
+class TaskUser extends ActiveRecord
 {
 
     /**
@@ -22,7 +24,7 @@ class TaskResponsible extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'task_responsible';
+        return 'task_user';
     }
 
     /**
@@ -31,8 +33,8 @@ class TaskResponsible extends ActiveRecord
     public function rules()
     {
         return [
-            ['task_id', 'required'],
-            [['task_id', 'user_id'], 'integer'],
+            [['task_id', 'user_type'], 'required'],
+            [['task_id', 'user_id', 'user_type'], 'integer'],
         ];
     }
 
@@ -44,7 +46,8 @@ class TaskResponsible extends ActiveRecord
         return [
             'id' => 'ID',
             'task_id' => 'Task',
-            'user_id' => 'User'
+            'user_id' => 'User',
+            'user_type' => 'User Type'
         ];
     }
 

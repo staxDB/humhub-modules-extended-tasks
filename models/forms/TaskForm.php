@@ -8,9 +8,7 @@
  */
 /**
  * Created by PhpStorm.
- * User: buddha
- * Date: 13.07.2017
- * Time: 22:00
+ * User: davidborn
  */
 
 namespace humhub\modules\task\models\forms;

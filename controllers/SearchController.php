@@ -7,11 +7,10 @@ use yii\web\Controller;
 
 
 /**
- * Search Controller provides action for searching users.
+ * todo.
+ * Search Controller provides action for searching tasks.
  *
- * @author Luke
- * @package humhub.modules_core.user.controllers
- * @since 0.5
+ * @author davidborn
  */
 class SearchController extends Controller
 {

@@ -13,11 +13,10 @@ use humhub\modules\notification\models\Notification;
 use humhub\modules\task\jobs\SendReminder;
 use humhub\modules\task\models\SnippetModuleSettings;
 use humhub\modules\task\models\Task;
-use humhub\modules\task\models\TaskAssigned;
 use humhub\modules\task\models\TaskItem;
 use humhub\modules\task\models\TaskReminder;
-use humhub\modules\task\models\TaskResponsible;
 use humhub\modules\task\integration\calendar\TaskCalendar;
+use humhub\modules\task\models\TaskUser;
 use humhub\modules\task\widgets\MyTasks;
 use Yii;
 use yii\base\Object;
@@ -110,32 +109,46 @@ class Events extends Object
         }
 
         // check for task responsible users without task or existing user
-        foreach (TaskResponsible::find()->all() as $taskResponsible) {
-            if ($taskResponsible->task === null) {
-                if ($integrityController->showFix("Deleting task responsible user id " . $taskResponsible->id . " without existing task!")) {
-                    $taskResponsible->delete();
+        foreach (TaskUser::find()->all() as $taskUser) {
+            if ($taskUser->task === null) {
+                if ($integrityController->showFix("Deleting task user user id " . $taskUser->id . " without existing task!")) {
+                    $taskUser->delete();
                 }
             }
-            if ($taskResponsible->user === null) {
-                if ($integrityController->showFix("Deleting task responsible user id " . $taskResponsible->id . " without existing user!")) {
-                    $taskResponsible->delete();
+            if ($taskUser->user === null) {
+                if ($integrityController->showFix("Deleting task user user id " . $taskUser->id . " without existing user!")) {
+                    $taskUser->delete();
                 }
             }
         }
 
-        // check for task assigned users without task or existing user
-        foreach (TaskAssigned::find()->all() as $taskAssigned) {
-            if ($taskAssigned->task === null) {
-                if ($integrityController->showFix("Deleting task assigned user id " . $taskAssigned->id . " without existing task!")) {
-                    $taskAssigned->delete();
-                }
-            }
-            if ($taskAssigned->user === null) {
-                if ($integrityController->showFix("Deleting task assigned user id " . $taskAssigned->id . " without existing user!")) {
-                    $taskAssigned->delete();
-                }
-            }
-        }
+//        // check for task responsible users without task or existing user
+//        foreach (TaskResponsible::find()->all() as $taskResponsible) {
+//            if ($taskResponsible->task === null) {
+//                if ($integrityController->showFix("Deleting task responsible user id " . $taskResponsible->id . " without existing task!")) {
+//                    $taskResponsible->delete();
+//                }
+//            }
+//            if ($taskResponsible->user === null) {
+//                if ($integrityController->showFix("Deleting task responsible user id " . $taskResponsible->id . " without existing user!")) {
+//                    $taskResponsible->delete();
+//                }
+//            }
+//        }
+
+//        // check for task assigned users without task or existing user
+//        foreach (TaskAssigned::find()->all() as $taskAssigned) {
+//            if ($taskAssigned->task === null) {
+//                if ($integrityController->showFix("Deleting task assigned user id " . $taskAssigned->id . " without existing task!")) {
+//                    $taskAssigned->delete();
+//                }
+//            }
+//            if ($taskAssigned->user === null) {
+//                if ($integrityController->showFix("Deleting task assigned user id " . $taskAssigned->id . " without existing user!")) {
+//                    $taskAssigned->delete();
+//                }
+//            }
+//        }
 
         // check for task reminders without task
         foreach (TaskReminder::find()->all() as $taskReminder) {
@@ -162,13 +175,9 @@ class Events extends Object
 
         if (!empty($tasks)) {
             foreach ($tasks as $task) {
-                if ($task->isTaskAssigned($event->user)) {
-                    $taskAssigned = $task->getTaskAssigned()->where(['task_assigned.user_id' => $event->user->id])->one();
-                    $taskAssigned->delete();
-                }
-                if ($task->isTaskResponsible($event->user)) {
-                    $taskResponsible = $task->getTaskResponsible()->where(['task_responsible.user_id' => $event->user->id])->one();
-                    $taskResponsible->delete();
+                $taskUser = $task->getTaskAssigned()->where(['task_user.user_id' => $event->user->id])->all();
+                foreach ($taskUser as $user) {
+                    $user->delete();
                 }
 
                 // remove notifications

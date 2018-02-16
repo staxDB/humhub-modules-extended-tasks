@@ -17,9 +17,7 @@ use yii\helpers\Url;
 
 /**
  * Created by PhpStorm.
- * User: buddha
- * Date: 14.09.2017
- * Time: 12:28
+ * User: davidborn
  */
 
 class TaskCalendar extends Object

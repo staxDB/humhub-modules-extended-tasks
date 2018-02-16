@@ -18,8 +18,7 @@ namespace humhub\modules\task\models\forms;
 
 use humhub\modules\content\components\ContentContainerActiveRecord;
 use humhub\modules\task\models\Task;
-use humhub\modules\task\models\TaskAssigned;
-use humhub\modules\task\models\TaskResponsible;
+use humhub\modules\task\models\TaskUser;
 use humhub\modules\task\permissions\ManageTasks;
 use Yii;
 use yii\base\Model;
@@ -101,16 +100,16 @@ class TaskFilter extends Model
         }
 
         if ($this->taskAssigned) {
-            $subQuery = TaskAssigned::find()
-                ->where('task_assigned.task_id=task.id')
-                ->andWhere(['task_assigned.user_id' => $user->id]);
+            $subQuery = TaskUser::find()
+                ->where('task_user.task_id=task.id')
+                ->andWhere(['task_user.user_id' => $user->id, 'task_user.user_type' => Task::USER_ASSIGNED]);
             $query->andWhere(['exists', $subQuery]);
         }
 
         if ($this->taskResponsible) {
-            $subQuery = TaskResponsible::find()
-                ->where('task_responsible.task_id=task.id')
-                ->andWhere(['task_responsible.user_id' => $user->id]);
+            $subQuery = TaskUser::find()
+                ->where('task_user.task_id=task.id')
+                ->andWhere(['task_user.user_id' => $user->id, 'task_user.user_type' => Task::USER_RESPONSIBLE]);
             $query->andWhere(['exists', $subQuery]);
         }
 

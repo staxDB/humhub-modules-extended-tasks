@@ -8,11 +8,11 @@ use \yii\helpers\Url;
 use humhub\modules\task\models\TaskFilter;
 
 /**
- * UserPickerWidget displays a task picker instead of an input field.
+ * TaskPickerWidget displays a task picker instead of an input field.
  *
  * To use this widget, you may insert the following code in a view:
  * <pre>
- * $this->widget('application.modules_core.task.widgets.UserPickerWidget',array(
+ * $this->widget('application.modules_core.task.widgets.TaskPickerWidget',array(
  *     'name'=>'tasks',
  *
  *     // additional javascript options for the date picker plugin
@@ -29,10 +29,7 @@ use humhub\modules\task\models\TaskFilter;
  * that need to be passed to the taskpicker plugin. Please refer to
  * the documentation for possible options (name-value pairs).
  *
- * @package humhub.modules_core.task.widgets
- * @since 0.5
- * @deprecated since 1.2 use UserPickerField widget for rendering a picker and \humhub\modules\task\models\UserPicker for search queries.
- * @author Luke
+ * @author davidborn
  */
 class TaskPicker extends \yii\base\Widget
 {
@@ -97,7 +94,7 @@ class TaskPicker extends \yii\base\Widget
     public $data = null;
 
     /**
-     * Inits the User Picker
+     * Inits the Task Picker
      *
      */
     public function init()
@@ -197,7 +194,7 @@ class TaskPicker extends \yii\base\Widget
 
             //Either the additional tasks are disabled (by default) or we disable them by permission
             $disableCondition = (isset($cfg['permission'])) ? $cfg['permission']  : $cfg['disableFillUser'];
-            $jsonResult = array_merge($jsonResult, UserPicker::asJSON($fillUser, $disableCondition, 1));
+            $jsonResult = array_merge($jsonResult, TaskPicker::asJSON($fillUser, $disableCondition, 1));
         }
 
         return $jsonResult;

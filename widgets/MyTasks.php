@@ -3,31 +3,27 @@
 namespace humhub\modules\task\widgets;
 
 use humhub\components\Widget;
-//use humhub\modules\calendar\interfaces\CalendarService;
 use humhub\modules\task\models\Task;
 use humhub\modules\task\models\SnippetModuleSettings;
 use humhub\modules\content\components\ContentContainerActiveRecord;
-use Yii;
-use yii\helpers\Url;
 
 /**
- * UpcomingEvents shows next events in sidebar.
+ * MyTasks shows users tasks in sidebar.
  *
- * @package humhub.modules_core.calendar.widgets
- * @author luke
+ * @author davidborn
  */
 class MyTasks extends Widget
 {
 
     /**
-     * ContentContainer to limit events to. (Optional)
+     * ContentContainer to limit tasks to. (Optional)
      *
      * @var ContentContainerActiveRecord
      */
     public $contentContainer;
 
     /**
-     * How many days in future events should be shown?
+     * How many tasks should be shown?
      *
      * @var int
      */

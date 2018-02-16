@@ -5,13 +5,11 @@ namespace humhub\modules\task\widgets;
 use humhub\components\Widget;
 
 /**
- * PollWallEntryWidget is used to display a poll inside the stream.
+ * TaskItemWidget is used to display a task item.
  *
- * This Widget will used by the Poll Model in Method getWallOut().
+ * This Widget will used by the Task Model in Method getWallOut().
  *
- * @package humhub.modules.polls.widgets
- * @since 0.5
- * @author Luke
+ * @author davidborn
  */
 class AddItemsInput extends Widget
 {

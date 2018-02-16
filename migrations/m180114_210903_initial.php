@@ -22,16 +22,11 @@ class m180114_210903_initial extends humhub\components\Migration
             'request_sent' => 'tinyint(4) DEFAULT 0',
         ), '');
 
-        $this->createTable('task_assigned', array(
+        $this->createTable('task_user', array(
             'id' => 'pk',
             'task_id' => 'int(11) NOT NULL',
             'user_id' => 'int(11) NOT NULL',
-        ), '');
-
-        $this->createTable('task_responsible', array(
-            'id' => 'pk',
-            'task_id' => 'int(11) NOT NULL',
-            'user_id' => 'int(11) NOT NULL',
+            'user_type' => 'tinyint(4) NOT NULL',
         ), '');
 
         $this->createTable('task_item', array(

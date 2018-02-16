@@ -18,10 +18,9 @@ use humhub\modules\content\interfaces\ContentOwner;
 
 /**
  * MailContentEntry renders a simple mail content with originator information and an
- * content block to simulate a wall entry as good as poosible.
+ * content block to simulate a wall entry as good as possible.
  *
- * @author buddha
- * @since 1.2
+ * @author davidborn
  */
 class MailContentEntry extends Widget
 {

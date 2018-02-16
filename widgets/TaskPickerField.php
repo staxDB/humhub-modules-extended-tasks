@@ -8,9 +8,7 @@ use humhub\widgets\BasePickerField;
 
 /**
  *
- * @package humhub.modules_core.task.widgets
- * @since 1.2
- * @author buddha
+ * @author davidborn
  */
 class TaskPickerField extends BasePickerField
 {

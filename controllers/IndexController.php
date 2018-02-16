@@ -12,8 +12,7 @@ use humhub\modules\content\permissions\ManageContent;
 use humhub\modules\task\models\forms\TaskFilter;
 use humhub\modules\task\models\forms\TaskForm;
 use humhub\modules\task\models\TaskPicker;
-use humhub\modules\task\models\TaskAssigned;
-use humhub\modules\task\models\TaskResponsible;
+use humhub\modules\task\models\TaskUser;
 use humhub\modules\task\permissions\ManageTasks;
 use humhub\modules\task\widgets\TaskListView;
 use humhub\modules\space\models\Space;
@@ -49,8 +48,7 @@ class IndexController extends ContentContainerController
             ['permission' => ManageTasks::class,
                 'actions' => [
                     'task-user-picker',
-                    'sub-task-picker',
-                    'send-invite-notifications'.
+//                    'sub-task-picker',    // Todo: for subtask-picker
                     'edit',
                     'delete',
                     'calendar-update'
@@ -116,7 +114,8 @@ class IndexController extends ContentContainerController
     public function actionTaskAssignedPicker($id = null, $keyword)
     {
         if($id) {
-            $subQuery = TaskAssigned::find()->where(['task_assigned.task_id' => $id])->andWhere('task_assigned.user_id=user.id');
+            $subQuery = TaskUser::find()->where(['task_user.task_id' => $id, 'task_user.user_type' => Task::USER_ASSIGNED])
+                ->andWhere('task_user.user_id=user.id');
             $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
         } else {
             $query = $this->getSpace()->getMembershipUser();
@@ -132,7 +131,8 @@ class IndexController extends ContentContainerController
     public function actionTaskResponsiblePicker($id = null, $keyword)
     {
         if($id) {
-            $subQuery = TaskResponsible::find()->where(['task_responsible.task_id' => $id])->andWhere('task_responsible.user_id=user.id');
+            $subQuery = TaskUser::find()->where(['task_user.task_id' => $id, 'task_user.user_type' => Task::USER_RESPONSIBLE])
+                ->andWhere('task_user.user_id=user.id');
             $query = $this->getSpace()->getMembershipUser()->where(['not exists', $subQuery]);
         } else {
             $query = $this->getSpace()->getMembershipUser();
@@ -311,7 +311,7 @@ class IndexController extends ContentContainerController
             throw new HttpException(404);
         }
 
-        $taskAssigned = $task->getTaskAssigned()->where(['task_assigned.user_id' => Yii::$app->user->id])->one();
+        $taskAssigned = $task->getTaskAssigned()->where(['task_user.user_id' => Yii::$app->user->id])->one();
         if(!$taskAssigned) {
             throw new HttpException(404);
         }

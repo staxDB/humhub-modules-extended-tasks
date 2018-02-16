@@ -34,8 +34,7 @@ class TaskCalendarQuery extends AbstractCalendarQuery
      */
     public function filterIsParticipant()
     {
-        $this->_query->leftJoin('task_assigned', 'task.id=task_assigned.task_id AND task_assigned.user_id=:userId', [':userId' => $this->_user->id]);
-        $this->_query->leftJoin('task_responsible', 'task.id=task_responsible.task_id AND task_responsible.user_id=:userId', [':userId' => $this->_user->id]);
+        $this->_query->leftJoin('task_user', 'task.id=task_user.task_id AND task_user.user_id=:userId', [':userId' => $this->_user->id]);
     }
 
 

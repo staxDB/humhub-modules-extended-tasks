@@ -15,7 +15,7 @@ use humhub\modules\task\models\TaskItem;
 
 /**
  * Widget for rendering the menue buttons for a Task.
- * @author buddh4
+ * @author davidborn
  */
 class TaskMenu extends \yii\base\Widget
 {

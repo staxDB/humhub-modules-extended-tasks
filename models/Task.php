@@ -2,6 +2,23 @@
 
 namespace humhub\modules\task\models;
 
+use humhub\libs\Html;
+use humhub\modules\notification\models\Notification;
+use Yii;
+use DateInterval;
+use DateTime;
+use DateTimeZone;
+use humhub\libs\DbDateValidator;
+use humhub\modules\content\components\ContentContainerActiveRecord;
+use humhub\modules\content\components\ContentActiveRecord;
+
+use humhub\modules\user\models\User;
+use humhub\modules\search\interfaces\Searchable;
+use yii\db\ActiveQuery;
+use humhub\modules\task\CalendarUtils;
+use yii\db\Exception;
+use yii\db\Expression;
+use humhub\widgets\Label;
 use humhub\modules\calendar\interfaces\CalendarItem;
 use humhub\modules\task\activities\TaskCompleted;
 use humhub\modules\task\activities\TaskReset;
@@ -19,24 +36,10 @@ use humhub\modules\task\notifications\NotifyStatusRejectedAfterReview;
 use humhub\modules\task\notifications\NotifyStatusReset;
 use humhub\modules\task\notifications\RemindEnd;
 use humhub\modules\task\notifications\RemindStart;
-use humhub\libs\Html;
-use Yii;
-use DateInterval;
-use DateTime;
-use DateTimeZone;
-use humhub\libs\DbDateValidator;
-use humhub\modules\content\components\ContentContainerActiveRecord;
-use humhub\modules\content\components\ContentActiveRecord;
-use humhub\modules\task\notifications\Invite;
 use humhub\modules\task\widgets\WallEntry;
 use humhub\modules\task\permissions\ManageTasks;
-use humhub\modules\user\models\User;
-use humhub\modules\search\interfaces\Searchable;
-use yii\db\ActiveQuery;
-use humhub\modules\task\CalendarUtils;
-use yii\db\Exception;
-use yii\db\Expression;
-use humhub\widgets\Label;
+use humhub\modules\task\models\TaskUser;
+
 
 /**
  * This is the model class for table "task".
@@ -102,6 +105,12 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     const CAL_MODE_NONE = 0;
     const CAL_MODE_SPACE = 1;
+
+    /**
+     * User Types
+     */
+    const USER_ASSIGNED = 0;
+    const USER_RESPONSIBLE = 1;
 
     /**
      * @var array all given cal modes as array
@@ -207,10 +216,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         }
 
         return self::find()
-            ->leftJoin('task_assigned', 'task.id=task_assigned.task_id', [])
-            ->where(['task_assigned.user_id' => $user->id])
-            ->leftJoin('task_responsible', 'task.id=task_responsible.task_id', [])
-            ->orWhere(['task_responsible.user_id' => $user->id])
+            ->leftJoin('task_user', 'task.id=task_user.task_id', [])
+            ->where(['task_user.user_id' => $user->id])
             ->andWhere(['!=', 'task.status', Task::STATUS_COMPLETED])
             ->orderBy([new Expression('-task.end_datetime DESC')])
             ->readable()
@@ -268,12 +275,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             $item->delete();
         }
 
-        foreach (TaskAssigned::findAll(['task_id' => $this->id]) as $taskAssigned) {
-            $taskAssigned->delete();
-        }
-
-        foreach (TaskResponsible::findAll(['task_id' => $this->id]) as $taskResponsible) {
-            $taskResponsible->delete();
+        foreach (TaskUser::findAll(['task_id' => $this->id]) as $taskUser) {
+            $taskUser->delete();
         }
 
         foreach (TaskReminder::findAll(['task_id' => $this->id]) as $taskReminder) {
@@ -292,16 +295,13 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     public function afterSave($insert, $changedAttributes)
     {
 
-        TaskAssigned::deleteAll(['task_id' => $this->id]);
+        TaskUser::deleteAll(['task_id' => $this->id]);
 
         if (!empty($this->assignedUsers)) {
             foreach ($this->assignedUsers as $guid) {
                 $this->addTaskAssigned($guid);
             }
         }
-
-        TaskResponsible::deleteAll(['task_id' => $this->id]);
-
         if (!empty($this->responsibleUsers)) {
             foreach ($this->responsibleUsers as $guid) {
                 $this->addTaskResponsible($guid);
@@ -341,7 +341,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getTaskAssigned()
     {
-        $query = $this->hasMany(TaskAssigned::className(), ['task_id' => 'id']);
+        $query = $this->hasMany(TaskUser::className(), ['task_id' => 'id'])
+            ->andOnCondition(['user_type' => self::USER_ASSIGNED]);
         return $query;
     }
 
@@ -368,7 +369,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             return false;
         }
 
-        $taskAssigned = array_filter($this->taskAssigned, function (TaskAssigned $p) use ($user) {
+        $taskAssigned = array_filter($this->taskAssigned, function (TaskUser $p) use ($user) {
             return $p->user_id == $user->id;
         });
 
@@ -384,9 +385,10 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         }
 
         if (!$this->isTaskAssigned($user)) {
-            $taskAssigned = new TaskAssigned([
+            $taskAssigned = new TaskUser([
                 'task_id' => $this->id,
                 'user_id' => $user->id,
+                'user_type' => self::USER_ASSIGNED
             ]);
             return $taskAssigned->save();
         }
@@ -404,7 +406,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getTaskResponsible()
     {
-        $query = $this->hasMany(TaskResponsible::className(), ['task_id' => 'id']);
+        $query = $this->hasMany(TaskUser::className(), ['task_id' => 'id'])->andOnCondition(['user_type' => self::USER_RESPONSIBLE]);
         return $query;
     }
 
@@ -431,7 +433,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             return false;
         }
 
-        $taskResponsible = array_filter($this->taskResponsible, function (TaskResponsible $p) use ($user) {
+        $taskResponsible = array_filter($this->taskResponsible, function (TaskUser $p) use ($user) {
             return $p->user_id == $user->id;
         });
 
@@ -447,9 +449,10 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         }
 
         if (!$this->isTaskResponsible($user)) {
-            $taskResponsible = new TaskResponsible([
+            $taskResponsible = new TaskUser([
                 'task_id' => $this->id,
                 'user_id' => $user->id,
+                'user_type' => self::USER_RESPONSIBLE
             ]);
             return $taskResponsible->save();
         }

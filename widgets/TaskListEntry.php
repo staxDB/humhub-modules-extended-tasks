@@ -8,9 +8,7 @@
 
 /**
  * Created by PhpStorm.
- * User: buddha
- * Date: 29.06.2017
- * Time: 17:52
+ * User: davidborn
  */
 
 namespace humhub\modules\task\widgets;
