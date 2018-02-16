@@ -249,6 +249,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             $this->end_datetime = new Expression("NULL");
         }
 
+        // Reset deadline extension requests
         if ($this->isAttributeChanged('start_datetime', true) || $this->isAttributeChanged('end_datetime', true)) {
             if ($this->request_sent) {
                 $this->request_sent = 0;
