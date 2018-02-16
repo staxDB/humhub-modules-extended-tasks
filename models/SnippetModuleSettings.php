@@ -28,6 +28,11 @@ class SnippetModuleSettings extends Model
      */
     public $myTasksSnippetMaxItems = 5;
 
+    /**
+     * @var int defines the snippet widgets sort order
+     */
+    public $myTasksSnippetSortOrder = 1;
+
 
     public function init()
     {
@@ -35,6 +40,7 @@ class SnippetModuleSettings extends Model
         $this->myTasksSnippetShow = $module->settings->get('myTasksSnippetShow', $this->myTasksSnippetShow);
         $this->myTasksSnippetShowSpace = $module->settings->get('myTasksSnippetShowSpace', $this->myTasksSnippetShowSpace);
         $this->myTasksSnippetMaxItems = $module->settings->get('myTasksSnippetMaxItems', $this->myTasksSnippetMaxItems);
+        $this->myTasksSnippetSortOrder = $module->settings->get('myTasksSnippetSortOrder', $this->myTasksSnippetSortOrder);
     }
 
     public function showMyTasksSnippet()
@@ -63,7 +69,8 @@ class SnippetModuleSettings extends Model
     {
         return [
             [['myTasksSnippetShow', 'myTasksSnippetShowSpace'],  'boolean'],
-            ['myTasksSnippetMaxItems',  'number', 'min' => 1, 'max' => 30]
+            ['myTasksSnippetMaxItems',  'number', 'min' => 1, 'max' => 30],
+            ['myTasksSnippetSortOrder',  'number', 'min' => 0],
         ];
     }
 
@@ -76,6 +83,7 @@ class SnippetModuleSettings extends Model
             'myTasksSnippetShow' => Yii::t('TaskModule.config', 'Show snippet'),
             'myTasksSnippetShowSpace' => Yii::t('TaskModule.config', 'Show snippet in Space'),
             'myTasksSnippetMaxItems' => Yii::t('TaskModule.config', 'Max tasks items'),
+            'myTasksSnippetSortOrder' => Yii::t('TaskModule.config', 'Sort order'),
         ];
     }
 
@@ -89,6 +97,7 @@ class SnippetModuleSettings extends Model
         $module->settings->set('myTasksSnippetShow', $this->myTasksSnippetShow);
         $module->settings->set('myTasksSnippetShowSpace', $this->myTasksSnippetShowSpace);
         $module->settings->set('myTasksSnippetMaxItems', $this->myTasksSnippetMaxItems);
+        $module->settings->set('myTasksSnippetSortOrder', $this->myTasksSnippetSortOrder);
         return true;
     }
 }

@@ -7,4 +7,5 @@ return array(
     'Show snippet' => 'Zeige Widget „Deine Aufgaben“',
     'Show snippet in Space' => 'Zeige Widget „Deine Aufgaben“ im Space',
     'Max tasks items' => 'Maximale Anzahl angezeigter Aufgaben',
+    'Sort order' => 'Sortierung',
 );

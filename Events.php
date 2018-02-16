@@ -66,7 +66,7 @@ class Events extends Object
         $settings = SnippetModuleSettings::instantiate();
 
         if ($settings->showMyTasksSnippet()) {
-            $event->sender->addWidget(MyTasks::className(), ['limit' => $settings->myTasksSnippetMaxItems]);
+            $event->sender->addWidget(MyTasks::className(), ['limit' => $settings->myTasksSnippetMaxItems], ['sortOrder' => $settings->myTasksSnippetSortOrder]);
         }
     }
 
@@ -81,7 +81,7 @@ class Events extends Object
 
         if ($space->isModuleEnabled('task')) {
             if ($settings->showMyTasksSnippetSpace()) {
-                $event->sender->addWidget(MyTasks::className(), ['limit' => $settings->myTasksSnippetMaxItems], ['sortOrder' => 1]);
+                $event->sender->addWidget(MyTasks::className(), ['limit' => $settings->myTasksSnippetMaxItems], ['sortOrder' => $settings->myTasksSnippetSortOrder]);
             }
         }
     }

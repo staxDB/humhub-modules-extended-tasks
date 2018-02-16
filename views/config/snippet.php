@@ -35,8 +35,8 @@ use \yii\helpers\Html;
 
         <?= $form->field($model, 'myTasksSnippetShowSpace')->checkbox(); ?>
 
-
         <?= $form->field($model, 'myTasksSnippetMaxItems')->input('number', ['min' => 1, 'max' => 30]) ?>
+        <?= $form->field($model, 'myTasksSnippetSortOrder')->input('number', ['min' => 0]) ?>
 
         <hr>
 
