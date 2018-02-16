@@ -70,6 +70,22 @@ class Events extends Object
         }
     }
 
+    public static function onSpaceSidebarInit($event)
+    {
+        if (Yii::$app->user->isGuest) {
+            return;
+        }
+
+        $space = $event->sender->space;
+        $settings = SnippetModuleSettings::instantiate();
+
+        if ($space->isModuleEnabled('task')) {
+            if ($settings->showMyTasksSnippetSpace()) {
+                $event->sender->addWidget(MyTasks::className(), ['limit' => $settings->myTasksSnippetMaxItems]);
+            }
+        }
+    }
+
     public static function onSpaceMenuInit($event)
     {
         /* @var $space \humhub\modules\space\models\Space */

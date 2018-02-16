@@ -3,7 +3,9 @@
 namespace humhub\modules\task\models;
 
 use humhub\libs\Html;
+use humhub\modules\content\models\ContentContainer;
 use humhub\modules\notification\models\Notification;
+use humhub\modules\space\models\Space;
 use Yii;
 use DateInterval;
 use DateTime;

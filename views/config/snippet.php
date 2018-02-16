@@ -28,6 +28,14 @@ use \yii\helpers\Html;
         </div>
         
         <?= $form->field($model, 'myTasksSnippetShow')->checkbox(); ?>
+
+        <div class="help-block">
+            <?= Yii::t('TaskModule.config', 'Shows the widget also on the dashboard of spaces.') ?>
+        </div>
+
+        <?= $form->field($model, 'myTasksSnippetShowSpace')->checkbox(); ?>
+
+
         <?= $form->field($model, 'myTasksSnippetMaxItems')->input('number', ['min' => 1, 'max' => 30]) ?>
 
         <hr>
