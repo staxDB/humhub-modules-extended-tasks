@@ -368,6 +368,10 @@ class IndexController extends ContentContainerController
     {
         Yii::$app->response->format = 'json';
 
+        echo '<pre>';
+        print_r('hat geklappt');
+        echo '</pre>';
+        die();
         $task = $this->getTaskByParameter();
 
         if (!$task->canCheckItems())
@@ -396,6 +400,32 @@ class IndexController extends ContentContainerController
             'contentContainer' => $this->contentContainer
         ]);
 
+    }
+
+    public function actionConfirmItem($id, $taskId)
+    {
+        $item = TaskItem::findOne(['id' => $id, 'task_id' => $taskId]);
+        if ($item) {
+            $checked = json_decode(Yii::$app->request->post('checked'), true);
+
+            if ($checked)
+                $item->completed = 1;
+            else
+                $item->completed = 0;
+            
+            if ($item->save()) {
+                $result = [
+                    'checked' => $item->completed
+                ];
+
+                return $this->asJson([
+                    'success' => true,
+                    'item' => $result
+                ]);
+            }
+        }
+
+        return $this->asJson(['success' => false]);
     }
 
     public function actionStatus($id, $status)

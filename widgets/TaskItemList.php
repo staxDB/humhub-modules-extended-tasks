@@ -65,7 +65,6 @@ class TaskItemList extends JsWidget
         $contentContainer = $this->task->content->container;
         return [
             'task-id' => $this->task->id,
-            'drop-url' => $contentContainer->createUrl('/task/item/drop', ['taskId' => $this->task->id]),
             'can-edit' => $this->canEdit
         ];
     }

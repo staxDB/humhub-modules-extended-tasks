@@ -56,13 +56,17 @@ $editUrl = $contentContainer->createUrl('edit', ['id' => $task->id]);
 
         <?php if ($task->hasItems()) : ?>
             <em><strong><?= Yii::t('TaskModule.views_index_index', 'Checklist') ?>:</strong></em><br>
-            <?= Html::beginForm($contentContainer->createUrl('/task/index/confirm', ['taskID' => $task->id])); ?>
+            <?php
+//            Html::beginForm($contentContainer->createUrl('/task/index/confirm', ['taskID' => $task->id]));
+            ?>
 
 
             <?= TaskItemList::widget(['task' => $task, 'canEdit' => $isResponsible]) ?>
 
 
-            <?= Html::endForm(); ?>
+            <?php
+//            Html::endForm();
+            ?>
 
             <hr>
         <?php endif; ?>

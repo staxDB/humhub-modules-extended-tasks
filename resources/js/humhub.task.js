@@ -245,41 +245,81 @@ humhub.module('task', function (module, require, $) {
     object.inherits(Item, Widget);
 
     Item.prototype.init = function () {
+
+        var label = this.$.find('label');
+        var checkbox = this.$.find('input[type="checkbox"]');
+
+        if (checkbox.prop('checked'))
+            label.addClass("item-finished");
+        else
+            label.removeClass("item-finished");
+
+    };
+
+    Item.prototype.loader = function () {
+        // debugger;
+    };
+
+    // Item.prototype.confirm = function (submitEvent) {
+    //     this.update(client.submit(submitEvent));
+    // };
+
+    Item.prototype.confirm = function () {
         var that = this;
-    };
 
-    Item.prototype.loader = function (show) {
-        debugger;
-    };
+        // this.update(client.submit(submitEvent));
 
-    Item.prototype.confirm = function (submitEvent) {
-        this.update(client.submit(submitEvent));
-    };
+        var data = {
+            'checked': that.$.find('input[type="checkbox"]').prop('checked')
+        };
 
-    Item.prototype.update = function (update) {
         this.loader();
-        update.then($.proxy(this.handleUpdateSuccess, this))
-            .catch(Item.handleUpdateError)
-            // .catch()
-            .finally($.proxy(this.loader, this, false));
+        client.post(that.options.confirmUrl, {data: data}).then(function (response) {
+            if (response.success) {
+                that.setData(response.item);
+                module.log.success('success.saved');
+            } else {
+                module.log.error(err, true);
+                // that.cancelDrop();
+            }
+        }).catch(function (err) {
+            module.log.error(err, true);
+            // that.cancelDrop();
+        }).finally(function () {
+            item.loader();
+        });
+
     };
 
-    Item.prototype.handleUpdateSuccess = function (response) {
-
-        // if (this.$.find("#taskStatus").text() === "Pending") {
-        //     client.reload();
-        // }
-        // var streamEntry = this.streamEntry();
-        // return streamEntry.replace(response.output).then(function () {
-        // this.loader();
-        module.log.success('success.saved');
-        // });
+    Item.prototype.setData = function (itemData) {
+        if(itemData.checked) {
+            this.$.find('label').addClass("item-finished");
+        }
+        else
+            this.$.find('label').removeClass("item-finished");
     };
 
-    Item.handleUpdateError = function (e) {
-        module.log.error(e.message, true);
-        // module.log.error(e, true);
-    };
+    // Item.prototype.update = function (update) {
+    //     this.loader();
+    //     update.then($.proxy(this.handleUpdateSuccess, this))
+    //         .catch(Item.handleUpdateError)
+    //         // .catch()
+    //         .finally($.proxy(this.loader, this, false));
+    // };
+
+    // Item.prototype.confirm = function (submitEvent) {
+    //     this.update(client.submit(submitEvent));
+    // };
+
+
+    // Item.prototype.handleUpdateSuccess = function (response) {
+    //     module.log.success('success.saved');
+    // };
+
+    // Item.handleUpdateError = function (e) {
+    //     module.log.error(e.message, true);
+    //     // module.log.error(e, true);
+    // };
 
     var ItemList = function (node, options) {
         Widget.call(this, node, options);

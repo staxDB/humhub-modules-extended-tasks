@@ -52,8 +52,12 @@ class TaskItemWidget extends JsWidget
 
     public function getData()
     {
+        $contentContainer = $this->task->content->container;
+
         return [
+            'task-id' => $this->task->id,
             'item-id' => $this->item->id,
+            'confirm-url' => $contentContainer->createUrl('/task/index/confirm-item', ['id' => $this->item->id, 'taskId' => $this->task->id]),
         ];
     }
 }
