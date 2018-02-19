@@ -405,6 +405,7 @@ class IndexController extends ContentContainerController
     public function actionConfirmItem($id, $taskId)
     {
         $item = TaskItem::findOne(['id' => $id, 'task_id' => $taskId]);
+
         if ($item) {
             $checked = json_decode(Yii::$app->request->post('checked'), true);
 
@@ -412,10 +413,17 @@ class IndexController extends ContentContainerController
                 $item->completed = 1;
             else
                 $item->completed = 0;
-            
+
             if ($item->save()) {
+                $statusChanged = false;
+                if ($item->task->isPending()) {
+                    $item->task->changeStatus(Task::STATUS_IN_PROGRESS);
+                    $statusChanged = true;
+                }
+
                 $result = [
-                    'checked' => $item->completed
+                    'checked' => $item->completed,
+                    'statChanged' => $statusChanged
                 ];
 
                 return $this->asJson([

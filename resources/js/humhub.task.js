@@ -297,6 +297,9 @@ humhub.module('task', function (module, require, $) {
         }
         else
             this.$.find('label').removeClass("item-finished");
+        if(itemData.statChanged) {
+            client.reload();
+        }
     };
 
     // Item.prototype.update = function (update) {
