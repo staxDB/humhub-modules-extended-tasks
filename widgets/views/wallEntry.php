@@ -28,9 +28,10 @@ $color = $task->color ? $task->color : $this->theme->variable('info');
     <?php
     $assigned = $task->isTaskAssigned();
     $responsible = $task->isTaskResponsible();
+    $anyone = $task->canAnyoneProcessTask();
     ?>
 
-    <?php if ($responsible || $assigned) : ?>
+    <?php if ($responsible || $assigned || $anyone) : ?>
         <div class="row">
             <div class="col-md-12 task-assignment">
                 <strong><i class="fa fa-users"></i> <?= Yii::t('TaskModule.widgets_views_wallentry', 'Assignments:'); ?>
@@ -42,6 +43,9 @@ $color = $task->color ? $task->color : $this->theme->variable('info');
                     <?php elseif ($assigned) : ?>
                         <i class="fa fa-check"></i>
                         <?= Yii::t('TaskModule.widgets_views_wallentry', 'You are assigned!') ?>
+                    <?php elseif ($anyone) : ?>
+                        <i class="fa fa-check"></i>
+                        <?= Yii::t('TaskModule.widgets_views_wallentry', 'Anyone can work on this task!') ?>
                     <?php endif; ?>
                 </div>
             </div>
