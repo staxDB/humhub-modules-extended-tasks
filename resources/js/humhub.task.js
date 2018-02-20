@@ -286,9 +286,8 @@ humhub.module('task', function (module, require, $) {
             module.log.error(err, true);
             // that.cancelDrop();
         }).finally(function () {
-            item.loader();
+            that.loader();
         });
-
     };
 
     Item.prototype.setData = function (itemData) {
