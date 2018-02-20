@@ -364,45 +364,45 @@ class IndexController extends ContentContainerController
     /**
      * Confirm an checklist item as closed
      */
-    public function actionConfirm()
-    {
-        Yii::$app->response->format = 'json';
+//    public function actionConfirm()
+//    {
+//        Yii::$app->response->format = 'json';
+//
+//        echo '<pre>';
+//        print_r('hat geklappt');
+//        echo '</pre>';
+//        die();
+//        $task = $this->getTaskByParameter();
+//
+//        if (!$task->canCheckItems())
+//            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
+//
+//        $items = Yii::$app->request->post('item');
+//
+//        // Build array of answer ids
+//        $results = array();
+//        if (is_array($items)) {
+//            foreach ($items as $item_id => $flag) {
+//                $results[] = (int) $item_id;
+//            }
+//        } else {
+//            $results[] = $items;
+//        }
+//
+//        $task->resetItems();
+//        $task->confirm($results);
+//
+//        if ($task->isPending())
+//            $task->changeStatus(Task::STATUS_IN_PROGRESS);
+//
+//        return $this->render("task", [
+//            'task' => $task,
+//            'contentContainer' => $this->contentContainer
+//        ]);
+//
+//    }
 
-        echo '<pre>';
-        print_r('hat geklappt');
-        echo '</pre>';
-        die();
-        $task = $this->getTaskByParameter();
-
-        if (!$task->canCheckItems())
-            throw new HttpException(401, Yii::t('TaskModule.controller', 'You have insufficient permissions to perform that operation!'));
-
-        $items = Yii::$app->request->post('item');
-
-        // Build array of answer ids
-        $results = array();
-        if (is_array($items)) {
-            foreach ($items as $item_id => $flag) {
-                $results[] = (int) $item_id;
-            }
-        } else {
-            $results[] = $items;
-        }
-
-        $task->resetItems();
-        $task->confirm($results);
-
-        if ($task->isPending())
-            $task->changeStatus(Task::STATUS_IN_PROGRESS);
-
-        return $this->render("task", [
-            'task' => $task,
-            'contentContainer' => $this->contentContainer
-        ]);
-
-    }
-
-    public function actionConfirmItem($id, $taskId)
+    public function actionCheckItem($id, $taskId)
     {
         $item = TaskItem::findOne(['id' => $id, 'task_id' => $taskId]);
 

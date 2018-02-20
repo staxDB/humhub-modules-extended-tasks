@@ -107,8 +107,8 @@ class TaskReminder extends ActiveRecord
     {
         return [
             self::REMIND_NONE => Yii::t('TaskModule.models_taskReminder', 'Do not remind'),
-            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskReminder', 'About 1 Hour before'),
-            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskReminder', 'About 2 Hours before'),
+            self::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskReminder', 'At least 1 Hour before'),
+            self::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskReminder', 'At least 2 Hours before'),
             self::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskReminder', '1 Day before'),
             self::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskReminder', '2 Days before'),
             self::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskReminder', '1 Week before'),
@@ -125,10 +125,10 @@ class TaskReminder extends ActiveRecord
                 return Yii::t('TaskModule.models_taskReminder', 'Do not remind');
                 break;
             case (self::REMIND_ONE_HOUR):
-                return Yii::t('TaskModule.models_taskReminder', 'About 1 Hour before');
+                return Yii::t('TaskModule.models_taskReminder', 'At least 1 Hour before');
                 break;
             case (self::REMIND_TWO_HOURS):
-                return Yii::t('TaskModule.models_taskReminder', 'About 2 Hours before');
+                return Yii::t('TaskModule.models_taskReminder', 'At least 2 Hours before');
                 break;
             case (self::REMIND_ONE_DAY):
                 return Yii::t('TaskModule.models_taskReminder', '1 Day before');
@@ -158,13 +158,13 @@ class TaskReminder extends ActiveRecord
         if ($now === '' || $dateTime === '')
             return false;
 
-        $modifiedTime = clone $dateTime;
+        $modifiedStart = clone $dateTime;
         $modifiedEnd = clone $dateTime;
 
 //        echo ($now->format('Y-m-d H:i:s') . ', ' . $dateTime->format('Y-m-d H:i:s') . ', allday=' . $allday);
 
 //        if ($allday) {
-//            $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+//            $modifiedStart = $modifiedStart->setTime('00', '00', '00');
 //            $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
 //        }
 
@@ -173,46 +173,46 @@ class TaskReminder extends ActiveRecord
                 return false;
                 break;
             case self::REMIND_ONE_HOUR :
-                // if has task reminder 2 hours and not sent yet --> skip this one
-                $modifiedTime = $modifiedTime->modify('-1 hour');
-                break;
-            case self::REMIND_TWO_HOURS :
-                $modifiedTime = $modifiedTime->modify('-2 hours');
+                $modifiedStart = $modifiedStart->modify('-2 hours');
                 $modifiedEnd = $modifiedEnd->modify('-1 hour');
                 break;
+            case self::REMIND_TWO_HOURS :
+                $modifiedStart = $modifiedStart->modify('-3 hours');
+                $modifiedEnd = $modifiedEnd->modify('-2 hours');
+                break;
             case self::REMIND_ONE_DAY :
-                $modifiedTime = $modifiedTime->modify('-1 day');
-                $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+                $modifiedStart = $modifiedStart->modify('-1 day');
+                $modifiedStart = $modifiedStart->setTime('00', '00', '00');
                 $modifiedEnd = $modifiedEnd->modify('-1 day');
                 $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
                 break;
             case self::REMIND_TWO_DAYS :
-                $modifiedTime = $modifiedTime->modify('-2 days');
-                $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+                $modifiedStart = $modifiedStart->modify('-2 days');
+                $modifiedStart = $modifiedStart->setTime('00', '00', '00');
                 $modifiedEnd = $modifiedEnd->modify('-2 days');
                 $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
                 break;
             case self::REMIND_ONE_WEEK :
-                $modifiedTime = $modifiedTime->modify('-1 week');
-                $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+                $modifiedStart = $modifiedStart->modify('-1 week');
+                $modifiedStart = $modifiedStart->setTime('00', '00', '00');
                 $modifiedEnd = $modifiedEnd->modify('-1 week');
                 $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
                 break;
             case self::REMIND_TWO_WEEKS :
-                $modifiedTime = $modifiedTime->modify('-2 weeks');
-                $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+                $modifiedStart = $modifiedStart->modify('-2 weeks');
+                $modifiedStart = $modifiedStart->setTime('00', '00', '00');
                 $modifiedEnd = $modifiedEnd->modify('-2 weeks');
                 $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
                 break;
             case self::REMIND_THREE_WEEKS :
-                $modifiedTime = $modifiedTime->modify('-3 weeks');
-                $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+                $modifiedStart = $modifiedStart->modify('-3 weeks');
+                $modifiedStart = $modifiedStart->setTime('00', '00', '00');
                 $modifiedEnd = $modifiedEnd->modify('-3 weeks');
                 $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
                 break;
             case self::REMIND_ONE_MONTH :
-                $modifiedTime = $modifiedTime->modify('-1 month');
-                $modifiedTime = $modifiedTime->setTime('00', '00', '00');
+                $modifiedStart = $modifiedStart->modify('-1 month');
+                $modifiedStart = $modifiedStart->setTime('00', '00', '00');
                 $modifiedEnd = $modifiedEnd->modify('-1 month');
                 $modifiedEnd = $modifiedEnd->setTime('23', '59', '59');
                 break;
@@ -223,12 +223,12 @@ class TaskReminder extends ActiveRecord
 
 
 
-//        echo ($modifiedTime->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s') . ' <= ' . $dateTime->format('Y-m-d H:i:s'));
-//        echo ($dateTime->format('Y-m-d H:i:s') . ' >= ' . $now->format('Y-m-d H:i:s') . ' && ' . $modifiedTime->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s'));
-//        echo ('true = '. ($dateTime > $now && $modifiedTime <= $now));
+//        echo ($modifiedStart->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s') . ' <= ' . $dateTime->format('Y-m-d H:i:s'));
+//        echo ($dateTime->format('Y-m-d H:i:s') . ' >= ' . $now->format('Y-m-d H:i:s') . ' && ' . $modifiedStart->format('Y-m-d H:i:s') . ' <= ' . $now->format('Y-m-d H:i:s'));
+//        echo ('true = '. ($dateTime > $now && $modifiedStart <= $now));
 //        die();
 
-        if ($modifiedEnd > $now && $modifiedTime <= $now)
+        if ($modifiedEnd > $now && $modifiedStart <= $now)
             return true;
         else
             return false;

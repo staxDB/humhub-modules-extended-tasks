@@ -363,8 +363,8 @@ class TaskForm extends Model
     public function getRemindModeItems()
     {
         return [
-            TaskReminder::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskReminder', 'About 1 Hour before'),
-            TaskReminder::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskReminder', 'About 2 Hours before'),
+            TaskReminder::REMIND_ONE_HOUR => Yii::t('TaskModule.models_taskReminder', 'At least 1 Hour before'),
+            TaskReminder::REMIND_TWO_HOURS => Yii::t('TaskModule.models_taskReminder', 'At least 2 Hours before'),
             TaskReminder::REMIND_ONE_DAY => Yii::t('TaskModule.models_taskReminder', '1 Day before'),
             TaskReminder::REMIND_TWO_DAYS => Yii::t('TaskModule.models_taskReminder', '2 Days before'),
             TaskReminder::REMIND_ONE_WEEK => Yii::t('TaskModule.models_taskReminder', '1 Week before'),

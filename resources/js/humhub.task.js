@@ -104,27 +104,27 @@ humhub.module('task', function (module, require, $) {
         return this.$titleFilter.val();
     };
 
-    var deleteTask = function(evt) {
-        var streamEntry = Widget.closest(evt.$trigger);
-        streamEntry.loader();
-        modal.confirm().then(function() {
-            modal.post(evt).then(function() {
-                modal.global.close();
-            }).catch(function(e) {
-                module.log.error(e, true);
-            });
-        });
-
-    };
-
-    var editTask = function (evt) {
-        var that = this;
-        var streamEntry = Widget.closest(evt.$trigger);
-        streamEntry.loader();
-        modal.load(evt).catch(function (e) {
-            module.log.error(e, true);
-        });
-    };
+    // var deleteTask = function(evt) {
+    //     var streamEntry = Widget.closest(evt.$trigger);
+    //     streamEntry.loader();
+    //     modal.confirm().then(function() {
+    //         modal.post(evt).then(function() {
+    //             modal.global.close();
+    //         }).catch(function(e) {
+    //             module.log.error(e, true);
+    //         });
+    //     });
+    //
+    // };
+    //
+    // var editTask = function (evt) {
+    //     var that = this;
+    //     var streamEntry = Widget.closest(evt.$trigger);
+    //     streamEntry.loader();
+    //     modal.load(evt).catch(function (e) {
+    //         module.log.error(e, true);
+    //     });
+    // };
 
 
 
@@ -264,7 +264,7 @@ humhub.module('task', function (module, require, $) {
     //     this.update(client.submit(submitEvent));
     // };
 
-    Item.prototype.confirm = function () {
+    Item.prototype.check = function () {
         var that = this;
 
         // this.update(client.submit(submitEvent));
@@ -274,7 +274,7 @@ humhub.module('task', function (module, require, $) {
         };
 
         this.loader();
-        client.post(that.options.confirmUrl, {data: data}).then(function (response) {
+        client.post(that.options.checkUrl, {data: data}).then(function (response) {
             if (response.success) {
                 that.setData(response.item);
                 module.log.success('success.saved');
@@ -380,8 +380,8 @@ humhub.module('task', function (module, require, $) {
     module.export({
         ItemList: ItemList,
         Item: Item,
-        deleteTask: deleteTask,
-        editTask:editTask,
+        // deleteTask: deleteTask,
+        // editTask:editTask,
         sendNotification: sendNotification,
         TaskFilter: TaskFilter,
         Form: Form,

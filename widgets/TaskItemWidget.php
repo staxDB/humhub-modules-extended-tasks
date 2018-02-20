@@ -57,7 +57,7 @@ class TaskItemWidget extends JsWidget
         return [
             'task-id' => $this->task->id,
             'item-id' => $this->item->id,
-            'confirm-url' => $contentContainer->createUrl('/task/index/confirm-item', ['id' => $this->item->id, 'taskId' => $this->task->id]),
+            'check-url' => $contentContainer->createUrl('/task/index/check-item', ['id' => $this->item->id, 'taskId' => $this->task->id]),
         ];
     }
 }
