@@ -519,7 +519,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function getItems()
     {
-        return $this->hasMany(TaskItem::class, ['task_id' => 'id']);
+        return $this->hasMany(TaskItem::class, ['task_id' => 'id'])->orderBy(['sort_order' => SORT_ASC]);
     }
 
     public function hasItems()
@@ -1408,6 +1408,33 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     {
         // Todo check task_items and subtask-Items
         return !empty($this->subTasks);
+    }
+
+
+
+    public function moveItemIndex($itemId, $newIndex)
+    {
+        $moveItem = TaskItem::findOne(['id' => $itemId]);
+        $items = $this->items;
+
+        // make sure no invalid index is given
+        if($moveItem->sort_order === $newIndex) {
+            return;
+        } else if($newIndex < 0) {
+            $newIndex = 0;
+        } else if($newIndex >= count($items)) {
+            $newIndex = count($items) -1;
+        }
+
+        array_splice($items, $moveItem->sort_order, 1);
+        array_splice($items, $newIndex, 0, [$moveItem]);
+
+        foreach ($items as $index => $item) {
+            $item->sort_order = $index;
+            $item->save();
+        }
+
+        $this->refresh();
     }
 
 

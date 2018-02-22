@@ -254,6 +254,21 @@ humhub.module('task', function (module, require, $) {
         else
             label.removeClass("item-finished");
 
+        var that = this;
+
+        if (this.parent().options.canResort) {
+            this.$.on('mouseover', function () {
+                if(that.$.siblings('li').length > 0 && that.$.find('.legacyFlag').length == 0) {
+                    that.$.find('.task-drag-icon').show();
+                }
+            }).on('mouseout', function () {
+                that.$.find('.task-drag-icon').hide();
+            });
+        }
+    };
+
+    Item.prototype.index = function () {
+        return this.$.index();
     };
 
     Item.prototype.loader = function () {
@@ -299,6 +314,9 @@ humhub.module('task', function (module, require, $) {
         if(itemData.statChanged) {
             client.reload();
         }
+
+        this.options.sortOrder = itemData.sortOrder;
+        this.$.attr('data-sort-order', itemData.sortOrder);
     };
 
     // Item.prototype.update = function (update) {
@@ -323,6 +341,8 @@ humhub.module('task', function (module, require, $) {
     //     // module.log.error(e, true);
     // };
 
+
+
     var ItemList = function (node, options) {
         Widget.call(this, node, options);
     };
@@ -330,17 +350,50 @@ humhub.module('task', function (module, require, $) {
     object.inherits(ItemList, Widget);
 
     ItemList.prototype.init = function () {
-
+        var that = this;
+        if (this.options.canResort && this.$.find('li[data-item-id]').length > 1 && this.$.find('.legacyFlag').length == 0) {
+            this.$.imagesLoaded(function() {
+                that.initSortableList();
+            });
+        }
     };
 
-    ItemList.prototype.getItems = function () {
-        var result = [];
+    ItemList.prototype.initSortableList = function (evt) {
+        var that = this;
+        this.$.sortable({
+            create: function () {
+                jQuery(this).height(jQuery(this).height());
+            },
+            revert: 50,
+            update: function (evt, ui) {
+                var item = Item.instance(ui.item);
 
-        this.$.find("[data-item-id]").each(function () {
-            result.push(Item.instance(this));
+                var data = {
+                    'ItemDrop[taskId]': that.options.taskId,
+                    'ItemDrop[itemId]': item.options.itemId,
+                    'ItemDrop[index]': item.index()
+                };
+
+                item.loader();
+                client.post(that.options.dropUrl, {data: data}).then(function (response) {
+                    if (response.success) {
+                        that.updateItems(response.items);
+                    } else {
+                        module.log.error(err, true);
+                        that.cancelDrop();
+                    }
+                }).catch(function (err) {
+                    module.log.error(err, true);
+                    that.cancelDrop();
+                }).finally(function () {
+                    item.loader(false);
+                });
+            },
+            stop: function () {
+                // that.updateViewByItemOrder();
+            }
         });
-
-        return result;
+        this.$.disableSelection();
     };
 
     ItemList.prototype.updateItems = function (items) {
@@ -354,7 +407,6 @@ humhub.module('task', function (module, require, $) {
 
 
     /**
-     * Action respond to calendar entry (participation)
      * @param evt
      */
     var extensionrequest = function(evt) {

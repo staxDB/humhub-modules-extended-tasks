@@ -35,7 +35,9 @@ class m180114_210903_initial extends humhub\components\Migration
             'title' => 'VARCHAR(255) NOT NULL',
             'description' => 'TEXT NULL',
             'completed' => 'tinyint(4) DEFAULT 0',
-        ), '');
+            'sort_order' => 'int(11) NOT NULL DEFAULT 1',
+
+    ), '');
 
         $this->createTable('task_reminder', array(
             'id' => 'pk',

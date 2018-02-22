@@ -15,13 +15,13 @@ use humhub\libs\Html;
 use humhub\modules\task\widgets\TaskItemWidget;
 
 $divOptions = $options;
-$divOptions['class'] = 'row';
+//$divOptions['class'] = 'row';
 
 ?>
 <div class="<?= (count($items)) ? "task-item-container" : '' ?>">
-    <?= Html::beginTag('div', $divOptions) ?>
+    <?= Html::beginTag('ul', $divOptions) ?>
     <?php foreach ($items as $item): ?>
         <?= TaskItemWidget::widget(['item' => $item, 'task' => $task]); ?>
     <?php endforeach; ?>
-    <?= Html::endTag('div') ?>
+    <?= Html::endTag('ul') ?>
 </div>

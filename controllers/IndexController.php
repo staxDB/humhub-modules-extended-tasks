@@ -9,6 +9,7 @@
 namespace humhub\modules\task\controllers;
 
 use humhub\modules\content\permissions\ManageContent;
+use humhub\modules\task\models\forms\ItemDrop;
 use humhub\modules\task\models\forms\TaskFilter;
 use humhub\modules\task\models\forms\TaskForm;
 use humhub\modules\task\models\TaskPicker;
@@ -423,7 +424,8 @@ class IndexController extends ContentContainerController
 
                 $result = [
                     'checked' => $item->completed,
-                    'statChanged' => $statusChanged
+                    'statChanged' => $statusChanged,
+                    'sortOrder' => $item->sort_order,
                 ];
 
                 return $this->asJson([
@@ -431,6 +433,29 @@ class IndexController extends ContentContainerController
                     'item' => $result
                 ]);
             }
+        }
+
+        return $this->asJson(['success' => false]);
+    }
+
+    public function actionDrop($taskId)
+    {
+        $model = new ItemDrop(['taskId' => $taskId]);
+        
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $result = [];
+            foreach ($model->task->items as $item) {
+                $result[$item->id] = [
+                    'sortOrder' => $item->sort_order,
+                    'checked' => $item->completed,
+                    'statChanged' => false,
+                ];
+            }
+
+            return $this->asJson([
+                'success' => true,
+                'items' => $result
+            ]);
         }
 
         return $this->asJson(['success' => false]);

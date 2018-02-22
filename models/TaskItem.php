@@ -14,7 +14,7 @@ use humhub\modules\user\models\User;
  * @property integer $task_id
  * @property string $title
  * @property integer $completed
- * @property string $notes
+ * @property integer $sort_order
  */
 class TaskItem extends ActiveRecord
 {
@@ -43,7 +43,7 @@ class TaskItem extends ActiveRecord
     {
         return [
             [['task_id', 'title'], 'required'],
-            [['task_id', 'completed'], 'integer'],
+            [['task_id', 'sort_order', 'completed'], 'integer'],
             [['title'], 'string', 'max' => 255],
             [['description', 'notes'], 'safe'],
         ];
@@ -67,7 +67,6 @@ class TaskItem extends ActiveRecord
             'id' => 'ID',
             'title' => Yii::t('TaskModule.models_taskitem', 'Title'),
             'completed' => Yii::t('TaskModule.models_taskitem', 'Completed'),
-            'notes' => Yii::t('TaskModule.models_taskitem', 'Notiz'),
         ];
     }
 
