@@ -58,7 +58,7 @@ class TaskItemWidget extends JsWidget
             'task-id' => $this->task->id,
             'item-id' => $this->item->id,
             'sort-order' => $this->item->sort_order,
-            'can-resort' => $this->task->isTaskResponsible(),
+            'can-resort' => $this->task->canResortItems(),
             'check-url' => $contentContainer->createUrl('/task/index/check-item', ['id' => $this->item->id, 'taskId' => $this->task->id]),
         ];
     }

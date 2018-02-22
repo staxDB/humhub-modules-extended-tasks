@@ -1322,6 +1322,15 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         return (self::isTaskResponsible() && (self::isCompleted()));
     }
 
+    /**
+     * handle task specific permissions
+     * @return bool
+     */
+    public function canResortItems()
+    {
+        return (self::isTaskResponsible() && (!self::isCompleted()));
+    }
+
 
 
 
