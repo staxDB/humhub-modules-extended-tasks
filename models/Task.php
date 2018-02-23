@@ -846,6 +846,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function remindUserOfStart()
     {
+        $this->deleteOldReminder();
+
         if (self::hasTaskAssigned())
             RemindStart::instance()->from($this->content->user)->about($this)->sendBulk(self::filterResponsibleAssigned());
         if (self::hasTaskResponsible())
@@ -857,6 +859,8 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function remindUserOfEnd()
     {
+        $this->deleteOldReminder();
+
         if (self::hasTaskAssigned())
             RemindEnd::instance()->from($this->content->user)->about($this)->sendBulk(self::filterResponsibleAssigned());
         if (self::hasTaskResponsible())
@@ -969,6 +973,20 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     {
         if ($this->review && $this->hasTaskAssigned())
             NotifyStatusRejectedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
+    }
+
+    public function deleteOldReminder()
+    {
+        // delete old reminder
+        $startNotifications = Notification::find()->where(['class' => RemindStart::className(), 'source_class' => self::className(), 'source_pk' => $this->id, 'space_id' => $this->content->container->id])->all();
+        foreach ($startNotifications as $notification) {
+            $notification->delete();
+        }
+
+        $endNotifications = Notification::find()->where(['class' => RemindEnd::className(), 'source_class' => self::className(), 'source_pk' => $this->id, 'space_id' => $this->content->container->id])->all();
+        foreach ($endNotifications as $notification) {
+            $notification->delete();
+        }
     }
 
 
