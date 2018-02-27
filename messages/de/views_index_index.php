@@ -12,6 +12,7 @@ return array (
     'Anyone can work on this task' => 'Jeder kann an dieser Aufgabe arbeiten',
     'Responsible' => 'Verantwortlich',
     'No Scheduling set for this Task' => 'Keine Zeitplanung für diese Aufgabe erstellt',
+    'Request extension' => 'Fristverlängerung anfordern',
 
     // Badge
     'Today' => 'Heute',
