@@ -873,8 +873,10 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function sendExtensionRequest()
     {
-        if ($this->hasTaskResponsible())
+        if ($this->hasTaskResponsible()) {
+            $this->deleteOldNotifications(ExtensionRequest::className());
             ExtensionRequest::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+        }
     }
 
     /**
@@ -883,6 +885,11 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function notifyDateTimeChanged()
     {
+        if ($this->isCompleted())
+            return;
+        // remove old notifications
+        $this->deleteOldNotifications(NotifyChangedDateTime::className());
+
         if (!empty($this->taskAssignedUsers)) {
             NotifyChangedDateTime::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
         }
@@ -898,6 +905,9 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function notifyReset()
     {
+        // remove all old notifications
+        $this->deleteOldNotifications();
+
         if ($this->hasTaskAssigned())
             NotifyStatusReset::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
 
@@ -917,8 +927,9 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function notifyInProgress()
     {
-        if ($this->hasTaskResponsible())
+        if ($this->hasTaskResponsible()) {
             NotifyStatusInProgress::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+        }
 
         //  Create Activity
         $activity = new TaskStart();
@@ -933,8 +944,11 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function notifyPendingReview()
     {
-        if ($this->review && $this->hasTaskResponsible())
+        if ($this->review && $this->hasTaskResponsible()) {
+            // remove old notifications
+            $this->deleteOldNotifications(NotifyStatusPendingReview::className());
             NotifyStatusPendingReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+        }
     }
 
     /**
@@ -943,8 +957,12 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     public function notifyCompleted()
     {
         if ($this->review) {
-            if (self::hasTaskAssigned())
+            if (self::hasTaskAssigned()) {
                 NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
+            }
+            if (self::hasTaskResponsible()) {
+                NotifyStatusCompletedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
+            }
 
             //  Create Activity
             $activity = new TaskReviewed();
@@ -953,9 +971,9 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
             $activity->create();
         }
         else {
-            if (self::hasTaskResponsible())
+            if (self::hasTaskResponsible()) {
                 NotifyStatusCompleted::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk($this->taskResponsibleUsers);
-
+            }
             //  Create Activity
             $activity = new TaskCompleted();
             $activity->source = $this;
@@ -971,8 +989,12 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
      */
     public function notifyRejectedReview()
     {
-        if ($this->review && $this->hasTaskAssigned())
+        if ($this->review && $this->hasTaskAssigned()) {
+            // remove all old notifications
+            $this->deleteOldNotifications(NotifyStatusRejectedAfterReview::className());
+
             NotifyStatusRejectedAfterReview::instance()->from(Yii::$app->user->getIdentity())->about($this)->sendBulk(self::filterResponsibleAssigned());
+        }
     }
 
     public function deleteOldReminder()
@@ -986,6 +1008,24 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
         $endNotifications = Notification::find()->where(['class' => RemindEnd::className(), 'source_class' => self::className(), 'source_pk' => $this->id, 'space_id' => $this->content->container->id])->all();
         foreach ($endNotifications as $notification) {
             $notification->delete();
+        }
+    }
+
+    public function deleteOldNotifications($notificationClassName = null)
+    {
+        if (!$notificationClassName) {
+            // delete all old notifications - used for reset
+            $notifications = Notification::find()->where(['source_class' => self::className(), 'source_pk' => $this->id, 'space_id' => $this->content->container->id])->all();
+            foreach ($notifications as $notification) {
+                $notification->delete();
+            }
+        }
+        else {
+            // delete specific old notifications
+            $notifications = Notification::find()->where(['class' => $notificationClassName, 'source_class' => self::className(), 'source_pk' => $this->id, 'space_id' => $this->content->container->id])->all();
+            foreach ($notifications as $notification) {
+                $notification->delete();
+            }
         }
     }
 
@@ -1297,7 +1337,7 @@ class Task extends ContentActiveRecord implements Searchable, CalendarItem
     {
         if (!$this->scheduling)
             return false;
-        return ((!self::isTaskResponsible() && self::hasTaskResponsible() && (self::isTaskAssigned() || self::canAnyoneProcessTask()) && (!(self::isCompleted() || self::isPending())) && (!self::hasRequestedExtension())));
+        return ((!self::isTaskResponsible() && self::hasTaskResponsible() && (self::isTaskAssigned() || self::canAnyoneProcessTask()) && (!(self::isCompleted() || self::isPending() || self::isPendingReview())) && (!self::hasRequestedExtension())));
     }
 
     /**
