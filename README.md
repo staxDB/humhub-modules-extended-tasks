@@ -1,3 +1,5 @@
+# DEPRECATED
+
 **_Note:_** This module is no longer under development. The Humhub team has taken over my module and enhanced it. For further information see https://github.com/humhub/humhub-modules-tasks
 
 ## Installation
